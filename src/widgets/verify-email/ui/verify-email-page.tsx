@@ -17,7 +17,7 @@ import {
  */
 export function VerifyEmailPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-6 py-10">
+    <main className="flex flex-1 items-center justify-center bg-background px-6 py-10">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full border bg-muted">
