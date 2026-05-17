@@ -15,6 +15,11 @@ type LoginPageProps = {
   nextPath: string
 }
 
+/**
+ * Google 로그인 화면을 구성하고 로그인 이후 이동 경로를 로그인 기능에 전달한다.
+ * @param nextPath 로그인 성공 후 이동할 안전한 내부 경로
+ * @returns 로그인 페이지 UI
+ */
 export function LoginPage({ nextPath }: LoginPageProps) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-6 py-10">

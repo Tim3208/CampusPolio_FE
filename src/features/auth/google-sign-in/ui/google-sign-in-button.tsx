@@ -14,6 +14,11 @@ type GoogleSignInButtonProps = {
   nextPath: string
 }
 
+/**
+ * Google Identity Services 버튼을 렌더링하고 로그인 결과에 따라 다음 화면으로 이동한다.
+ * @param nextPath 인증 완료 사용자가 로그인 후 이동할 내부 경로
+ * @returns Google 로그인 버튼과 처리 상태 UI
+ */
 export function GoogleSignInButton({ nextPath }: GoogleSignInButtonProps) {
   const router = useRouter()
   const buttonRef = useRef<HTMLDivElement>(null)

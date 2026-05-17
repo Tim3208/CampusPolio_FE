@@ -30,10 +30,20 @@ const mockUsers: Record<AuthMockState, MockUser> = {
   },
 }
 
+/**
+ * 현재 mock 인증 상태에 맞는 사용자 fixture를 반환한다.
+ * @returns mock 인증 상태에 대응하는 사용자 정보
+ */
 function getMockUser() {
   return mockUsers[mockConfig.authState]
 }
 
+/**
+ * mock mode에서 인증 관련 API 응답을 네트워크 요청 없이 반환한다.
+ * @param path 요청 API path
+ * @param method 요청 HTTP method
+ * @returns 처리 가능한 mock API 응답. mock 대상이 아니면 undefined
+ */
 export function resolveMockApiResponse<TData>(
   path: `/${string}`,
   method = "GET"

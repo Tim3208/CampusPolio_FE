@@ -1,5 +1,10 @@
 import { ApiError } from "@/shared/api"
 
+/**
+ * 로그인 처리 중 발생한 오류를 사용자에게 보여줄 한국어 메시지로 변환한다.
+ * @param error 로그인 API 또는 Google 인증 처리 중 발생한 오류
+ * @returns 로그인 카드에 표시할 오류 메시지
+ */
 export function getLoginErrorMessage(error: unknown) {
   if (error instanceof ApiError) {
     if (error.status === 400) {

@@ -11,6 +11,10 @@ import {
   CardTitle,
 } from "@/shared/ui/card"
 
+/**
+ * 학교 이메일 인증 기능이 연결되기 전 인증 필요 상태를 안내한다.
+ * @returns 이메일 인증 안내 UI
+ */
 export function VerifyEmailPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-6 py-10">
