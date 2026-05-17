@@ -1,25 +1,119 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# Next.js Project Notes
+# CampusPolio 저장소 작업 가이드
 
-This project uses a current Next.js release. When touching framework behavior,
-check the relevant guide in `node_modules/next/dist/docs/` before relying on
-older Next.js assumptions.
-<!-- END:nextjs-agent-rules -->
+## 목적
 
-# Architecture
+이 저장소에서 AI가 기능을 추가하거나 수정할 때 가장 먼저 지켜야 하는 기준은
+지금의 파일 구조를 유지하는 것이다.
 
-- Use practical Feature-Sliced Design under `src`.
-- Keep `src/app` thin: routes, layouts, metadata, and provider wiring only.
-- Compose page-level UI in `src/widgets`.
-- Put user actions and business workflows in `src/features`.
-- Put domain model code in `src/entities`.
-- Put reusable primitives in `src/shared`.
+여기서 말하는 "지금의 파일 구조를 지킨다"의 정확한 의미는 다음과 같다.
 
-# Imports
+- 현재 저장소에 이미 자리잡은 FSD 기반 디렉토리 구조를 기본으로 본다.
+- AI가 작업하기 쉽게 책임을 분리하되, 사람이 읽어도 흐름을 따라갈 수 있게 유지한다.
+- 과도하게 잘게 쪼개거나, 반대로 책임이 다른 코드를 한 파일에 다시 뭉치지 않는다.
+- 새 기능은 기존 구조에 맞춰 배치하고, 구조 자체를 임의로 다시 설계하지 않는다.
+- 구조 재설계가 필요하다고 판단되면 먼저 사용자에게 변경 이유와 범위를 제안하고 승인을 받는다. 승인 없이 구조를 변경하지 않으며, 작업 후에는 관련 문서를 반드시 갱신한다.
 
-- Use the `@/*` alias for application imports.
-- shadcn/ui components live in `src/shared/ui`.
-- Shared utilities live in `src/shared/lib`.
-- Import shadcn components directly, for example `@/shared/ui/button`.
-- Expose non-trivial slices through an `index.ts` public API.
-- Do not import from sibling slices through private internal paths.
+## 최우선 원칙
+
+- 현재 `src` 구조를 기준으로 작업한다.
+- 기능 추가를 이유로 FSD 경계를 무너뜨리지 않는다.
+- AI 친화적인 분리는 가능하지만, 인간이 읽기 어려운 과분할은 피한다.
+- 한 파일의 책임은 명확해야 하고, 파일 이름만 보고도 역할을 짐작할 수 있어야 한다.
+
+## 아키텍처 구조
+
+- `src` 내부는 실용적인 Feature-Sliced Design(FSD) 구조를 따른다.
+- `src/app`은 최소한으로 유지하며, 라우팅, 레이아웃, 메타데이터, 전역 provider 연결만 담당한다.
+- 화면 단위 UI 조합은 `src/widgets`에서 구성한다.
+- 사용자 행동 및 비즈니스 흐름은 `src/features`에 배치한다.
+- 도메인 모델 및 타입, 규칙은 `src/entities`에 둔다.
+- 재사용 가능한 공통 UI 및 유틸은 `src/shared`에 둔다.
+
+## 계층 배치 기준
+
+- `app`: 앱 진입점, 전역 레이아웃, provider, 전역 설정
+- `widgets`: 페이지를 구성하는 큰 UI 블록
+- `features`: 사용자 행동(입력, 클릭, 제출 등)과 기능 단위 로직
+- `entities`: 도메인 데이터, 타입, 규칙, 상태 모델
+- `shared`: 전역에서 재사용되는 UI 컴포넌트 및 유틸 함수
+
+판단 규칙:
+
+- 화면 전체 조합이 아니라면 `widgets`
+- 사용자 인터랙션이 중심이면 `features`
+- 데이터 구조나 규칙이면 `entities`
+- 여러 기능에서 공통으로 사용되면 `shared`
+
+## Import 규칙
+
+- 애플리케이션 내부 import는 `@/*` alias를 사용한다.
+- shadcn/ui 컴포넌트는 `src/shared/ui`에 위치한다.
+- 공통 유틸 함수는 `src/shared/lib`에 위치한다.
+- shadcn 컴포넌트는 예시처럼 직접 import 한다:
+  - `@/shared/ui/button`
+- 규모가 있는 slice는 `index.ts`를 통해 public API를 노출한다.
+- 다른 slice의 내부 파일로 직접 접근하는 deep import는 금지한다.
+
+## 구조 유지 규칙
+
+- 다른 slice의 내부 경로로 직접 import 하지 않는다.
+- 반드시 각 slice의 public API(`index.ts`)를 통해 접근한다.
+- 특정 기능 전용 코드를 `shared`로 이동시키지 않는다.
+- 기능 단위 로직은 `features`, 도메인 로직은 `entities`에 유지한다.
+- `app` 레이어에 비즈니스 로직을 작성하지 않는다.
+- 기존 구조로 해결 가능한 경우 새로운 중간 계층을 임의로 만들지 않는다.
+
+## 설계 원칙
+
+- 기능 단위로 분리하고, 책임이 명확한 구조를 유지한다.
+- UI, 상태, 로직을 한 파일에 과도하게 결합하지 않는다.
+- 확장성과 협업을 고려하여 구조를 단순하게 유지한다.
+
+## 함수와 주석 규칙
+
+- 새로운 함수를 추가할 때는 알아보기 쉽게 한글 JSDoc 주석을 작성한다.
+- 함수 주석에는 최소한 "무엇을 하는지"가 드러나야 한다.
+- 입력이나 반환이 헷갈리면 `@param`, `@returns`를 함께 적는다.
+- 변수가 복잡하거나 문맥이 없으면 변수에도 짧은 한글 주석을 달 수 있다.
+- 다만 자명한 코드에 불필요한 주석을 늘리지 않는다.
+
+예시:
+
+```ts
+/**
+ * 목록에서 선택한 게시글 상세 화면으로 이동한다.
+ * @param href 이동할 경로
+ */
+const handlePostRowClick = (href: string) => {
+  router.push(href);
+};
+```
+
+## 문서 갱신 규칙
+
+문서 갱신 규칙은 유지한다.
+
+아래 경우에는 문서를 같이 갱신한다.
+
+- 새 기능의 동작 규칙을 후속 작업자가 알아야 할 때
+- 구조 배치 기준이 바뀌거나 새로 생겼을 때
+- 특정 기능의 이식, 설계, 제약을 따로 남길 필요가 있을 때
+- 저장소 전체에 적용되는 작업 원칙이 바뀔 때
+
+기본 원칙:
+
+- 저장소 전체 규칙은 `AGENTS.md`에 반영한다.
+- Copilot 공통 지침을 바꿨다면 `.github/copilot-instructions.md`도 함께 갱신한다.
+- 기능별 작업 메모나 설계 문서는 필요할 때 `docs/ai/` 아래에 새로 만든다.
+- 문서가 오래되어 현재 코드와 어긋나면 코드 기준으로 다시 갱신한다.
+
+## 문서 작성 기준
+
+- 문서는 "현재 구조에서 어떻게 작업해야 하는지"를 설명해야 한다.
+- 과거 구조 설명보다 현재 구조 기준 판단 규칙을 우선한다.
+- 기능 문서는 작업 목적, 배치 이유, 검증 기준이 드러나게 쓴다.
+- AI만 이해하는 표현보다, 사람이 읽어도 바로 판단 가능한 문장으로 쓴다.
+
+## 사용자와 대화 규칙
+
+- 사용자가 요구한 내용이 애매모호 할 경우, 임의로 판단하고 결정하지 않고 사용자에게 먼저 질문한다.
