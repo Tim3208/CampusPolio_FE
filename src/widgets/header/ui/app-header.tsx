@@ -10,25 +10,27 @@ import { Button } from "@/shared/ui/button";
  */
 export function AppHeader() {
   return (
-    <header className="sticky top-0 z-40 h-14 shrink-0 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="mx-auto flex h-full w-full max-w-6xl items-center justify-between gap-4 px-6 md:px-10">
+    <header className="sticky top-0 z-40 shrink-0 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-6 py-2 md:px-10 md:py-3">
         <Link
           href={appRoutes.home}
-          className="inline-flex min-w-0 items-center gap-2 text-sm font-semibold"
+          className="inline-flex min-w-0 items-center gap-2 text-xl font-semibold"
           aria-label="CampusPolio 홈으로 이동"
         >
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-muted">
-            <GraduationCap aria-hidden="true" className="size-4" />
-          </span>
-          <span className="truncate">CampusPolio</span>
+          <span className="truncate">Campus Polio</span>
         </Link>
 
-        <Button asChild variant="outline" size="sm">
-          <Link href={appRoutes.login}>
-            <LogIn aria-hidden="true" />
+        <div className="flex justify-between gap-2 items-center">
+          <div className="bg-gray-300 rounded-2xl px-3 py-2 text-sm text-black">
+            검색창이 들어갈 예정입니다.
+          </div>
+          <span className="px-3 py-2 rounded-md font-medium text-[12px] shadow-sm">
             로그인
-          </Link>
-        </Button>
+          </span>
+          <span className="px-3 py-2 rounded-md font-medium text-[12px] shadow-sm bg-[#005E9C] text-white">
+            회원가입
+          </span>
+        </div>
       </div>
     </header>
   );
