@@ -1,5 +1,7 @@
+import Link from "next/link"
 import { ArrowRight, CheckCircle2, Layers3 } from "lucide-react"
 
+import { appRoutes } from "@/shared/config"
 import { Badge } from "@/shared/ui/badge"
 import { Button } from "@/shared/ui/button"
 import {
@@ -44,9 +46,11 @@ export function HomePage() {
               ready in one workspace.
             </p>
           </div>
-          <Button type="button" className="w-full md:w-auto">
-            <ArrowRight aria-hidden="true" />
-            Start building
+          <Button asChild className="w-full md:w-auto">
+            <Link href={appRoutes.login}>
+              <ArrowRight aria-hidden="true" />
+              로그인하기
+            </Link>
           </Button>
         </header>
 
