@@ -1,5 +1,6 @@
 import { buildApiUrl } from "@/shared/config"
 
+import { resolveMockApiResponse } from "./mock-auth"
 import { ApiError, type ApiResponse } from "./types"
 
 type ApiRequestInit = Omit<RequestInit, "body"> & {
@@ -24,6 +25,12 @@ export async function apiRequest<TData>(
   path: `/${string}`,
   init: ApiRequestInit = {}
 ) {
+  const mockResponse = resolveMockApiResponse<TData>(path, init.method)
+
+  if (mockResponse) {
+    return mockResponse
+  }
+
   const headers = new Headers(init.headers)
   const body = isJsonBody(init.body) ? JSON.stringify(init.body) : init.body
 
