@@ -24,12 +24,16 @@ export function AppHeader() {
           <div className="bg-gray-300 rounded-2xl px-3 py-2 text-sm text-black">
             검색창이 들어갈 예정입니다.
           </div>
-          <span className="px-3 py-2 rounded-md font-medium text-[12px] shadow-sm">
-            로그인
-          </span>
-          <span className="px-3 py-2 rounded-md font-medium text-[12px] shadow-sm bg-[#005E9C] text-white">
-            회원가입
-          </span>
+          <Link href={appRoutes.login} className="cursor-pointer">
+            <span className="px-3 py-2 rounded-md font-medium text-[12px] shadow-sm">
+              로그인
+            </span>
+          </Link>
+          <Link href={appRoutes.login} className="cursor-pointer">
+            <span className="px-3 py-2 rounded-md font-medium text-[12px] shadow-sm bg-[#005E9C] text-white">
+              회원가입
+            </span>
+          </Link>
         </div>
       </div>
     </header>
