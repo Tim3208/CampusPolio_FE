@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 
 import { appRoutes, publicEnv } from "@/shared/config"
 
+import { clearAuthSession } from "../api/clear-auth-session"
 import { loginWithGoogle } from "../api/login-with-google"
 import { getLoginErrorMessage } from "../lib/error-message"
 import type { GoogleCredentialResponse } from "../model/google-identity"
@@ -41,6 +42,8 @@ export function GoogleSignInButton({ nextPath }: GoogleSignInButtonProps) {
         const user = await loginWithGoogle(response.credential)
 
         if (!user.isDomainValid) {
+          await clearAuthSession().catch(() => undefined)
+          router.refresh()
           setErrorMessage("삼육대학교 Google 계정으로 로그인해 주세요.")
           return
         }
