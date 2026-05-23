@@ -40,7 +40,7 @@ export function LoginPage({ nextPath }: LoginPageProps) {
             </div>
             <CardTitle>로그인</CardTitle>
             <CardDescription>
-              학교 계정 확인 후 서비스 이용 상태를 확인합니다.
+              Google 로그인 후 서비스 이용 상태를 확인합니다.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
