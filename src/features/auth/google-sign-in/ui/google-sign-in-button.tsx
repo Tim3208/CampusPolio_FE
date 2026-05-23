@@ -4,7 +4,12 @@ import Script from "next/script"
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 
-import { appRoutes, publicEnv } from "@/shared/config"
+import {
+  appRoutes,
+  publicEnv,
+  queryParams,
+  requiresSchoolVerification,
+} from "@/shared/config"
 
 import { loginWithGoogle } from "../api/login-with-google"
 import { getLoginErrorMessage } from "../lib/error-message"
@@ -14,6 +19,11 @@ type GoogleSignInButtonProps = {
   nextPath: string
 }
 
+/**
+ * Google Identity Services 버튼을 렌더링하고 로그인 결과에 따라 다음 화면으로 이동한다.
+ * @param nextPath 로그인 후 이동할 안전한 내부 경로
+ * @returns Google 로그인 버튼과 처리 상태 UI
+ */
 export function GoogleSignInButton({ nextPath }: GoogleSignInButtonProps) {
   const router = useRouter()
   const buttonRef = useRef<HTMLDivElement>(null)
@@ -40,13 +50,10 @@ export function GoogleSignInButton({ nextPath }: GoogleSignInButtonProps) {
       try {
         const user = await loginWithGoogle(response.credential)
 
-        if (!user.isDomainValid) {
-          setErrorMessage("삼육대학교 Google 계정으로 로그인해 주세요.")
-          return
-        }
+        if (requiresSchoolVerification(nextPath) && !user.isVerified) {
+          const params = new URLSearchParams({ [queryParams.next]: nextPath })
 
-        if (!user.isVerified) {
-          router.push(appRoutes.verifyEmail)
+          router.push(`${appRoutes.verifyEmail}?${params.toString()}`)
           return
         }
 
