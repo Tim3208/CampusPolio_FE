@@ -1,6 +1,11 @@
 export const appRoutes = {
   home: "/",
   login: "/login",
+  mypage: "/mypage",
+  mypageProjects: "/mypage/projects",
+  mypagePortfolios: "/mypage/portfolios",
+  mypageSettings: "/mypage/settings",
+  mypageSupport: "/mypage/support",
   verifyEmail: "/verify-email",
 } as const
 

@@ -3,7 +3,7 @@ import { buildApiUrl } from "@/shared/config"
 import { resolveMockApiResponse } from "./mock-auth"
 import { ApiError, type ApiResponse } from "./types"
 
-type ApiRequestInit = Omit<RequestInit, "body"> & {
+export type ApiRequestInit = Omit<RequestInit, "body"> & {
   body?: BodyInit | Record<string, unknown> | null
 }
 
