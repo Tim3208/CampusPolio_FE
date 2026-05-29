@@ -23,6 +23,15 @@ export function getProjectDetailPath(projectId: number | string) {
   return `/projects/${projectId}`
 }
 
+/**
+ * 프로젝트 수정 화면 경로를 생성한다.
+ * @param projectId 수정할 프로젝트 ID
+ * @returns 프로젝트 수정 화면 경로
+ */
+export function getProjectEditPath(projectId: number | string) {
+  return `/projects/${projectId}/edit`
+}
+
 const schoolVerificationRequiredPathPrefixes: readonly `/${string}`[] = []
 
 /**

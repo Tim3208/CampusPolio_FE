@@ -2,26 +2,25 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import {
-  type KeyboardEvent,
-  type MouseEvent,
-  useEffect,
-  useState,
-} from "react"
+import { type KeyboardEvent, type MouseEvent } from "react"
 import { Globe2, Lock, MoreVertical, Plus } from "lucide-react"
 
-import { getMyProjects, type MyProject } from "@/entities/project"
-import { appRoutes, getProjectDetailPath } from "@/shared/config"
+import type { MyProject } from "@/entities/project"
+import {
+  appRoutes,
+  getProjectDetailPath,
+  getProjectEditPath,
+} from "@/shared/config"
 import { cn } from "@/shared/lib/utils"
 
-type ProjectsLoadState = {
-  status: "loading" | "success" | "error"
+type MypageProjectsPageProps = {
   projects: MyProject[]
   errorMessage?: string
 }
 
 type ProjectCardProps = {
   project: MyProject
+  onEdit: (projectId: number) => void
   onOpen: (projectId: number) => void
 }
 
@@ -105,10 +104,11 @@ function ProjectCreateCard() {
 /**
  * 프로젝트 카드 클릭 가능 영역을 렌더링한다.
  * @param project 표시할 프로젝트
+ * @param onEdit 프로젝트 수정 이동 핸들러
  * @param onOpen 프로젝트 상세 이동 핸들러
  * @returns 프로젝트 카드 UI
  */
-function ProjectCard({ project, onOpen }: ProjectCardProps) {
+function ProjectCard({ project, onEdit, onOpen }: ProjectCardProps) {
   const visibilityLabel = getVisibilityLabel(project.status)
 
   /**
@@ -137,6 +137,7 @@ function ProjectCard({ project, onOpen }: ProjectCardProps) {
    */
   function handleSettingsClick(event: MouseEvent<HTMLButtonElement>) {
     event.stopPropagation()
+    onEdit(project.projectId)
   }
 
   /**
@@ -228,31 +229,6 @@ function ProjectCard({ project, onOpen }: ProjectCardProps) {
 }
 
 /**
- * 프로젝트 목록 로딩 중 표시할 카드 skeleton을 렌더링한다.
- * @returns 프로젝트 카드 skeleton 목록
- */
-function ProjectCardSkeletons() {
-  return Array.from({ length: 4 }).map((_, index) => (
-    <div
-      key={index}
-      className="min-h-[360px] overflow-hidden rounded-lg bg-white shadow-sm"
-      aria-hidden="true"
-    >
-      <div className="h-44 animate-pulse bg-slate-200" />
-      <div className="space-y-4 px-6 py-6">
-        <div className="h-6 w-4/5 animate-pulse rounded bg-slate-200" />
-        <div className="h-6 w-2/3 animate-pulse rounded bg-slate-200" />
-        <div className="flex gap-2">
-          <div className="h-6 w-12 animate-pulse rounded bg-slate-200" />
-          <div className="h-6 w-16 animate-pulse rounded bg-slate-200" />
-        </div>
-        <div className="h-5 w-24 animate-pulse rounded bg-slate-200" />
-      </div>
-    </div>
-  ))
-}
-
-/**
  * 프로젝트 목록이 비어 있을 때의 안내 영역을 렌더링한다.
  * @returns 빈 프로젝트 목록 상태 UI
  */
@@ -289,65 +265,15 @@ function ErrorProjectsState({ message }: { message: string }) {
 
 /**
  * 마이페이지 프로젝트 모음 본문을 렌더링한다.
+ * @param projects 서버에서 조회한 내 프로젝트 목록
+ * @param errorMessage 프로젝트 목록 조회 실패 메시지
  * @returns 프로젝트 생성 카드와 내 프로젝트 카드 목록
  */
-export function MypageProjectsPage() {
+export function MypageProjectsPage({
+  errorMessage,
+  projects,
+}: MypageProjectsPageProps) {
   const router = useRouter()
-  const [state, setState] = useState<ProjectsLoadState>({
-    projects: [],
-    status: "loading",
-  })
-
-  useEffect(() => {
-    let ignore = false
-
-    /**
-     * 내 프로젝트 목록 첫 페이지를 불러와 화면 상태를 갱신한다.
-     */
-    async function loadProjects() {
-      setState((current) => ({
-        ...current,
-        errorMessage: undefined,
-        status: "loading",
-      }))
-
-      try {
-        const projectsPage = await getMyProjects({
-          page: 0,
-          size: 9,
-          status: "ALL",
-        })
-
-        if (ignore) {
-          return
-        }
-
-        setState({
-          projects: projectsPage.content,
-          status: "success",
-        })
-      } catch (error) {
-        if (ignore) {
-          return
-        }
-
-        setState({
-          errorMessage:
-            error instanceof Error
-              ? error.message
-              : "알 수 없는 오류가 발생했습니다.",
-          projects: [],
-          status: "error",
-        })
-      }
-    }
-
-    loadProjects()
-
-    return () => {
-      ignore = true
-    }
-  }, [])
 
   /**
    * 선택한 프로젝트 상세 화면으로 이동한다.
@@ -355,6 +281,14 @@ export function MypageProjectsPage() {
    */
   function handleProjectOpen(projectId: number) {
     router.push(getProjectDetailPath(projectId))
+  }
+
+  /**
+   * 선택한 프로젝트 수정 화면으로 이동한다.
+   * @param projectId 이동할 프로젝트 ID
+   */
+  function handleProjectEdit(projectId: number) {
+    router.push(getProjectEditPath(projectId))
   }
 
   return (
@@ -366,26 +300,22 @@ export function MypageProjectsPage() {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
         <ProjectCreateCard />
 
-        {state.status === "loading" && <ProjectCardSkeletons />}
-
-        {state.status === "error" && (
+        {errorMessage ? (
           <ErrorProjectsState
-            message={state.errorMessage ?? "잠시 후 다시 시도해주세요."}
+            message={errorMessage ?? "잠시 후 다시 시도해주세요."}
           />
+        ) : projects.length > 0 ? (
+          projects.map((project) => (
+            <ProjectCard
+              key={project.projectId}
+              onEdit={handleProjectEdit}
+              project={project}
+              onOpen={handleProjectOpen}
+            />
+          ))
+        ) : (
+          <EmptyProjectsState />
         )}
-
-        {state.status === "success" &&
-          (state.projects.length > 0 ? (
-            state.projects.map((project) => (
-              <ProjectCard
-                key={project.projectId}
-                project={project}
-                onOpen={handleProjectOpen}
-              />
-            ))
-          ) : (
-            <EmptyProjectsState />
-          ))}
       </div>
     </section>
   )
