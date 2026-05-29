@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { CircleUserRound, Search } from "lucide-react";
 
 import { getCurrentUser } from "@/entities/user";
@@ -29,6 +29,7 @@ async function getIsLoggedIn() {
 export function AppHeader() {
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState("");
 
   useEffect(() => {
     let ignore = false;
@@ -44,22 +45,39 @@ export function AppHeader() {
     };
   }, [pathname]);
 
+  /**
+   * 헤더 검색 폼의 기본 제출 동작을 막는다.
+   * @param event 검색 폼 제출 이벤트
+   */
+  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+  };
+
   return (
-    <header className="sticky top-0 z-40 shrink-0 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-6 py-2 md:px-10 md:py-3">
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
+      <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-6">
         <Link
           href={appRoutes.home}
-          className="inline-flex min-w-0 items-center gap-2 text-xl font-semibold"
+          className="text-sm font-bold text-[#005E9C]"
           aria-label="CampusPolio 홈으로 이동"
         >
-          <span className="truncate">Campus Polio</span>
+          Campus Polio
         </Link>
 
-        <div className="flex items-center justify-between gap-2">
-          <div className="hidden items-center gap-2 rounded-2xl bg-gray-200 px-3 py-2 text-sm text-gray-700 sm:flex">
-            <Search className="size-4" aria-hidden="true" />
-            <span>검색창이 들어갈 예정입니다.</span>
-          </div>
+        <div className="flex items-center gap-3">
+          <form
+            onSubmit={handleSearch}
+            className="hidden h-8 w-[260px] items-center gap-2 rounded-full bg-slate-100 px-3 md:flex"
+          >
+            <Search className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+            <input
+              value={searchKeyword}
+              onChange={(event) => setSearchKeyword(event.target.value)}
+              placeholder="검색어를 입력하세요"
+              className="w-full bg-transparent text-xs text-slate-700 outline-none placeholder:text-slate-400"
+            />
+          </form>
+
           {isLoggedIn ? (
             <Button asChild variant="ghost" size="icon" aria-label="마이페이지로 이동">
               <Link href={appRoutes.mypage}>
@@ -68,12 +86,18 @@ export function AppHeader() {
             </Button>
           ) : (
             <>
-              <Button asChild variant="ghost" size="sm">
-                <Link href={appRoutes.login}>로그인</Link>
-              </Button>
-              <Button asChild size="sm" className="bg-[#005E9C] text-white">
-                <Link href={appRoutes.login}>회원가입</Link>
-              </Button>
+              <Link
+                href={appRoutes.login}
+                className="rounded-md px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100"
+              >
+                로그인
+              </Link>
+              <Link
+                href={appRoutes.login}
+                className="rounded-md bg-[#005E9C] px-3 py-2 text-[12px] font-medium text-white shadow-sm"
+              >
+                회원가입
+              </Link>
             </>
           )}
         </div>
