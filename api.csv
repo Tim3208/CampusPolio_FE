@@ -1,0 +1,356 @@
+Method,URL,설명,파라미터,요청예시(바디),응답예시(바디),실패코드,성공코드,주석
+GET,/api/projects,"매인검색 기능
+프로젝트 검색 및 필터링 조회","keyword, tags, page,
+size, filterType,year,term","api/projects?tags=시각디자인
+&tags=2024&page=0&filterType=""viewCount""","{
+  ""content"": [
+    {
+      ""projectId"": 1,
+      ""title"": ""디지털 저장소"",
+      ""description"": ""설명"",
+      ""thumbnailUrl"": ""https://..."",
+      ""tags"":[]
+      ""users"": [{
+        ""userId"": 1,
+        ""name"": ""홍길동""
+        ""role"":""MEMBER""
+      },
+{
+        ""userId"": 2,
+        ""name"": ""김길동""
+        ""role"":""Oner""
+      }],
+      ""viewCount"": 120,
+      ""likeCount"": 30,
+      ""isLiked"": true
+    } ],
+  ""page"": 0,
+  ""size"": 9,
+  ""totalElements"": 100,
+  ""totalPages"": 12
+}","400 Bad Request (잘못된 쿼리 파라미터)
+500 Internal Server Error (서버 오류)",200 OK,"필터: 최신순, 조회수
+
+
+
+북마크(좋아요)
+는 마이페이지"
+GET ,/api/users/me/projects,내(사용자) 프로젝트들 조회,,GET /api/users/me/projects?page=0&status=ALL,"{
+  ""content"": [
+    {
+      ""projectId"": 1,
+      ""title"": ""미래 지능형 건축"",
+      ""thumbnailUrl"": ""https://..."",
+      ""tags"": [""ARCH""],
+      ""updatedAt"": ""2026-05-01"",
+      ""status"": ""PUBLISHED""
+    },
+    {
+      ""projectId"": 2,
+      ""title"": ""언어 모델 최적화"",
+      ""thumbnailUrl"": ""https://..."",
+      ""tags"": [""NLP"", ""ML""],
+      ""updatedAt"": ""2026-04-28"",
+      ""status"": ""DRAFT""
+    }
+  ],
+  ""page"": 0,
+  ""size"": 9,
+  ""totalElements"": 12,
+  ""totalPages"": 2
+}","401 Unauthorized (인증 실패)
+500 Internal Server Error (서버 오류)",200 OK,
+GET, /api/users/me/portfolios,내(사용자) 포트폴리오 조회,"page,size,isPublic","GET /api/users/me/portfolios?
+isPublic=false&page=0&size=6","{
+  ""content"": [
+    {
+      ""portfolioId"": 1,
+      ""title"": ""AI 프로젝트 모음"",
+      ""description"": ""AI 관련 프로젝트"",
+      ""thumbnailUrl"": ""https://..."",
+      ""isPublic"": true,
+      ""projectCount"": 5,
+
+      users:[
+           {userId:1}. {userId2}. {{userId3}],
+
+      ""createdAt"": ""2026-05-01"",
+      ""updatedAt"": ""2026-05-03""
+    }
+  ],
+  ""page"": 0,
+  ""size"": 6,
+  ""totalElements"": 10,
+  ""totalPages"": 2
+}","401 Unauthorized (인증 실패)
+500 Internal Server Error (서버 오류)",200 OK,
+POST, /api/projects,"프로젝트 임시생성(Draft)
+(5행~ 12행까지 프로젝트 등록)",,"{
+ 
+}","{
+  ""projectId"": 1,
+  ""status"": ""DRAFT""
+""tags"":[~~~~~]
+}","400 Bad Request (요청 데이터 오류)
+401 Unauthorized (인증 실패)
+500 Internal Server Error (서버 오류)",200 OK,
+PATCH,/api/projects/{projectId},프로젝트 상세 작성 / 수정,,"{
+  ""title"": ""제목"",
+  ""description"": ""설명"",
+  ""content"": ""# 마크다운 내용"",
+  ""thumbnailUrl"": ""https://..."",
+  ""isPublic"": true
+}","{
+  ""projectId"": 1,
+  ""status"": ""DRAFT"",
+  ""updatedAt"": ""2026-05-05T12:10:00Z"",
+  ""message"": ""프로젝트 수정 완료""
+}","400 Bad Request (요청 데이터 오류)
+401 Unauthorized (인증 실패)
+403 Forbidden (권한 없음)
+404 Not Found (프로젝트 없음)
+500 Internal Server Error (서버 오류)",200 OK,
+POST ,/api/projects/{projectId}/files,"프로젝트 컨텐츠의 파일이나
+이미지 업로드",,"{
+  ""fileName"": ""image.png"",
+  ""fileType"": ""image/png""
+}","{
+  ""uploadUrl"": ""https://s3.amazonaws.com/xxx?..."",
+  ""fileUrl"": ""https://s3.amazonaws.com/xxx/image.png""
+}","400 Bad Request (파일 정보 오류)
+401 Unauthorized (인증 실패)
+500 Internal Server Error (서버 오류)",200 OK,
+POST ,/api/projects/preview,프로젝트 등록 미리보기,,"{
+  ""content"": ""# 제목\n내용""
+}","{
+  ""html"": ""<h1>제목</h1><p>내용입니다</p>"",
+  ""summary"": ""제목 내용입니다"",
+  ""imageUrls"": [
+    ""https://s3.amazonaws.com/xxx/image.png""
+  ]
+}","400 Bad Request (마크다운 변환 실패)
+500 Internal Server Error (서버 오류)",200 OK,
+POST ,/api/projects/{projectId}/publish,프로젝트 등록,,"{
+""tags"":~~~
+}","{
+  ""message"": ""프로젝트 등록 완료"",
+  ""status"": ""PUBLISHED""
+}","400 Bad Request (유효성 검사 실패)
+401 Unauthorized (인증 실패)
+403 Forbidden (권한 없음)
+404 Not Found (프로젝트 없음)
+500 Internal Server Error (서버 오류)",200 OK,
+POST,/api/files/presigned-url,업로드 url 발급 ,,"{
+  ""fileName"": ""thumbnail.png"",
+  ""fileType"": ""image/png""
+}","{
+  ""uploadUrl"": ""https://s3.amazonaws.com/xxx?..."",
+  ""fileUrl"": ""https://s3.amazonaws.com/xxx/thumbnail.png""
+}","400 Bad Request (파일 정보 오류)
+401 Unauthorized (인증 실패)
+500 Internal Server Error (서버 오류)",200 OK,
+POST,/api/auth/login,로그인 (OAuth 연동),,"{
+""idToken"": ""google_id_token""
+}","{ 
+ ""success"": true,  ""data"": {
+    ""id"": 1,    ""email"": ""user@syu.ac.kr"", 
+   ""isDomainValid"": true, (구글 도메인 인증)
+    ""isVerified"": false (학교 이메일 인증) 
+ }
+}","400잘못된 요청
+401토큰 검증 실패
+500서버 오류",,
+POST,/api/auth/email/send,인증번호 발송,,"{ 
+ ""email"": ""user@syu.ac.kr""
+}","{ 
+ ""success"": true,
+  ""message"": ""인증번호 발송 완료""
+}","400이메일 형식 오류
+403학교 이메일 아님
+429요청 과다 (rate limit)
+500이메일 전송 실패",,
+POST,/api/auth/email/verify,인증번호 확인,,"{ 
+ ""email"": ""user@syu.ac.kr"",  ""code"": ""123456""
+}","{ 
+ ""success"": true, 
+ ""data"": { 
+   ""isVerified"": true 
+ }
+}","400코드 불일치
+404인증 요청 없음
+410인증번호 만료
+500서버 오류",,
+GET,/api/users/me,사용자 상태 재조회,,,"{ 
+ ""success"": true,  ""data"": {
+    ""id"": 1,
+    ""email"": ""user@syu.ac.kr"", 
+   ""isDomainValid"": true,
+    ""isVerified"": true
+  }
+}","400 잘못된 요청
+401 인증 안됨
+403 권한 없음
+500 서버 오류",,
+POST,/api/auth/logout,로그아웃,,,"{
+  ""success"": true,
+  ""message"": ""로그아웃 완료""
+}","400잘못된 요청
+401인증 안됨 (토큰 없음 또는 만료)
+500서버 오류",,
+POST,/api/auth/email/resend,인증번호 재발송 ,,"{
+  ""email"": ""user@syu.ac.kr""
+}","{ 
+ ""success"": true,
+  ""message"": ""인증번호 재발송 완료""
+}
+","400 잘못된 요청
+401 인증 안됨
+403 학교 이메일 아님
+429 요청 과다
+500 서버 오류",,
+POST ,/api/portfolios,포트폴리오 생성,,"{
+  ""title"": ""공모전 포트폴리오""
+}","{ 
+ ""success"": true, 
+ ""data"": {
+    ""portfolioId"": 3
+  }
+}","400잘못된 요청
+401인증 안됨
+500서버 오류",,
+PATCH,/api/portfolios/{portfolioId}/projects,포트폴리오에 프로젝트 추가/제거,,"{ 
+ ""add"": [1, 2],
+  ""remove"": [3]
+}",,"400잘못된 요청
+401인증 안됨
+403권한 없음
+404포트폴리오 없음
+500서버 오류",,
+PATCH ,/api/portfolios/{portfolioId}/order,포트폴리오 내 프로젝트 순서 변경,,"{
+  ""projectOrder"": [2, 1, 3]
+}",,"400잘못된 요청
+401인증 안됨
+403권한 없음
+404포트폴리오 없음
+500서버 오류",,
+GET,/api/portfolios/{slug},고유 URL(slug)을 통해 포트폴리오 조회,,,"{ 
+ ""title"": ""팀 포트폴리오"", 
+ ""projects"": [
+    {
+      ""id"": 1, 
+     ""title"": ""프로젝트1""
+    }
+  ]
+}","400잘못된 요청
+404존재하지 않는 포트폴리오
+500서버 오류",,
+DELETE,/api/projects/{projectId},내 프로젝트 삭제,,"
+",204 No Content,"401 Unauthorized (인증 실패)
+403 Forbidden (본인 프로젝트 아님)
+404 Not Found (프로젝트 없음)
+500 Internal Server Error (서버 오류)",,
+GET,/api/home,메인에서 출력될 프로젝트 출력,,,"{
+  ""featured"": {
+    ""projectId"": 1,
+    ""title"": ""지속 가능한 도시주거 2026"",
+    ""thumbnailUrl"": ""...""
+  },
+  ""exhibitions"": [
+    {
+      ""projectId"": 2,
+      ""title"": ""식물 두피관리"",
+      ""thumbnailUrl"": ""...""
+    }
+  ],
+  ""references"": [
+    {
+      ""projectId"": 3,
+      ""title"": ""공간감각 유동성"",
+      ""thumbnailUrl"": ""...""
+    }
+  ]
+}",,,
+GET,/api/home/project,네비바에서 검색,keyword,"/api/home/project?keyword=""컴공""","{
+  ""content"": [
+    {
+      ""projectId"": 1,
+      ""title"": ""컴공 저장소"",
+      ""description"": ""설명"",
+      ""thumbnailUrl"": ""https://..."",
+      ""tags"":[]
+      ""users"": {
+        ""userId"": 1,
+        ""name"": ""홍길동""
+        ""role"":""MEMBER""
+      },
+      ""viewCount"": 120,
+      ""likeCount"": 30,
+      ""isLiked"": true
+    }
+  ],
+  ""page"": 0,
+  ""size"": 9,
+  ""totalElements"": 100,
+  ""totalPages"": 12
+}",,,
+GET,/api/projects/{projectId},특정 프로젝트 조회,,,"{
+  ""projectId"": 1,
+  ""title"": ""AI 추천 시스템"",
+  ""description"": ""사용자 행동 기반 추천"",
+  ""content"": ""<h1>프로젝트 소개</h1>"",
+  ""thumbnailUrl"": ""https://s3.amazonaws.com/xxx.png"",
+  ""author"": {
+    ""userId"": 10,
+    ""name"": ""홍길동"",
+    ""profileImage"": ""https://...""
+  },
+  ""tags"": [""AI"", ""추천""],
+  ""members"": [
+    {
+      ""userId"": 11,
+      ""name"": ""김철수""
+    }
+  ],
+  ""likes"": 120,
+  ""views"": 540,
+  ""isPublic"": true,
+  ""createdAt"": ""2026-05-01"",
+  ""updatedAt"": ""2026-05-05""
+}",,,
+PATCH,/api/projects/{id}/visibility,프로젝트 공개/ 비공개,,,"{
+  ""isPublic"": false
+}",,,
+GET,/api/profile,유저 프로필 조회,,,"{
+  ""userId"": 1,
+  ""email"": ""test@syu.ac.kr"",
+  ""name"": ""홍길동"",
+  ""nickname"": ""길동이"",
+  ""bio"": ""백엔드 개발 및 AI 프로젝트를 진행합니다."",
+  ""major"": ""컴퓨터공학과"",
+  ""grade"": 4,
+  ""profileImage"": ""https://s3.amazonaws.com/profile.png"",
+  ""createdAt"": ""2026-05-01""
+}",,,
+POST ,/api/profile,유저 프로필 등록,,"{
+  ""nickname"": ""길동이"",
+  ""bio"": ""백엔드 개발자""
+}","{
+  ""profileId"": 1,
+  ""message"": ""프로필 생성 완료""
+}",,,
+PATCH,/api/profile,유저프로필 수정,,"{
+  ""name"": ""홍길동"",
+  ""nickname"": ""길동이"",
+  ""bio"": ""백엔드 개발 및 AI 프로젝트를 진행합니다."",
+  ""major"": ""컴퓨터공학과"",
+  ""grade"": 4,
+  ""profileImage"": ""https://s3.amazonaws.com/profile.png""
+}","{
+  ""userId"": 1,
+  ""updatedAt"": ""2026-05-05T14:00:00Z"",
+  ""message"": ""프로필 수정 완료""
+}","400 Bad Request (잘못된 입력값)
+401 Unauthorized (인증 실패)
+404 Not Found (사용자 없음)
+500 Internal Server Error (서버 오류)",,
+DELETE,/api/users/me,회원 탈퇴,,,,,,
