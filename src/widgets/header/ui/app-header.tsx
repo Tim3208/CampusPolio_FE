@@ -1,30 +1,24 @@
+"use client";
+
 import Link from "next/link";
-import { headers } from "next/headers";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { CircleUserRound, Search } from "lucide-react";
 
 import { getCurrentUser } from "@/entities/user";
-import { appRoutes, mockConfig } from "@/shared/config";
+import { appRoutes } from "@/shared/config";
 import { Button } from "@/shared/ui/button";
 
 /**
- * 요청 쿠키를 전달해 현재 로그인 사용자를 조회한다.
- * @returns 로그인 사용자가 있으면 사용자 정보, 없으면 null
+ * 브라우저에서 현재 로그인 사용자를 조회한다.
+ * @returns 로그인 상태 여부
  */
-async function getHeaderUser() {
-  const requestHeaders = await headers();
-  const cookie = requestHeaders.get("cookie");
-
-  if (!cookie && !mockConfig.useMockApi) {
-    return null;
-  }
-
+async function getIsLoggedIn() {
   try {
-    return await getCurrentUser({
-      cache: "no-store",
-      headers: cookie ? { cookie } : undefined,
-    });
+    await getCurrentUser({ cache: "no-store" });
+    return true;
   } catch {
-    return null;
+    return false;
   }
 }
 
@@ -32,8 +26,23 @@ async function getHeaderUser() {
  * 모든 페이지 상단에 표시되는 공통 애플리케이션 헤더를 렌더링한다.
  * @returns 공통 헤더 UI
  */
-export async function AppHeader() {
-  const user = await getHeaderUser();
+export function AppHeader() {
+  const pathname = usePathname();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    let ignore = false;
+
+    getIsLoggedIn().then((nextIsLoggedIn) => {
+      if (!ignore) {
+        setIsLoggedIn(nextIsLoggedIn);
+      }
+    });
+
+    return () => {
+      ignore = true;
+    };
+  }, [pathname]);
 
   return (
     <header className="sticky top-0 z-40 shrink-0 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
@@ -51,7 +60,7 @@ export async function AppHeader() {
             <Search className="size-4" aria-hidden="true" />
             <span>검색창이 들어갈 예정입니다.</span>
           </div>
-          {user ? (
+          {isLoggedIn ? (
             <Button asChild variant="ghost" size="icon" aria-label="마이페이지로 이동">
               <Link href={appRoutes.mypage}>
                 <CircleUserRound className="size-5" aria-hidden="true" />

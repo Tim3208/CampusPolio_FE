@@ -19,6 +19,11 @@ type GoogleSignInButtonProps = {
   nextPath: string
 }
 
+let googleCredentialHandler:
+  | ((response: GoogleCredentialResponse) => void)
+  | null = null
+let initializedGoogleClientId: string | null = null
+
 /**
  * Google Identity Services 버튼을 렌더링하고 로그인 결과에 따라 다음 화면으로 이동한다.
  * @param nextPath 로그인 후 이동할 안전한 내부 경로
@@ -69,6 +74,8 @@ export function GoogleSignInButton({ nextPath }: GoogleSignInButtonProps) {
   )
 
   useEffect(() => {
+    googleCredentialHandler = handleCredential
+
     if (!isScriptReady || !buttonRef.current) {
       return
     }
@@ -81,13 +88,20 @@ export function GoogleSignInButton({ nextPath }: GoogleSignInButtonProps) {
       return
     }
 
-    buttonRef.current.innerHTML = ""
-    window.google.accounts.id.initialize({
-      client_id: publicEnv.googleClientId,
-      callback: handleCredential,
-      ux_mode: "popup",
-    })
-    window.google.accounts.id.renderButton(buttonRef.current, {
+    const buttonElement = buttonRef.current
+
+    buttonElement.innerHTML = ""
+
+    if (initializedGoogleClientId !== publicEnv.googleClientId) {
+      window.google.accounts.id.initialize({
+        client_id: publicEnv.googleClientId,
+        callback: (response) => googleCredentialHandler?.(response),
+        ux_mode: "popup",
+      })
+      initializedGoogleClientId = publicEnv.googleClientId
+    }
+
+    window.google.accounts.id.renderButton(buttonElement, {
       logo_alignment: "left",
       shape: "rectangular",
       size: "large",
@@ -95,6 +109,10 @@ export function GoogleSignInButton({ nextPath }: GoogleSignInButtonProps) {
       theme: "outline",
       width: 320,
     })
+
+    return () => {
+      buttonElement.innerHTML = ""
+    }
   }, [handleCredential, isScriptReady])
 
   return (

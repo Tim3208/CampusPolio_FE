@@ -11,11 +11,15 @@ export const publicEnv = {
 } as const
 
 /**
- * 공개 API base URL과 API path를 결합한다.
+ * 실행 환경에 맞는 API 요청 URL을 만든다.
  * @param path `/`로 시작하는 API path
- * @returns API base URL이 있으면 절대 URL, 없으면 입력 path
+ * @returns 브라우저에서는 same-origin path, 서버에서는 API base URL이 반영된 URL
  */
 export function buildApiUrl(path: `/${string}`) {
+  if (typeof window !== "undefined") {
+    return path
+  }
+
   if (!publicEnv.apiBaseUrl) {
     return path
   }
