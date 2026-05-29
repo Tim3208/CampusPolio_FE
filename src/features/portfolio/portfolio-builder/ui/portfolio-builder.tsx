@@ -1,40 +1,41 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import type { ReactNode } from "react"
-import { useMemo, useState } from "react"
+import Link from "next/link";
+import type { ReactNode } from "react";
+import { useMemo, useState } from "react";
 import {
   ArrowDown,
   ArrowUp,
   Check,
+  ChevronLeft,
   ChevronsUpDown,
   Eye,
   FilePlus2,
   Grid2X2,
   Search,
   X,
-} from "lucide-react"
+} from "lucide-react";
 
-import type { MyProject, MyProjectsPage } from "@/entities/project"
-import { appRoutes } from "@/shared/config"
-import { cn } from "@/shared/lib/utils"
+import type { MyProject, MyProjectsPage } from "@/entities/project";
+import { appRoutes } from "@/shared/config";
+import { cn } from "@/shared/lib/utils";
 
 type PortfolioBuilderProps = {
-  projectsPage: MyProjectsPage | null
-  errorMessage?: string
-}
+  projectsPage: MyProjectsPage | null;
+  errorMessage?: string;
+};
 
 type SelectedTemplate = {
-  id: "my-projects"
-  title: string
-  description: string
-}
+  id: "my-projects";
+  title: string;
+  description: string;
+};
 
 const selectedTemplate: SelectedTemplate = {
   id: "my-projects",
   title: "My Projects",
   description: "읽기 전용 아카이브 느낌의 리스트형 포트폴리오 템플릿",
-}
+};
 
 /**
  * 프로젝트 날짜를 포트폴리오 제작 화면 표시 형식으로 변환한다.
@@ -42,13 +43,13 @@ const selectedTemplate: SelectedTemplate = {
  * @returns `YYYY.MM` 형식 날짜
  */
 function formatProjectMonth(updatedAt: string) {
-  const date = new Date(updatedAt)
+  const date = new Date(updatedAt);
 
   if (Number.isNaN(date.getTime())) {
-    return "날짜 없음"
+    return "날짜 없음";
   }
 
-  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}`
+  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
 /**
@@ -57,7 +58,10 @@ function formatProjectMonth(updatedAt: string) {
  * @returns 카드 설명 문구
  */
 function getProjectDescription(project: MyProject) {
-  return project.description?.trim() || "프로젝트 상세 설명은 다음 단계에서 연결됩니다."
+  return (
+    project.description?.trim() ||
+    "프로젝트 상세 설명은 다음 단계에서 연결됩니다."
+  );
 }
 
 /**
@@ -70,26 +74,22 @@ function getProjectDescription(project: MyProject) {
 function moveSelectedProject(
   projects: MyProject[],
   projectId: number,
-  direction: "up" | "down"
+  direction: "up" | "down",
 ) {
   const currentIndex = projects.findIndex(
-    (project) => project.projectId === projectId
-  )
-  const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1
+    (project) => project.projectId === projectId,
+  );
+  const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
 
-  if (
-    currentIndex < 0 ||
-    targetIndex < 0 ||
-    targetIndex >= projects.length
-  ) {
-    return projects
+  if (currentIndex < 0 || targetIndex < 0 || targetIndex >= projects.length) {
+    return projects;
   }
 
-  const nextProjects = [...projects]
-  const [project] = nextProjects.splice(currentIndex, 1)
-  nextProjects.splice(targetIndex, 0, project)
+  const nextProjects = [...projects];
+  const [project] = nextProjects.splice(currentIndex, 1);
+  nextProjects.splice(targetIndex, 0, project);
 
-  return nextProjects
+  return nextProjects;
 }
 
 /**
@@ -101,17 +101,17 @@ export function PortfolioBuilder({
   errorMessage,
   projectsPage,
 }: PortfolioBuilderProps) {
-  const projects = useMemo(() => projectsPage?.content ?? [], [projectsPage])
-  const [keyword, setKeyword] = useState("")
-  const [selectedProjects, setSelectedProjects] = useState<MyProject[]>([])
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
-  const [notice, setNotice] = useState("")
+  const projects = useMemo(() => projectsPage?.content ?? [], [projectsPage]);
+  const [keyword, setKeyword] = useState("");
+  const [selectedProjects, setSelectedProjects] = useState<MyProject[]>([]);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [notice, setNotice] = useState("");
 
   const filteredProjects = useMemo(() => {
-    const normalizedKeyword = keyword.trim().toLowerCase()
+    const normalizedKeyword = keyword.trim().toLowerCase();
 
     if (!normalizedKeyword) {
-      return projects
+      return projects;
     }
 
     return projects.filter((project) => {
@@ -121,31 +121,31 @@ export function PortfolioBuilder({
         ...project.tags,
       ]
         .join(" ")
-        .toLowerCase()
+        .toLowerCase();
 
-      return searchable.includes(normalizedKeyword)
-    })
-  }, [keyword, projects])
+      return searchable.includes(normalizedKeyword);
+    });
+  }, [keyword, projects]);
 
   /**
    * 프로젝트 선택 여부를 전환한다.
    * @param project 선택하거나 해제할 프로젝트
    */
   function toggleProject(project: MyProject) {
-    setNotice("")
+    setNotice("");
     setSelectedProjects((currentProjects) => {
       const isSelected = currentProjects.some(
-        (currentProject) => currentProject.projectId === project.projectId
-      )
+        (currentProject) => currentProject.projectId === project.projectId,
+      );
 
       if (isSelected) {
         return currentProjects.filter(
-          (currentProject) => currentProject.projectId !== project.projectId
-        )
+          (currentProject) => currentProject.projectId !== project.projectId,
+        );
       }
 
-      return [...currentProjects, project]
-    })
+      return [...currentProjects, project];
+    });
   }
 
   /**
@@ -154,8 +154,8 @@ export function PortfolioBuilder({
    */
   function removeSelectedProject(projectId: number) {
     setSelectedProjects((currentProjects) =>
-      currentProjects.filter((project) => project.projectId !== projectId)
-    )
+      currentProjects.filter((project) => project.projectId !== projectId),
+    );
   }
 
   /**
@@ -165,22 +165,22 @@ export function PortfolioBuilder({
    */
   function handleMoveProject(projectId: number, direction: "up" | "down") {
     setSelectedProjects((currentProjects) =>
-      moveSelectedProject(currentProjects, projectId, direction)
-    )
+      moveSelectedProject(currentProjects, projectId, direction),
+    );
   }
 
   /**
    * 다음 단계 버튼의 임시 안내 메시지를 표시한다.
    */
   function handleNextStep() {
-    setNotice("다음 단계 연동은 템플릿 생성 API 연결 단계에서 제공됩니다.")
+    setNotice("다음 단계 연동은 템플릿 생성 API 연결 단계에서 제공됩니다.");
   }
 
   /**
    * 임시 저장 버튼의 임시 안내 메시지를 표시한다.
    */
   function handleTemporarySave() {
-    setNotice("임시 저장은 포트폴리오 저장 API 연결 단계에서 제공됩니다.")
+    setNotice("임시 저장은 포트폴리오 저장 API 연결 단계에서 제공됩니다.");
   }
 
   return (
@@ -199,16 +199,10 @@ export function PortfolioBuilder({
           <div className="flex items-center gap-3">
             <Link
               href={appRoutes.mypagePortfolios}
-              className="inline-flex h-10 items-center rounded-md border border-slate-200 bg-white px-5 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex h-10 items-center rounded-md border border-slate-200 bg-white pl-3 pr-5 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
             >
-              나가기
-            </Link>
-            <Link
-              href={appRoutes.mypagePortfolios}
-              aria-label="포트폴리오 제작 닫기"
-              className="inline-flex size-10 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
-            >
-              <X className="size-5" aria-hidden="true" />
+              <ChevronLeft className="size-4" aria-hidden="true" />
+              이전으로 돌아가기
             </Link>
           </div>
         </div>
@@ -227,7 +221,9 @@ export function PortfolioBuilder({
       <section className="mx-auto grid w-full max-w-[1504px] grid-cols-1 gap-4 px-8 lg:grid-cols-[1.08fr_0.82fr] xl:grid-cols-[1.08fr_0.82fr_1fr]">
         <Panel>
           <div className="mb-5 flex items-center justify-between gap-4">
-            <h2 className="text-base font-extrabold text-slate-950">내 프로젝트</h2>
+            <h2 className="text-base font-extrabold text-slate-950">
+              내 프로젝트
+            </h2>
             <span className="text-sm font-medium text-slate-500">
               {projectsPage?.totalElements ?? projects.length}개
             </span>
@@ -266,8 +262,8 @@ export function PortfolioBuilder({
               filteredProjects.map((project) => {
                 const selected = selectedProjects.some(
                   (selectedProject) =>
-                    selectedProject.projectId === project.projectId
-                )
+                    selectedProject.projectId === project.projectId,
+                );
 
                 return (
                   <ProjectSelectCard
@@ -276,7 +272,7 @@ export function PortfolioBuilder({
                     selected={selected}
                     onToggle={toggleProject}
                   />
-                )
+                );
               })
             ) : (
               <div className="flex min-h-40 items-center justify-center rounded-md border border-dashed border-slate-200 bg-slate-50 px-4 text-center text-sm text-slate-500">
@@ -311,7 +307,9 @@ export function PortfolioBuilder({
           <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
             <p className="text-sm font-bold text-slate-950">
               선택된 프로젝트
-              <span className="ml-3 text-main-10">{selectedProjects.length}개</span>
+              <span className="ml-3 text-main-10">
+                {selectedProjects.length}개
+              </span>
             </p>
             <button
               type="button"
@@ -352,7 +350,10 @@ export function PortfolioBuilder({
               ))
             ) : (
               <div className="flex min-h-[328px] flex-col items-center justify-center rounded-md border border-dashed border-slate-300 bg-white px-6 text-center">
-                <FilePlus2 className="size-10 text-slate-400" aria-hidden="true" />
+                <FilePlus2
+                  className="size-10 text-slate-400"
+                  aria-hidden="true"
+                />
                 <p className="mt-4 text-sm font-medium text-slate-500">
                   프로젝트를 추가하면 이곳에서 순서를 변경할 수 있습니다.
                 </p>
@@ -363,7 +364,9 @@ export function PortfolioBuilder({
 
         <Panel className="lg:col-span-2 xl:col-span-1">
           <div className="mb-5">
-            <h2 className="text-base font-extrabold text-slate-950">템플릿 선택</h2>
+            <h2 className="text-base font-extrabold text-slate-950">
+              템플릿 선택
+            </h2>
             <p className="mt-3 text-sm leading-6 text-slate-500">
               포트폴리오에 사용할 템플릿을 선택하세요.
             </p>
@@ -447,7 +450,7 @@ export function PortfolioBuilder({
         />
       )}
     </main>
-  )
+  );
 }
 
 /**
@@ -459,19 +462,19 @@ function Panel({
   children,
   className,
 }: {
-  children: ReactNode
-  className?: string
+  children: ReactNode;
+  className?: string;
 }) {
   return (
     <section
       className={cn(
         "rounded-lg border border-slate-200 bg-white p-4 shadow-sm",
-        className
+        className,
       )}
     >
       {children}
     </section>
-  )
+  );
 }
 
 /**
@@ -484,23 +487,23 @@ function StepItem({
   label,
   number,
 }: {
-  active?: boolean
-  label: string
-  number: number
+  active?: boolean;
+  label: string;
+  number: number;
 }) {
   return (
     <li className="flex items-center justify-center gap-3">
       <span
         className={cn(
           "inline-flex size-7 items-center justify-center rounded-full text-sm font-extrabold",
-          active ? "bg-slate-900 text-white" : "bg-slate-400 text-white"
+          active ? "bg-slate-900 text-white" : "bg-slate-400 text-white",
         )}
       >
         {number}
       </span>
       <span className="text-sm font-extrabold text-slate-800">{label}</span>
     </li>
-  )
+  );
 }
 
 /**
@@ -508,7 +511,7 @@ function StepItem({
  * @returns 단계 연결선 UI
  */
 function StepLine() {
-  return <span className="hidden h-px w-44 bg-slate-200 md:block" />
+  return <span className="hidden h-px w-44 bg-slate-200 md:block" />;
 }
 
 /**
@@ -521,9 +524,9 @@ function ProjectSelectCard({
   project,
   selected,
 }: {
-  onToggle: (project: MyProject) => void
-  project: MyProject
-  selected: boolean
+  onToggle: (project: MyProject) => void;
+  project: MyProject;
+  selected: boolean;
 }) {
   return (
     <button
@@ -533,7 +536,7 @@ function ProjectSelectCard({
         "grid w-full grid-cols-[28px_88px_1fr] items-center gap-4 rounded-md border p-3 text-left transition",
         selected
           ? "border-main-20 bg-main-22/40"
-          : "border-slate-200 bg-white hover:border-main-20"
+          : "border-slate-200 bg-white hover:border-main-20",
       )}
     >
       <span
@@ -541,7 +544,7 @@ function ProjectSelectCard({
           "inline-flex size-5 items-center justify-center rounded border",
           selected
             ? "border-slate-900 bg-slate-900 text-white"
-            : "border-slate-300 bg-white text-transparent"
+            : "border-slate-300 bg-white text-transparent",
         )}
       >
         <Check className="size-3.5" aria-hidden="true" />
@@ -567,7 +570,7 @@ function ProjectSelectCard({
         </span>
       </span>
     </button>
-  )
+  );
 }
 
 /**
@@ -582,11 +585,11 @@ function SelectedProjectCard({
   project,
   totalCount,
 }: {
-  index: number
-  onMove: (projectId: number, direction: "up" | "down") => void
-  onRemove: (projectId: number) => void
-  project: MyProject
-  totalCount: number
+  index: number;
+  onMove: (projectId: number, direction: "up" | "down") => void;
+  onRemove: (projectId: number) => void;
+  project: MyProject;
+  totalCount: number;
 }) {
   return (
     <article className="grid grid-cols-[28px_72px_1fr_auto] items-center gap-4 rounded-md border border-slate-200 bg-white p-3">
@@ -631,7 +634,7 @@ function SelectedProjectCard({
         </button>
       </div>
     </article>
-  )
+  );
 }
 
 /**
@@ -647,14 +650,14 @@ function ProjectThumb({ project }: { project: MyProject }) {
         className="block h-16 w-full rounded bg-cover bg-center grayscale"
         style={{ backgroundImage: `url(${project.thumbnailUrl})` }}
       />
-    )
+    );
   }
 
   return (
     <span className="flex h-16 w-full items-center justify-center rounded bg-slate-100 text-slate-300">
       <Grid2X2 className="size-6" aria-hidden="true" />
     </span>
-  )
+  );
 }
 
 /**
@@ -667,7 +670,7 @@ function TemplatePreview() {
       <div className="mb-2 h-2 w-16 rounded bg-slate-200" />
       <div className="mb-3 h-6 w-24 rounded bg-slate-900" />
       <div className="space-y-2">
-        {[0, 1, 2].map((item) => (
+        {[0, 1].map((item) => (
           <div
             key={item}
             className="grid h-5 grid-cols-[20px_36px_1fr] items-center gap-2 rounded bg-white px-1"
@@ -679,7 +682,7 @@ function TemplatePreview() {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 /**
@@ -692,9 +695,9 @@ function PreviewDialog({
   selectedProjects,
   template,
 }: {
-  onClose: () => void
-  selectedProjects: MyProject[]
-  template: SelectedTemplate
+  onClose: () => void;
+  selectedProjects: MyProject[];
+  template: SelectedTemplate;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
@@ -770,5 +773,5 @@ function PreviewDialog({
         </div>
       </section>
     </div>
-  )
+  );
 }
