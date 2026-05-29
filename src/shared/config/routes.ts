@@ -6,12 +6,22 @@ export const appRoutes = {
   mypagePortfolios: "/mypage/portfolios",
   mypageSettings: "/mypage/settings",
   mypageSupport: "/mypage/support",
+  projectCreate: "/projects/new",
   verifyEmail: "/verify-email",
 } as const
 
 export const queryParams = {
   next: "next",
 } as const
+
+/**
+ * 프로젝트 상세 화면 경로를 생성한다.
+ * @param projectId 이동할 프로젝트 ID
+ * @returns 프로젝트 상세 화면 경로
+ */
+export function getProjectDetailPath(projectId: number | string) {
+  return `/projects/${projectId}`
+}
 
 const schoolVerificationRequiredPathPrefixes: readonly `/${string}`[] = []
 
