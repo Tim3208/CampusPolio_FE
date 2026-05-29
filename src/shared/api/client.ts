@@ -89,7 +89,11 @@ export async function apiRequest<TData>(
   path: `/${string}`,
   init: ApiRequestInit = {}
 ) {
-  const mockResponse = resolveMockApiResponse<TData>(path, init.method)
+  const mockResponse = resolveMockApiResponse<TData>(
+    path,
+    init.method,
+    init.body
+  )
 
   if (mockResponse) {
     return mockResponse

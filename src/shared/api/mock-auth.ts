@@ -12,8 +12,12 @@ type MockUser = {
 type MockProject = {
   projectId: number
   title: string
+  description: string
+  content: string
   thumbnailUrl: string | null
   tags: string[]
+  isPublic: boolean
+  createdAt: string
   updatedAt: string
   status: "PUBLISHED" | "DRAFT"
 }
@@ -51,40 +55,63 @@ const mockProjects: MockProject[] = [
   {
     projectId: 1,
     title: "미래 지능형 건축",
+    description:
+      "탄소 배출을 줄이는 모듈러 건축 시스템을 제안하는 학술 프로젝트입니다.",
+    content:
+      "# 미래 지능형 건축\n\n탄소 배출을 줄이는 모듈러 건축 시스템을 제안합니다.\n\n- 친환경 소재\n- 공기 단축\n- 재사용 가능한 구조",
     thumbnailUrl:
       "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1200&auto=format&fit=crop",
     tags: ["AI", "ARCH"],
+    isPublic: true,
+    createdAt: "2026-05-20T09:00:00+09:00",
     updatedAt: "2026-05-29T10:00:00+09:00",
     status: "PUBLISHED",
   },
   {
     projectId: 2,
     title: "언어 모델 최적화",
+    description: "소형 언어 모델의 추론 비용을 줄이는 실험 기록입니다.",
+    content:
+      "# 언어 모델 최적화\n\n소형 언어 모델의 추론 비용을 줄이는 실험을 정리합니다.",
     thumbnailUrl:
       "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop",
     tags: ["NLP", "ML"],
+    isPublic: false,
+    createdAt: "2026-05-18T11:00:00+09:00",
     updatedAt: "2026-05-28T09:30:00+09:00",
     status: "DRAFT",
   },
   {
     projectId: 3,
     title: "바이오 데이터 가공",
+    description: "바이오 실험 데이터를 시각화 가능한 형태로 정제합니다.",
+    content:
+      "# 바이오 데이터 가공\n\n바이오 실험 데이터를 시각화 가능한 형태로 정제합니다.",
     thumbnailUrl:
       "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?q=80&w=1200&auto=format&fit=crop",
     tags: ["BIO", "DATA"],
+    isPublic: true,
+    createdAt: "2026-05-15T14:30:00+09:00",
     updatedAt: "2026-05-26T12:00:00+09:00",
     status: "PUBLISHED",
   },
   {
     projectId: 4,
     title: "스마트 시티 설계",
+    description: "도시 인프라 데이터를 활용한 스마트 시티 설계안입니다.",
+    content:
+      "# 스마트 시티 설계\n\n도시 인프라 데이터를 활용한 스마트 시티 설계안입니다.",
     thumbnailUrl:
       "https://images.unsplash.com/photo-1518005020951-eccb494ad742?q=80&w=1200&auto=format&fit=crop",
     tags: ["URBAN", "IOT"],
+    isPublic: true,
+    createdAt: "2026-05-12T10:10:00+09:00",
     updatedAt: "2026-05-22T15:20:00+09:00",
     status: "PUBLISHED",
   },
 ]
+
+let mockNextProjectId = 5
 
 /**
  * 현재 mock 인증 상태에 맞는 사용자 fixture를 반환한다.
@@ -145,6 +172,154 @@ function getMockProjectsPage(url: URL): MockProjectsPage {
 }
 
 /**
+ * mock 응답에서 사용할 현재 시각 문자열을 만든다.
+ * @returns ISO 형식 현재 시각
+ */
+function getMockNow() {
+  return new Date().toISOString()
+}
+
+/**
+ * 값이 일반 객체 형태인지 확인한다.
+ * @param value 검사할 값
+ * @returns 일반 객체 여부
+ */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value)
+}
+
+/**
+ * API 경로에서 프로젝트 ID를 추출한다.
+ * @param url mock URL 객체
+ * @returns 프로젝트 ID. 없으면 undefined
+ */
+function getProjectIdFromUrl(url: URL) {
+  const match = url.pathname.match(/^\/api\/projects\/(\d+)(?:\/|$)/)
+
+  if (!match) {
+    return undefined
+  }
+
+  return Number(match[1])
+}
+
+/**
+ * mock 프로젝트 ID로 프로젝트를 찾는다.
+ * @param projectId 찾을 프로젝트 ID
+ * @returns mock 프로젝트. 없으면 undefined
+ */
+function findMockProject(projectId: number) {
+  return mockProjects.find((project) => project.projectId === projectId)
+}
+
+/**
+ * mock 프로젝트 임시 초안을 생성한다.
+ * @returns 생성된 mock 프로젝트 초안
+ */
+function createMockProjectDraft() {
+  const now = getMockNow()
+  const project: MockProject = {
+    projectId: mockNextProjectId,
+    title: "새 프로젝트",
+    description: "",
+    content: "",
+    thumbnailUrl: null,
+    tags: [],
+    isPublic: false,
+    createdAt: now,
+    updatedAt: now,
+    status: "DRAFT",
+  }
+
+  mockNextProjectId += 1
+  mockProjects.unshift(project)
+
+  return {
+    projectId: project.projectId,
+    status: project.status,
+    tags: project.tags,
+  }
+}
+
+/**
+ * mock 프로젝트 상세 수정 payload를 반영한다.
+ * @param project 수정할 mock 프로젝트
+ * @param body API 요청 body
+ * @returns 수정 결과 응답
+ */
+function updateMockProject(project: MockProject, body: unknown) {
+  const payload = isRecord(body) ? body : {}
+  const title = typeof payload.title === "string" ? payload.title : project.title
+  const description =
+    typeof payload.description === "string"
+      ? payload.description
+      : project.description
+  const content =
+    typeof payload.content === "string" ? payload.content : project.content
+  const thumbnailUrl =
+    typeof payload.thumbnailUrl === "string" || payload.thumbnailUrl === null
+      ? payload.thumbnailUrl
+      : project.thumbnailUrl
+  const isPublic =
+    typeof payload.isPublic === "boolean" ? payload.isPublic : project.isPublic
+
+  project.title = title
+  project.description = description
+  project.content = content
+  project.thumbnailUrl = thumbnailUrl
+  project.isPublic = isPublic
+  project.updatedAt = getMockNow()
+
+  return {
+    projectId: project.projectId,
+    status: project.status,
+    updatedAt: project.updatedAt,
+    message: "프로젝트 수정 완료",
+  }
+}
+
+/**
+ * mock 프로젝트 공개 등록 payload를 반영한다.
+ * @param project 등록할 mock 프로젝트
+ * @param body API 요청 body
+ * @returns 등록 결과 응답
+ */
+function publishMockProject(project: MockProject, body: unknown) {
+  const payload = isRecord(body) ? body : {}
+  const tags = Array.isArray(payload.tags)
+    ? payload.tags.filter((tag): tag is string => typeof tag === "string")
+    : project.tags
+
+  project.tags = tags
+  project.status = "PUBLISHED"
+  project.isPublic = true
+  project.updatedAt = getMockNow()
+
+  return {
+    message: "프로젝트 등록 완료",
+    status: project.status,
+  }
+}
+
+/**
+ * mock 파일 업로드 URL 응답을 만든다.
+ * @param projectId 파일을 연결할 프로젝트 ID
+ * @param body API 요청 body
+ * @returns mock 업로드 URL과 파일 URL
+ */
+function createMockFileUpload(projectId: number, body: unknown) {
+  const payload = isRecord(body) ? body : {}
+  const fileName =
+    typeof payload.fileName === "string" ? payload.fileName : "upload.bin"
+  const encodedName = encodeURIComponent(fileName)
+
+  return {
+    uploadUrl: `mock://projects/${projectId}/files/${encodedName}`,
+    fileUrl: `https://campus-polio.local/mock/projects/${projectId}/${encodedName}`,
+  }
+}
+
+/**
  * mock mode에서 지원하는 API 응답을 네트워크 요청 없이 반환한다.
  * @param path 요청 API path
  * @param method 요청 HTTP method
@@ -152,7 +327,8 @@ function getMockProjectsPage(url: URL): MockProjectsPage {
  */
 export function resolveMockApiResponse<TData>(
   path: `/${string}`,
-  method = "GET"
+  method = "GET",
+  body?: unknown
 ): ApiResponse<TData> | undefined {
   if (!mockConfig.useMockApi) {
     return undefined
@@ -186,6 +362,54 @@ export function resolveMockApiResponse<TData>(
     return {
       success: true,
       data: getMockProjectsPage(url) as TData,
+    }
+  }
+
+  if (url.pathname === "/api/projects" && normalizedMethod === "POST") {
+    return {
+      success: true,
+      data: createMockProjectDraft() as TData,
+    }
+  }
+
+  const projectId = getProjectIdFromUrl(url)
+  const project = projectId ? findMockProject(projectId) : undefined
+
+  if (project && url.pathname === `/api/projects/${projectId}`) {
+    if (normalizedMethod === "GET") {
+      return {
+        success: true,
+        data: project as TData,
+      }
+    }
+
+    if (normalizedMethod === "PATCH") {
+      return {
+        success: true,
+        data: updateMockProject(project, body) as TData,
+      }
+    }
+  }
+
+  if (
+    project &&
+    url.pathname === `/api/projects/${projectId}/files` &&
+    normalizedMethod === "POST"
+  ) {
+    return {
+      success: true,
+      data: createMockFileUpload(project.projectId, body) as TData,
+    }
+  }
+
+  if (
+    project &&
+    url.pathname === `/api/projects/${projectId}/publish` &&
+    normalizedMethod === "POST"
+  ) {
+    return {
+      success: true,
+      data: publishMockProject(project, body) as TData,
     }
   }
 
