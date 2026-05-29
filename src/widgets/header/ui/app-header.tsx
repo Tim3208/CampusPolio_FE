@@ -58,7 +58,7 @@ export function AppHeader() {
       <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-6">
         <Link
           href={appRoutes.home}
-          className="text-sm font-bold text-[#005E9C]"
+          className="text-xl font-bold text-[#005E9C]"
           aria-label="CampusPolio 홈으로 이동"
         >
           Campus Polio
@@ -79,7 +79,12 @@ export function AppHeader() {
           </form>
 
           {isLoggedIn ? (
-            <Button asChild variant="ghost" size="icon" aria-label="마이페이지로 이동">
+            <Button
+              asChild
+              variant="ghost"
+              size="icon"
+              aria-label="마이페이지로 이동"
+            >
               <Link href={appRoutes.mypage}>
                 <CircleUserRound className="size-5" aria-hidden="true" />
               </Link>
