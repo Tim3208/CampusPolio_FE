@@ -6,6 +6,7 @@ export const appRoutes = {
   mypagePortfolios: "/mypage/portfolios",
   mypageSettings: "/mypage/settings",
   mypageSupport: "/mypage/support",
+  portfolioCreate: "/portfolios/new",
   verifyEmail: "/verify-email",
 } as const
 
