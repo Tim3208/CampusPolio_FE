@@ -198,7 +198,7 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
   const [errorMessage, setErrorMessage] = useState("")
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
-  const [tags, setTags] = useState<string[]>(["모듈러건축", "도시재생"])
+  const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState("")
   const [isPublic, setIsPublic] = useState(true)
   const [productionYear, setProductionYear] = useState(

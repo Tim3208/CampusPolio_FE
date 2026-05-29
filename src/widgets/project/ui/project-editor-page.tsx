@@ -36,18 +36,6 @@ export function ProjectEditorPage({ mode, projectId }: ProjectEditorPageProps) {
 
         <ProjectEditorForm mode={mode} projectId={projectId} />
       </section>
-
-      <footer className="mt-20 border-t border-slate-200 bg-slate-100/70">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-6 py-8 text-xs tracking-[0.18em] text-slate-500 sm:flex-row sm:items-center sm:justify-between lg:px-10">
-          <p>© COPYRIGHT 어쩌고 저쩌고.. ALL RIGHTS RESERVED.</p>
-          <div className="flex flex-wrap gap-6 tracking-normal">
-            <span>대학교 홈페이지</span>
-            <span>아카이브 정책</span>
-            <span>큐레이터 문의</span>
-            <span>디지털 아카이브</span>
-          </div>
-        </div>
-      </footer>
     </main>
   )
 }
