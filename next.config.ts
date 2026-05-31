@@ -10,6 +10,14 @@ const stripTrailingSlash = (value: string) => value.replace(/\/+$/, "");
 const apiBaseUrl = stripTrailingSlash(process.env.NEXT_PUBLIC_API_BASE_URL ?? "");
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+    ],
+  },
   async rewrites() {
     if (!apiBaseUrl) {
       return [];

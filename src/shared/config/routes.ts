@@ -7,6 +7,7 @@ export const appRoutes = {
   mypageSettings: "/mypage/settings",
   mypageSupport: "/mypage/support",
   verifyEmail: "/verify-email",
+  projectDetail: (projectId: number | string) => `/projects/${projectId}`,
 } as const
 
 export const queryParams = {
