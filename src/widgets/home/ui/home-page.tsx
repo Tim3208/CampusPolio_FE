@@ -135,7 +135,7 @@ export function HomePage() {
                 href={appRoutes.home}
                 className="inline-flex items-center gap-1 text-xs font-semibold text-[#005E9C]"
               >
-                전체 컬렉션 보기
+                전체 포트폴리오 보기
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
 
@@ -181,9 +181,10 @@ export function HomePage() {
                   transform: `translateX(calc(-${slideIndex} * (33.333% + 1rem)))`,
                 }}
               >
-                {filteredFeaturedProjects.map((project) => (
+                {filteredFeaturedProjects.map((project, index) => (
                   <FeaturedCard
                     key={project.title + project.category}
+                    projectId={index + 1}
                     {...project}
                   />
                 ))}
@@ -210,8 +211,8 @@ export function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            {projects.map((project) => (
-              <ProjectCard key={project.title} {...project} />
+            {projects.map((project, index) => (
+              <ProjectCard key={project.title} projectId={index + 6} {...project} />
             ))}
           </div>
         </section>
@@ -276,6 +277,7 @@ export function HomePage() {
 }
 
 type FeaturedCardProps = {
+  projectId: number;
   title: string;
   category: string;
   author: string;
@@ -285,6 +287,7 @@ type FeaturedCardProps = {
 };
 
 function FeaturedCard({
+  projectId,
   title,
   category,
   author,
@@ -323,9 +326,12 @@ function FeaturedCard({
         </div>
 
         <div className="mt-5 translate-y-4 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-          <button className="rounded-full bg-white px-4 py-2 text-xs font-bold text-slate-900">
+          <Link
+            href={appRoutes.projectDetail(projectId)}
+            className="inline-flex rounded-full bg-white px-4 py-2 text-xs font-bold text-slate-900"
+          >
             자세히 보기
-          </button>
+          </Link>
         </div>
       </div>
     </article>
@@ -333,6 +339,7 @@ function FeaturedCard({
 }
 
 type ProjectCardProps = {
+  projectId: number;
   title: string;
   category: string;
   author: string;
@@ -342,6 +349,7 @@ type ProjectCardProps = {
 };
 
 function ProjectCard({
+  projectId,
   title,
   category,
   author,
@@ -359,9 +367,12 @@ function ProjectCard({
 
         <div className="absolute inset-0 bg-black/0 transition group-hover:bg-black/35" />
 
-        <button className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-4 py-2 text-xs font-bold text-slate-900 opacity-0 transition group-hover:opacity-100">
+        <Link
+          href={appRoutes.projectDetail(projectId)}
+          className="absolute left-1/2 top-1/2 inline-flex -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-4 py-2 text-xs font-bold text-slate-900 opacity-0 transition group-hover:opacity-100"
+        >
           자세히 보기
-        </button>
+        </Link>
       </div>
 
       <div className="p-5">

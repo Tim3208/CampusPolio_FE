@@ -8,6 +8,7 @@ export const appRoutes = {
   mypageSupport: "/mypage/support",
   portfolioCreate: "/portfolios/new",
   verifyEmail: "/verify-email",
+  projectDetail: (projectId: number | string) => `/projects/${projectId}`,
 } as const
 
 export const queryParams = {
