@@ -9,6 +9,24 @@ type MockUser = {
   isVerified: boolean
 }
 
+type MockProject = {
+  projectId: number
+  title: string
+  description: string
+  thumbnailUrl: string | null
+  tags: string[]
+  updatedAt: string
+  status: "PUBLISHED" | "DRAFT"
+}
+
+type MockProjectsPage = {
+  content: MockProject[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
 const mockUsers: Record<AuthMockState, MockUser> = {
   unverified: {
     id: 1,
@@ -30,12 +48,153 @@ const mockUsers: Record<AuthMockState, MockUser> = {
   },
 }
 
+const mockProjects: MockProject[] = [
+  {
+    projectId: 1,
+    title: "공간의 경험을 재해석한 전시 디자인",
+    description:
+      "캠퍼스 전시 공간의 동선을 재구성하고 관람자 경험을 개선한 전시 디자인 프로젝트입니다.",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1518005020951-eccb494ad742?q=80&w=1200&auto=format&fit=crop",
+    tags: ["전시", "공간디자인"],
+    updatedAt: "2026-05-25T10:00:00+09:00",
+    status: "PUBLISHED",
+  },
+  {
+    projectId: 2,
+    title: "지속가능한 제품을 위한 브랜드 아이덴티티",
+    description:
+      "재활용 소재 기반 제품군을 위한 브랜드 시스템과 패키지 디자인을 구축했습니다.",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1200&auto=format&fit=crop",
+    tags: ["브랜딩", "그래픽"],
+    updatedAt: "2026-04-12T09:30:00+09:00",
+    status: "PUBLISHED",
+  },
+  {
+    projectId: 3,
+    title: "사용자 경험 개선을 위한 앱 UI/UX 리디자인",
+    description:
+      "학내 커뮤니티 앱의 정보 구조와 주요 화면 흐름을 재설계한 UI/UX 프로젝트입니다.",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1559028012-481c04fa702d?q=80&w=1200&auto=format&fit=crop",
+    tags: ["UIUX", "모바일"],
+    updatedAt: "2026-03-20T14:00:00+09:00",
+    status: "DRAFT",
+  },
+  {
+    projectId: 4,
+    title: "지역 커뮤니티를 위한 공공시설 제안",
+    description:
+      "지역 주민의 문화 활동과 휴식을 지원하는 공공시설 콘셉트 제안입니다.",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200&auto=format&fit=crop",
+    tags: ["건축", "공공디자인"],
+    updatedAt: "2026-02-08T16:20:00+09:00",
+    status: "PUBLISHED",
+  },
+  {
+    projectId: 5,
+    title: "타이포그래피를 활용한 포스터 시리즈",
+    description:
+      "학과 전시 홍보를 위한 타이포그래피 중심 포스터 시스템입니다.",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop",
+    tags: ["타이포그래피", "포스터"],
+    updatedAt: "2026-01-22T11:45:00+09:00",
+    status: "PUBLISHED",
+  },
+  {
+    projectId: 6,
+    title: "캠퍼스 길찾기 인터랙션 프로토타입",
+    description:
+      "신입생을 위한 캠퍼스 길찾기 인터랙션과 정보 표시 체계를 설계했습니다.",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=1200&auto=format&fit=crop",
+    tags: ["서비스디자인", "프로토타입"],
+    updatedAt: "2025-12-18T13:10:00+09:00",
+    status: "PUBLISHED",
+  },
+  {
+    projectId: 7,
+    title: "데이터 시각화를 활용한 학습 리포트",
+    description:
+      "학습 데이터를 분석해 개인별 학습 패턴을 시각화하는 리포트 UI입니다.",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200&auto=format&fit=crop",
+    tags: ["데이터", "시각화"],
+    updatedAt: "2025-11-04T08:30:00+09:00",
+    status: "DRAFT",
+  },
+  {
+    projectId: 8,
+    title: "로컬 브랜드를 위한 패키지 디자인",
+    description:
+      "지역 생산품의 정체성을 담은 패키지와 라벨 디자인 제안입니다.",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1607082349566-187342175e2f?q=80&w=1200&auto=format&fit=crop",
+    tags: ["패키지", "브랜드"],
+    updatedAt: "2025-10-15T17:00:00+09:00",
+    status: "PUBLISHED",
+  },
+]
+
 /**
  * 현재 mock 인증 상태에 맞는 사용자 fixture를 반환한다.
  * @returns mock 인증 상태에 대응하는 사용자 정보
  */
 function getMockUser() {
   return mockUsers[mockConfig.authState]
+}
+
+/**
+ * API path와 query를 mock 처리용 URL 객체로 변환한다.
+ * @param path 요청 API path
+ * @returns query를 포함한 mock URL 객체
+ */
+function createMockUrl(path: `/${string}`) {
+  return new URL(path, "https://campus-polio.local")
+}
+
+/**
+ * 숫자 query 값을 안전하게 파싱한다.
+ * @param value query string 값
+ * @param fallback 파싱 실패 시 사용할 값
+ * @returns 0 이상 숫자 query 값
+ */
+function getNonNegativeQueryNumber(value: string | null, fallback: number) {
+  const parsed = Number(value)
+
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return fallback
+  }
+
+  return Math.floor(parsed)
+}
+
+/**
+ * mock 프로젝트 목록을 page, size, status query 기준으로 잘라 반환한다.
+ * @param url 프로젝트 목록 요청 URL
+ * @returns mock 프로젝트 목록 페이지
+ */
+function getMockProjectsPage(url: URL): MockProjectsPage {
+  const page = getNonNegativeQueryNumber(url.searchParams.get("page"), 0)
+  const size = getNonNegativeQueryNumber(url.searchParams.get("size"), 8)
+  const status = url.searchParams.get("status") ?? "ALL"
+  const filteredProjects =
+    status === "ALL"
+      ? mockProjects
+      : mockProjects.filter((project) => project.status === status)
+  const startIndex = page * size
+  const content = filteredProjects.slice(startIndex, startIndex + size)
+
+  return {
+    content,
+    page,
+    size,
+    totalElements: filteredProjects.length,
+    totalPages: size === 0 ? 0 : Math.ceil(filteredProjects.length / size),
+  }
 }
 
 /**
@@ -53,6 +212,7 @@ export function resolveMockApiResponse<TData>(
   }
 
   const normalizedMethod = method.toUpperCase()
+  const url = createMockUrl(path)
 
   if (path === authApiPaths.login && normalizedMethod === "POST") {
     return {
@@ -72,6 +232,13 @@ export function resolveMockApiResponse<TData>(
     return {
       success: true,
       message: "로그아웃 완료",
+    }
+  }
+
+  if (url.pathname === "/api/users/me/projects" && normalizedMethod === "GET") {
+    return {
+      success: true,
+      data: getMockProjectsPage(url) as TData,
     }
   }
 
