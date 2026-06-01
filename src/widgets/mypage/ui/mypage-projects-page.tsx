@@ -14,7 +14,7 @@ import {
 import { cn } from "@/shared/lib/utils"
 
 type MypageProjectsPageProps = {
-  projects: MyProject[]
+  projects?: MyProject[]
   errorMessage?: string
 }
 
@@ -110,6 +110,7 @@ function ProjectCreateCard() {
  */
 function ProjectCard({ project, onEdit, onOpen }: ProjectCardProps) {
   const visibilityLabel = getVisibilityLabel(project.status)
+  const tags = Array.isArray(project.tags) ? project.tags : []
 
   /**
    * 현재 프로젝트 상세 페이지로 이동한다.
@@ -193,8 +194,8 @@ function ProjectCard({ project, onEdit, onOpen }: ProjectCardProps) {
         </h2>
 
         <div className="mt-4 flex min-h-7 flex-wrap gap-2">
-          {project.tags.length > 0 ? (
-            project.tags.map((tag) => (
+          {tags.length > 0 ? (
+            tags.map((tag) => (
               <span
                 key={`${project.projectId}-${tag}`}
                 className="inline-flex h-6 items-center rounded bg-main-22 px-2.5 text-xs font-bold text-main-02"
@@ -271,7 +272,7 @@ function ErrorProjectsState({ message }: { message: string }) {
  */
 export function MypageProjectsPage({
   errorMessage,
-  projects,
+  projects = [],
 }: MypageProjectsPageProps) {
   const router = useRouter()
 

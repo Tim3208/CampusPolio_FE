@@ -33,5 +33,9 @@ export async function getMyProjects(
     throw new Error("프로젝트 목록 응답이 비어 있습니다.")
   }
 
+  if (!Array.isArray(response.data.content)) {
+    throw new Error("프로젝트 목록 응답 형식이 올바르지 않습니다.")
+  }
+
   return response.data
 }
