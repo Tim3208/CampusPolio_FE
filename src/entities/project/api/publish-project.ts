@@ -8,7 +8,7 @@ import type {
 /**
  * 임시 저장된 프로젝트를 공개 등록한다.
  * @param projectId 등록할 프로젝트 ID
- * @param payload 등록 시 반영할 태그 목록
+ * @param payload 등록 시 반영할 제목, 본문, 태그
  * @returns 등록 처리 결과
  */
 export async function publishProject(
@@ -23,9 +23,5 @@ export async function publishProject(
     }
   )
 
-  if (!response.data) {
-    throw new Error("프로젝트 등록 응답이 비어 있습니다.")
-  }
-
-  return response.data
+  return response
 }

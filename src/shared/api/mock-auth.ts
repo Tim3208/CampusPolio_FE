@@ -216,12 +216,19 @@ function findMockProject(projectId: number) {
  * mock 프로젝트 임시 초안을 생성한다.
  * @returns 생성된 mock 프로젝트 초안
  */
-function createMockProjectDraft() {
+function createMockProjectDraft(body: unknown) {
+  const payload = isRecord(body) ? body : {}
+  const title =
+    typeof payload.title === "string" && payload.title.trim()
+      ? payload.title.trim()
+      : "새 프로젝트"
+  const description =
+    typeof payload.description === "string" ? payload.description : ""
   const now = getMockNow()
   const project: MockProject = {
     projectId: mockNextProjectId,
-    title: "새 프로젝트",
-    description: "",
+    title,
+    description,
     content: "",
     thumbnailUrl: null,
     tags: [],
@@ -236,8 +243,6 @@ function createMockProjectDraft() {
 
   return {
     projectId: project.projectId,
-    status: project.status,
-    tags: project.tags,
   }
 }
 
@@ -257,24 +262,22 @@ function updateMockProject(project: MockProject, body: unknown) {
   const content =
     typeof payload.content === "string" ? payload.content : project.content
   const thumbnailUrl =
-    typeof payload.thumbnailUrl === "string" || payload.thumbnailUrl === null
-      ? payload.thumbnailUrl
+    typeof payload.thumbnail === "string" || payload.thumbnail === null
+      ? payload.thumbnail
       : project.thumbnailUrl
-  const isPublic =
-    typeof payload.isPublic === "boolean" ? payload.isPublic : project.isPublic
+  const tags = Array.isArray(payload.tags)
+    ? payload.tags.filter((tag): tag is string => typeof tag === "string")
+    : project.tags
 
   project.title = title
   project.description = description
   project.content = content
   project.thumbnailUrl = thumbnailUrl
-  project.isPublic = isPublic
+  project.tags = tags
   project.updatedAt = getMockNow()
 
   return {
     projectId: project.projectId,
-    status: project.status,
-    updatedAt: project.updatedAt,
-    message: "프로젝트 수정 완료",
   }
 }
 
@@ -286,19 +289,24 @@ function updateMockProject(project: MockProject, body: unknown) {
  */
 function publishMockProject(project: MockProject, body: unknown) {
   const payload = isRecord(body) ? body : {}
+  const title = typeof payload.title === "string" ? payload.title : project.title
+  const description =
+    typeof payload.description === "string"
+      ? payload.description
+      : project.description
+  const content =
+    typeof payload.content === "string" ? payload.content : project.content
   const tags = Array.isArray(payload.tags)
     ? payload.tags.filter((tag): tag is string => typeof tag === "string")
     : project.tags
 
+  project.title = title
+  project.description = description
+  project.content = content
   project.tags = tags
   project.status = "PUBLISHED"
   project.isPublic = true
   project.updatedAt = getMockNow()
-
-  return {
-    message: "프로젝트 등록 완료",
-    status: project.status,
-  }
 }
 
 /**
@@ -368,7 +376,7 @@ export function resolveMockApiResponse<TData>(
   if (url.pathname === "/api/projects" && normalizedMethod === "POST") {
     return {
       success: true,
-      data: createMockProjectDraft() as TData,
+      data: createMockProjectDraft(body) as TData,
     }
   }
 
@@ -407,9 +415,10 @@ export function resolveMockApiResponse<TData>(
     url.pathname === `/api/projects/${projectId}/publish` &&
     normalizedMethod === "POST"
   ) {
+    publishMockProject(project, body)
+
     return {
       success: true,
-      data: publishMockProject(project, body) as TData,
     }
   }
 

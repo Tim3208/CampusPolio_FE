@@ -1,15 +1,17 @@
 import { apiRequest } from "@/shared/api"
 
-import type { ProjectDraft } from "../model/types"
+import type { ProjectCreatePayload, ProjectDraft } from "../model/types"
 
 const projectsPath = "/api/projects"
 
 /**
  * 새 프로젝트 작성에 사용할 임시 프로젝트를 생성한다.
- * @returns 생성된 임시 프로젝트 ID와 상태
+ * @param payload Draft 생성에 필요한 제목과 설명
+ * @returns 생성된 임시 프로젝트 ID
  */
-export async function createProjectDraft() {
+export async function createProjectDraft(payload: ProjectCreatePayload) {
   const response = await apiRequest<ProjectDraft>(projectsPath, {
+    body: payload,
     method: "POST",
   })
 

@@ -7,6 +7,7 @@ export type MyProject = {
   tags: string[]
   updatedAt: string
   status: MyProjectStatus
+  role?: "OWNER" | "MEMBER" | string
 }
 
 export type MyProjectsPage = {
@@ -23,6 +24,17 @@ export type MyProjectsQuery = {
   page?: number
   size?: number
   status?: MyProjectsStatusFilter
+}
+
+export type MyProjectApiItem = {
+  projectId: number
+  title: string
+  thumbnail?: string | null
+  thumbnailUrl?: string | null
+  tags?: string[]
+  updatedAt: string
+  status: MyProjectStatus
+  role?: "OWNER" | "MEMBER" | string
 }
 
 export type ProjectAuthor = {
@@ -54,23 +66,23 @@ export type ProjectDetail = {
 
 export type ProjectDraft = {
   projectId: number
-  status: "DRAFT" | string
-  tags?: string[]
+}
+
+export type ProjectCreatePayload = {
+  title: string
+  description?: string
 }
 
 export type ProjectUpdatePayload = {
-  title: string
-  description: string
-  content: string
-  thumbnailUrl: string | null
-  isPublic: boolean
+  title?: string
+  description?: string
+  content?: string
+  thumbnail?: string
+  tags?: string[]
 }
 
 export type ProjectUpdateResult = {
   projectId: number
-  status: "DRAFT" | string
-  updatedAt: string
-  message: string
 }
 
 export type ProjectFileUploadPayload = {
@@ -84,10 +96,10 @@ export type ProjectFileUpload = {
 }
 
 export type ProjectPublishPayload = {
+  title: string
+  description?: string
+  content: string
   tags: string[]
 }
 
-export type ProjectPublishResult = {
-  message: string
-  status: "PUBLISHED" | string
-}
+export type ProjectPublishResult = void

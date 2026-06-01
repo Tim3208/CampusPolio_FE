@@ -8,7 +8,7 @@ import type {
 /**
  * 프로젝트 상세 내용을 저장하거나 수정한다.
  * @param projectId 저장할 프로젝트 ID
- * @param payload 제목, 본문, 공개 여부 등 수정 내용
+ * @param payload 제목, 본문, 썸네일, 태그 등 수정 내용
  * @returns 저장 처리 결과
  */
 export async function updateProject(

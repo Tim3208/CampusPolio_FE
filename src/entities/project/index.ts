@@ -6,10 +6,12 @@ export { requestProjectFileUpload } from "./api/request-project-file-upload"
 export { updateProject } from "./api/update-project"
 export type {
   MyProject,
+  MyProjectApiItem,
   MyProjectsPage,
   MyProjectsQuery,
   MyProjectsStatusFilter,
   MyProjectStatus,
+  ProjectCreatePayload,
   ProjectDetail,
   ProjectDraft,
   ProjectFileUpload,
