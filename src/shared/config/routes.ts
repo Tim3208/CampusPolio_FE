@@ -32,7 +32,18 @@ export function getProjectEditPath(projectId: number | string) {
   return `/projects/${projectId}/edit`
 }
 
-const schoolVerificationRequiredPathPrefixes: readonly `/${string}`[] = []
+const schoolVerificationRequiredPathPrefixes: readonly `/${string}`[] = [
+  appRoutes.projectCreate,
+]
+
+/**
+ * 프로젝트 수정 화면 경로인지 확인한다.
+ * @param path 검사할 앱 내부 경로
+ * @returns 프로젝트 수정 화면 경로 여부
+ */
+function isProjectEditPath(path: string) {
+  return /^\/projects\/[^/]+\/edit$/.test(path)
+}
 
 /**
  * 로그인 이후 이동할 next 경로가 앱 내부 경로인지 검증한다.
@@ -77,7 +88,11 @@ export function requiresSchoolVerification(path: string) {
 
   const url = new URL(candidate, "https://campus-polio.local")
 
-  return schoolVerificationRequiredPathPrefixes.some(
-    (prefix) => url.pathname === prefix || url.pathname.startsWith(`${prefix}/`)
+  return (
+    isProjectEditPath(url.pathname) ||
+    schoolVerificationRequiredPathPrefixes.some(
+      (prefix) =>
+        url.pathname === prefix || url.pathname.startsWith(`${prefix}/`)
+    )
   )
 }

@@ -12,14 +12,8 @@ import {
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  Bold,
   FileImage,
   FileText,
-  Heading2,
-  ImagePlus,
-  Italic,
-  LinkIcon,
-  List,
   Save,
   Tag,
   UploadCloud,
@@ -33,8 +27,23 @@ import {
   requestProjectFileUpload,
   updateProject,
 } from "@/entities/project";
-import { appRoutes } from "@/shared/config";
+import { getCurrentUser } from "@/entities/user";
+import { ApiError } from "@/shared/api";
+import {
+  appRoutes,
+  getProjectEditPath,
+  queryParams,
+} from "@/shared/config";
 import { cn } from "@/shared/lib/utils";
+
+import {
+  ProjectEditorErrorDialog,
+  type ProjectEditorDialogError,
+} from "./project-editor-error-dialog";
+import {
+  RichMarkdownEditor,
+  type RichMarkdownEditorHandle,
+} from "./rich-markdown-editor";
 
 type ProjectEditorMode = "create" | "edit";
 
@@ -206,13 +215,93 @@ function getProductionYears() {
 }
 
 /**
+ * 현재 편집 화면의 next 경로를 만든다.
+ * @param mode 등록/수정 모드
+ * @param projectId 수정 중인 프로젝트 ID
+ * @returns 로그인/인증 이후 돌아올 내부 경로
+ */
+function getEditorNextPath(mode: ProjectEditorMode, projectId?: number) {
+  return mode === "edit" && projectId
+    ? getProjectEditPath(projectId)
+    : appRoutes.projectCreate;
+}
+
+/**
+ * next query를 포함한 인증 관련 경로를 만든다.
+ * @param route 이동할 인증 화면 경로
+ * @param nextPath 인증 후 돌아올 경로
+ * @returns next query가 포함된 경로
+ */
+function getAuthRedirectPath(route: string, nextPath: string) {
+  return `${route}?${queryParams.next}=${encodeURIComponent(nextPath)}`;
+}
+
+/**
+ * API 오류를 프로젝트 등록 전용 대화상자 정보로 변환한다.
+ * @param error API 또는 일반 오류 객체
+ * @returns 사용자에게 표시할 오류 대화상자 정보
+ */
+function getProjectEditorDialogError(
+  error: unknown,
+): ProjectEditorDialogError {
+  if (error instanceof ApiError) {
+    if (error.status === 401) {
+      return {
+        action: "login",
+        actionLabel: "로그인하기",
+        description:
+          "프로젝트를 저장하거나 등록하려면 먼저 로그인해야 합니다.",
+        title: "로그인이 필요합니다",
+      };
+    }
+
+    if (error.status === 403) {
+      return {
+        action: "verify-email",
+        actionLabel: "학교 이메일 인증하기",
+        description:
+          "프로젝트를 저장하거나 등록하려면 학교 이메일 인증을 완료해야 합니다.",
+        title: "학교 이메일 인증이 필요합니다",
+      };
+    }
+
+    if (error.status === 400) {
+      return {
+        action: "close",
+        actionLabel: "확인",
+        description:
+          error.message || "입력한 프로젝트 정보를 다시 확인해주세요.",
+        title: "입력 내용을 확인해주세요",
+      };
+    }
+
+    return {
+      action: "close",
+      actionLabel: "확인",
+      description: error.message || "요청 처리 중 오류가 발생했습니다.",
+      title: "요청을 처리하지 못했습니다",
+    };
+  }
+
+  return {
+    action: "close",
+    actionLabel: "확인",
+    description:
+      error instanceof Error
+        ? error.message
+        : "요청 처리 중 오류가 발생했습니다.",
+    title: "요청을 처리하지 못했습니다",
+  };
+}
+
+/**
  * 프로젝트 등록과 수정에 공통으로 쓰이는 마크다운 편집 폼을 렌더링한다.
  * @param props 등록/수정 모드와 기존 프로젝트 ID
  * @returns 프로젝트 편집 폼 UI
  */
 export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
   const router = useRouter();
-  const contentRef = useRef<HTMLTextAreaElement | null>(null);
+  const richEditorRef = useRef<RichMarkdownEditorHandle | null>(null);
   const assetInputRef = useRef<HTMLInputElement | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const [draftProjectId, setDraftProjectId] = useState(projectId);
@@ -235,8 +324,11 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [savingAction, setSavingAction] = useState<SavingAction | null>(null);
   const [notice, setNotice] = useState("");
+  const [dialogError, setDialogError] =
+    useState<ProjectEditorDialogError | null>(null);
   const years = getProductionYears();
   const isSaving = savingAction !== null;
+  const nextPath = getEditorNextPath(mode, projectId);
 
   useEffect(() => {
     if (mode !== "edit" || !projectId) {
@@ -305,55 +397,14 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
   }
 
   /**
-   * 본문 textarea의 현재 커서 위치에 마크다운 문자열을 삽입한다.
-   * @param markdown 삽입할 마크다운 문자열
+   * 저장/등록/업로드 직전에 로그인과 학교 인증 상태를 다시 확인한다.
    */
-  function insertMarkdownText(markdown: string) {
-    const textarea = contentRef.current;
-    const start = textarea?.selectionStart ?? content.length;
-    const end = textarea?.selectionEnd ?? content.length;
-    const nextContent = `${content.slice(0, start)}${markdown}${content.slice(
-      end,
-    )}`;
-    const nextCursor = start + markdown.length;
+  async function ensureVerifiedUser() {
+    const user = await getCurrentUser({ cache: "no-store" });
 
-    setContent(nextContent);
-
-    window.requestAnimationFrame(() => {
-      contentRef.current?.focus();
-      contentRef.current?.setSelectionRange(nextCursor, nextCursor);
-    });
-  }
-
-  /**
-   * 선택 영역을 마크다운 prefix/suffix로 감싼다.
-   * @param prefix 앞에 붙일 마크다운 문법
-   * @param suffix 뒤에 붙일 마크다운 문법
-   * @param fallback 선택 영역이 없을 때 사용할 텍스트
-   */
-  function wrapMarkdownSelection(
-    prefix: string,
-    suffix: string,
-    fallback: string,
-  ) {
-    const textarea = contentRef.current;
-    const start = textarea?.selectionStart ?? content.length;
-    const end = textarea?.selectionEnd ?? content.length;
-    const selected = content.slice(start, end) || fallback;
-    const markdown = `${prefix}${selected}${suffix}`;
-    const nextContent = `${content.slice(0, start)}${markdown}${content.slice(
-      end,
-    )}`;
-
-    setContent(nextContent);
-
-    window.requestAnimationFrame(() => {
-      const selectionStart = start + prefix.length;
-      const selectionEnd = selectionStart + selected.length;
-
-      contentRef.current?.focus();
-      contentRef.current?.setSelectionRange(selectionStart, selectionEnd);
-    });
+    if (!user.isVerified) {
+      throw new ApiError("학교 이메일 인증이 필요합니다.", 403);
+    }
   }
 
   /**
@@ -413,6 +464,8 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
       throw new Error(`${file.name}은 지원하지 않는 파일 형식입니다.`);
     }
 
+    await ensureVerifiedUser();
+
     const targetProjectId = await ensureDraftProjectId();
     const upload = await requestProjectFileUpload(targetProjectId, {
       fileName: file.name,
@@ -465,6 +518,11 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
       setUploadedAssets((currentAssets) => [...currentAssets, ...uploaded]);
       setNotice(`${uploaded.length}개 파일을 업로드했습니다.`);
     } catch (error) {
+      if (error instanceof ApiError) {
+        setDialogError(getProjectEditorDialogError(error));
+        return;
+      }
+
       setNotice(
         error instanceof Error
           ? error.message
@@ -511,9 +569,14 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
       const uploaded = await uploadSingleFile(file);
 
       setUploadedAssets((currentAssets) => [...currentAssets, uploaded]);
-      insertMarkdownText(`\n![${file.name}](${uploaded.fileUrl})\n`);
+      richEditorRef.current?.insertImage(file.name, uploaded.fileUrl);
       setNotice("본문에 이미지를 삽입했습니다.");
     } catch (error) {
+      if (error instanceof ApiError) {
+        setDialogError(getProjectEditorDialogError(error));
+        return;
+      }
+
       setNotice(
         error instanceof Error
           ? error.message
@@ -588,16 +651,14 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
     setNotice("");
 
     try {
+      await ensureVerifiedUser();
+
       const targetProjectId = await ensureDraftProjectId();
 
       await saveProjectDetail(targetProjectId);
       router.push(appRoutes.mypageProjects);
     } catch (error) {
-      setNotice(
-        error instanceof Error
-          ? error.message
-          : "프로젝트 임시 저장 중 오류가 발생했습니다.",
-      );
+      setDialogError(getProjectEditorDialogError(error));
     } finally {
       setSavingAction(null);
     }
@@ -619,6 +680,8 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
     setNotice("");
 
     try {
+      await ensureVerifiedUser();
+
       const targetProjectId = await ensureDraftProjectId();
       const payload = getProjectUpdatePayload();
 
@@ -632,14 +695,24 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
 
       router.push(appRoutes.mypageProjects);
     } catch (error) {
-      setNotice(
-        error instanceof Error
-          ? error.message
-          : "프로젝트 등록 중 오류가 발생했습니다.",
-      );
+      setDialogError(getProjectEditorDialogError(error));
     } finally {
       setSavingAction(null);
     }
+  }
+
+  /**
+   * 로그인 페이지로 이동한다.
+   */
+  function goToLogin() {
+    router.push(getAuthRedirectPath(appRoutes.login, nextPath));
+  }
+
+  /**
+   * 학교 이메일 인증 페이지로 이동한다.
+   */
+  function goToVerifyEmail() {
+    router.push(getAuthRedirectPath(appRoutes.verifyEmail, nextPath));
   }
 
   if (loadState === "loading") {
@@ -670,10 +743,11 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
   }
 
   return (
-    <form
-      onSubmit={handlePublishSubmit}
-      className="grid gap-10 lg:grid-cols-[1fr_360px]"
-    >
+    <>
+      <form
+        onSubmit={handlePublishSubmit}
+        className="grid gap-10 lg:grid-cols-[1fr_360px]"
+      >
       <section className="space-y-12">
         <div className="rounded-lg bg-white p-6 shadow-sm ring-1 ring-slate-200 sm:p-10">
           <div className="space-y-8">
@@ -699,81 +773,17 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
                   htmlFor="project-content"
                   className="text-sm font-bold text-main-10"
                 >
-                  본문 Markdown
+                  본문
                 </label>
-
-                <div className="flex items-center gap-1 rounded-md bg-slate-100 p-1">
-                  <button
-                    type="button"
-                    title="제목"
-                    onClick={() => insertMarkdownText("\n## 소제목\n")}
-                    className="inline-flex size-8 items-center justify-center rounded text-slate-600 hover:bg-white hover:text-main-10"
-                  >
-                    <Heading2 className="size-4" aria-hidden="true" />
-                    <span className="sr-only">제목 삽입</span>
-                  </button>
-                  <button
-                    type="button"
-                    title="굵게"
-                    onClick={() =>
-                      wrapMarkdownSelection("**", "**", "굵은 글씨")
-                    }
-                    className="inline-flex size-8 items-center justify-center rounded text-slate-600 hover:bg-white hover:text-main-10"
-                  >
-                    <Bold className="size-4" aria-hidden="true" />
-                    <span className="sr-only">굵게</span>
-                  </button>
-                  <button
-                    type="button"
-                    title="기울임"
-                    onClick={() =>
-                      wrapMarkdownSelection("_", "_", "기울임 글씨")
-                    }
-                    className="inline-flex size-8 items-center justify-center rounded text-slate-600 hover:bg-white hover:text-main-10"
-                  >
-                    <Italic className="size-4" aria-hidden="true" />
-                    <span className="sr-only">기울임</span>
-                  </button>
-                  <button
-                    type="button"
-                    title="목록"
-                    onClick={() => insertMarkdownText("\n- 항목\n")}
-                    className="inline-flex size-8 items-center justify-center rounded text-slate-600 hover:bg-white hover:text-main-10"
-                  >
-                    <List className="size-4" aria-hidden="true" />
-                    <span className="sr-only">목록 삽입</span>
-                  </button>
-                  <button
-                    type="button"
-                    title="링크"
-                    onClick={() =>
-                      wrapMarkdownSelection("[", "](https://)", "링크 텍스트")
-                    }
-                    className="inline-flex size-8 items-center justify-center rounded text-slate-600 hover:bg-white hover:text-main-10"
-                  >
-                    <LinkIcon className="size-4" aria-hidden="true" />
-                    <span className="sr-only">링크 삽입</span>
-                  </button>
-                  <button
-                    type="button"
-                    title="이미지"
-                    onClick={() => imageInputRef.current?.click()}
-                    className="inline-flex size-8 items-center justify-center rounded text-slate-600 hover:bg-white hover:text-main-10 disabled:opacity-40"
-                    disabled={isUploading}
-                  >
-                    <ImagePlus className="size-4" aria-hidden="true" />
-                    <span className="sr-only">이미지 삽입</span>
-                  </button>
-                </div>
               </div>
 
-              <textarea
-                ref={contentRef}
+              <RichMarkdownEditor
+                ref={richEditorRef}
                 id="project-content"
                 value={content}
-                onChange={(event) => setContent(event.target.value)}
-                placeholder="# 프로젝트 소개&#10;&#10;본문을 마크다운 형식으로 작성하세요. 이미지 버튼을 누르면 현재 커서 위치에 이미지가 삽입됩니다."
-                className="mt-3 min-h-72 w-full resize-y border border-slate-400 bg-white px-4 py-4 text-base leading-8 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-main-10 focus:ring-2 focus:ring-main-20"
+                disabled={isUploading}
+                onChange={setContent}
+                onImageButtonClick={() => imageInputRef.current?.click()}
               />
               <input
                 ref={imageInputRef}
@@ -1037,6 +1047,14 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
           </div>
         </div>
       </aside>
-    </form>
+      </form>
+
+      <ProjectEditorErrorDialog
+        error={dialogError}
+        onClose={() => setDialogError(null)}
+        onLogin={goToLogin}
+        onVerifyEmail={goToVerifyEmail}
+      />
+    </>
   );
 }
