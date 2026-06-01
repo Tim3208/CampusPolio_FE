@@ -112,12 +112,20 @@ const mockProjects: MockProject[] = [
 ]
 
 let mockNextProjectId = 5
+let mockEmailVerified = false
 
 /**
  * 현재 mock 인증 상태에 맞는 사용자 fixture를 반환한다.
  * @returns mock 인증 상태에 대응하는 사용자 정보
  */
 function getMockUser() {
+  if (mockConfig.authState === "unverified" && mockEmailVerified) {
+    return {
+      ...mockUsers.unverified,
+      isVerified: true,
+    }
+  }
+
   return mockUsers[mockConfig.authState]
 }
 
@@ -186,6 +194,51 @@ function getMockNow() {
  */
 function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value)
+}
+
+/**
+ * 이메일이 mock 인증에서 허용하는 대학 이메일인지 확인한다.
+ * @param email 검사할 이메일
+ * @returns .ac.kr 이메일 여부
+ */
+function isMockAcademicEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.ac\.kr$/i.test(email.trim())
+}
+
+/**
+ * mock 이메일 인증 payload에서 이메일을 추출한다.
+ * @param body API 요청 body
+ * @returns 요청 이메일
+ */
+function getMockEmailFromBody(body: unknown) {
+  const payload = isRecord(body) ? body : {}
+
+  return typeof payload.email === "string" ? payload.email.trim() : ""
+}
+
+/**
+ * mock 이메일 인증 요청의 공통 검증을 수행한다.
+ * @param body API 요청 body
+ * @returns 실패 응답. 검증에 성공하면 undefined
+ */
+function getMockEmailValidationError(body: unknown) {
+  const email = getMockEmailFromBody(body)
+
+  if (!email || !isMockAcademicEmail(email)) {
+    return {
+      success: false,
+      message: ".ac.kr로 끝나는 학교 이메일을 입력해주세요.",
+    }
+  }
+
+  if (getMockUser().isVerified) {
+    return {
+      success: false,
+      message: "이미 학교 이메일 인증이 완료되었습니다.",
+    }
+  }
+
+  return undefined
 }
 
 /**
@@ -363,6 +416,71 @@ export function resolveMockApiResponse<TData>(
     return {
       success: true,
       message: "로그아웃 완료",
+    }
+  }
+
+  if (
+    url.pathname === authApiPaths.sendEmailCode &&
+    normalizedMethod === "POST"
+  ) {
+    const validationError = getMockEmailValidationError(body)
+
+    if (validationError) {
+      return validationError as ApiResponse<TData>
+    }
+
+    return {
+      success: true,
+      data: {
+        message: "인증번호가 발송되었습니다. mock 인증번호는 123456입니다.",
+      } as TData,
+    }
+  }
+
+  if (
+    url.pathname === authApiPaths.resendEmailCode &&
+    normalizedMethod === "POST"
+  ) {
+    const validationError = getMockEmailValidationError(body)
+
+    if (validationError) {
+      return validationError as ApiResponse<TData>
+    }
+
+    return {
+      success: true,
+      data: {
+        message: "인증번호를 다시 발송했습니다. mock 인증번호는 123456입니다.",
+      } as TData,
+    }
+  }
+
+  if (
+    url.pathname === authApiPaths.verifyEmailCode &&
+    normalizedMethod === "POST"
+  ) {
+    const validationError = getMockEmailValidationError(body)
+    const payload = isRecord(body) ? body : {}
+    const code = typeof payload.code === "string" ? payload.code : ""
+
+    if (validationError) {
+      return validationError as ApiResponse<TData>
+    }
+
+    if (code !== "123456") {
+      return {
+        success: false,
+        message: "인증번호가 일치하지 않습니다.",
+      } as ApiResponse<TData>
+    }
+
+    mockEmailVerified = true
+
+    return {
+      success: true,
+      data: {
+        message: "학교 이메일 인증이 완료되었습니다.",
+      } as TData,
     }
   }
 
