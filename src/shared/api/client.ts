@@ -26,7 +26,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /**
- * JSON payload가 공통 API wrapper 형식인지 확인한다.
+ * JSON payload가 기존 API wrapper 형식인지 확인한다.
  * @param payload API JSON payload
  * @returns success 필드를 가진 API wrapper 여부
  */
@@ -37,7 +37,7 @@ function hasApiSuccessField<TData>(
 }
 
 /**
- * raw JSON 응답을 공통 API 응답 형식으로 정규화한다.
+ * success 필드가 없는 raw JSON 응답을 공통 API 응답 형태로 정규화한다.
  * @param payload fetch에서 파싱한 JSON payload
  * @returns 공통 API 응답 형식
  */
@@ -65,18 +65,18 @@ function normalizeApiResponse<TData>(
 }
 
 /**
- * fetch 응답에서 JSON API 응답을 읽는다.
+ * fetch 응답에서 JSON payload를 읽는다.
  * @param response fetch 응답 객체
- * @returns JSON 응답이면 파싱된 API 응답, 아니면 undefined
+ * @returns JSON 응답이면 파싱된 payload, 아니면 undefined
  */
-async function readJsonResponse<TData>(response: Response) {
+async function readJsonPayload(response: Response) {
   const contentType = response.headers.get("content-type")
 
   if (!contentType?.includes("application/json")) {
     return undefined
   }
 
-  return normalizeApiResponse<TData>(await response.json())
+  return (await response.json()) as unknown
 }
 
 /**
@@ -89,7 +89,11 @@ export async function apiRequest<TData>(
   path: `/${string}`,
   init: ApiRequestInit = {}
 ) {
-  const mockResponse = resolveMockApiResponse<TData>(path, init.method)
+  const mockResponse = resolveMockApiResponse<TData>(
+    path,
+    init.method,
+    init.body
+  )
 
   if (mockResponse) {
     return mockResponse
@@ -108,7 +112,7 @@ export async function apiRequest<TData>(
     credentials: "include",
     headers,
   })
-  const apiResponse = await readJsonResponse<TData>(response)
+  const apiResponse = normalizeApiResponse<TData>(await readJsonPayload(response))
 
   if (!response.ok || apiResponse?.success === false) {
     throw new ApiError(

@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   CircleHelp,
   FolderArchive,
   Images,
   Settings,
   Upload,
-} from "lucide-react"
+} from "lucide-react";
 
-import { appRoutes } from "@/shared/config"
-import { cn } from "@/shared/lib/utils"
-import { Button } from "@/shared/ui/button"
+import { appRoutes } from "@/shared/config";
+import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui/button";
 
 const mypageTabs = [
   {
@@ -35,7 +35,7 @@ const mypageTabs = [
     icon: CircleHelp,
     label: "Support",
   },
-] as const
+] as const;
 
 /**
  * 현재 경로가 사이드바 탭 경로에 속하는지 확인한다.
@@ -44,7 +44,7 @@ const mypageTabs = [
  * @returns 현재 탭 활성 여부
  */
 function isActiveTab(pathname: string, href: string) {
-  return pathname === href || pathname.startsWith(`${href}/`)
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 /**
@@ -52,7 +52,7 @@ function isActiveTab(pathname: string, href: string) {
  * @returns 마이페이지 사이드바 UI
  */
 export function MypageSidebar() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return (
     <aside className="flex w-56 shrink-0 flex-col gap-5 border-r bg-white px-5 py-8">
@@ -63,8 +63,8 @@ export function MypageSidebar() {
 
       <nav className="flex flex-col gap-1" aria-label="마이페이지 메뉴">
         {mypageTabs.map((tab) => {
-          const Icon = tab.icon
-          const active = isActiveTab(pathname, tab.href)
+          const Icon = tab.icon;
+          const active = isActiveTab(pathname, tab.href);
 
           return (
             <Link
@@ -72,25 +72,26 @@ export function MypageSidebar() {
               href={tab.href}
               className={cn(
                 "inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-medium text-gray-06 transition-colors hover:bg-main-22 hover:text-main-02",
-                active && "bg-main-22 text-main-02"
+                active && "bg-main-22 text-main-02",
               )}
               aria-current={active ? "page" : undefined}
             >
               <Icon className="size-4" aria-hidden="true" />
               <span>{tab.label}</span>
             </Link>
-          )
+          );
         })}
       </nav>
 
       <Button
-        type="button"
-        disabled
-        className="mt-2 h-9 rounded-md bg-main-10 text-xs text-white disabled:opacity-100"
+        asChild
+        className="mt-2 h-9 rounded-md bg-main-10 text-xs text-white hover:bg-main-11"
       >
-        <Upload className="size-4" aria-hidden="true" />
-        Upload Project
+        <Link href={appRoutes.projectCreate}>
+          <Upload className="size-4" aria-hidden="true" />
+          Upload Project
+        </Link>
       </Button>
     </aside>
-  )
+  );
 }
