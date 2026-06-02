@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
 import { CircleUserRound, Search } from "lucide-react";
 
@@ -28,6 +28,7 @@ async function getIsLoggedIn() {
  */
 export function AppHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
 
@@ -51,6 +52,19 @@ export function AppHeader() {
    */
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    const keyword = searchKeyword.trim();
+    const params = new URLSearchParams();
+
+    if (keyword) {
+      params.set("keyword", keyword);
+    }
+
+    router.push(
+      params.toString()
+        ? `${appRoutes.projects}?${params.toString()}`
+        : appRoutes.projects,
+    );
   };
 
   return (

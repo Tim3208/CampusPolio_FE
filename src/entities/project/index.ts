@@ -1,15 +1,23 @@
-export { getMockProjectDetail, mockProjectDetail } from "./model/mock-project";
+export { getMyProjects } from "./api/get-my-projects"
+export { searchProjects } from "./api/search-projects"
+export { getMockProjectDetail, mockProjectDetail } from "./model/mock-project"
 export type {
-  ProjectAuthor,
-  ProjectDetail,
-  ProjectMember,
-  ProjectResource,
-  ProjectSection,
-  RelatedProject,
   MyProject,
   MyProjectsPage,
   MyProjectsQuery,
   MyProjectsStatusFilter,
   MyProjectStatus,
-} from "./model/types";
-export { getMyProjects } from "./api/get-my-projects";
+  ProjectAuthor,
+  ProjectDetail,
+  ProjectMember,
+  ProjectResource,
+  ProjectSearchApiItem,
+  ProjectSearchApiPage,
+  ProjectSearchFilterType,
+  ProjectSearchItem,
+  ProjectSearchPage,
+  ProjectSearchQuery,
+  ProjectSearchUser,
+  ProjectSection,
+  RelatedProject,
+} from "./model/types"
