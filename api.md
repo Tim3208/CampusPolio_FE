@@ -1,114 +1,118 @@
 {
-"openapi": "3.1.0",
-"info": {
-"title": "CampusPolio API",
-"description": "CampusPolio 백엔드 API 명세서",
-"version": "v1.0.0"
-},
-"servers": [
-{
-"url": "http://localhost:8080",
-"description": "Local Server"
-}
-],
-"tags": [
-{
-"name": "Profile",
-"description": "프로필 API"
-},
-{
-"name": "Project",
-"description": "프로젝트 API"
-},
-{
-"name": "User",
-"description": "사용자 API"
-},
-{
-"name": "Portfolio",
-"description": "포트폴리오 API"
-},
-{
-"name": "My Project",
-"description": "내 프로젝트 조회 API"
-},
-{
-"name": "Email Auth",
-"description": "학교 이메일 인증 API"
-},
-{
-"name": "Auth",
-"description": "로그인/로그아웃 API"
-}
-],
-"paths": {
-"/api/projects": {
-"get": {
-"tags": [
-"project-query-controller"
-],
-"operationId": "search",
-"parameters": [
-{
-"name": "keyword",
-"in": "query",
-"required": false,
-"schema": {
-"type": "string"
-}
-},
-{
-"name": "tags",
-"in": "query",
-"required": false,
-"schema": {
-"type": "array",
-"items": {
-"type": "string"
-}
-}
-},
-{
-"name": "page",
-"in": "query",
-"required": false,
-"schema": {
-"type": "integer",
-"format": "int32",
-"default": 0
-}
-},
-{
-"name": "size",
-"in": "query",
-"required": false,
-"schema": {
-"type": "integer",
-"format": "int32",
-"default": 9
-}
-},
-{
-"name": "filterType",
-"in": "query",
-"required": false,
-"schema": {
-"type": "string",
-"default": "LATEST",
-"enum": [
-"LATEST",
-"VIEW_COUNT"
-]
-}
-}
-],
-"responses": {
-"200": {
-"description": "OK",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseProjectSearchPageResponse"
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CampusPolio API",
+    "description": "CampusPolio 백엔드 API 명세서",
+    "version": "v1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.campuspolio.cloud",
+      "description": "Production Server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Profile",
+      "description": "프로필 API"
+    },
+    {
+      "name": "Project",
+      "description": "프로젝트 API"
+    },
+    {
+      "name": "User",
+      "description": "사용자 API"
+    },
+    {
+      "name": "Portfolio",
+      "description": "포트폴리오 API"
+    },
+    {
+      "name": "My Project",
+      "description": "내 프로젝트 조회 API"
+    },
+    {
+      "name": "Email Auth",
+      "description": "학교 이메일 인증 API"
+    },
+    {
+      "name": "Project File",
+      "description": "프로젝트 파일 API"
+    },
+    {
+      "name": "Auth",
+      "description": "로그인/로그아웃 API"
+    }
+  ],
+  "paths": {
+    "/api/projects": {
+      "get": {
+        "tags": [
+          "project-query-controller"
+        ],
+        "operationId": "search",
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 9
+            }
+          },
+          {
+            "name": "filterType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "LATEST",
+              "enum": [
+                "LATEST",
+                "VIEW_COUNT"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProjectSearchPageResponse"
                 }
               }
             }
@@ -127,18 +131,18 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ProjectCreateRequest"
-}
-}
-},
-"required": true
-},
-"responses": {
-"200": {
-"description": "OK",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseProjectCreateResponse"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProjectCreateResponse"
                 }
               }
             }
@@ -170,18 +174,98 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ProjectPublishRequest"
-}
-}
-},
-"required": true
-},
-"responses": {
-"200": {
-"description": "OK",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseVoid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/files": {
+      "get": {
+        "tags": [
+          "Project File"
+        ],
+        "summary": "프로젝트 파일 조회",
+        "operationId": "getFiles",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListProjectFileResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Project File"
+        ],
+        "summary": "프로젝트 파일 업로드",
+        "operationId": "uploadFile",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProjectFileUploadResponse"
                 }
               }
             }
@@ -215,16 +299,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseProfileResponse"
-}
-}
-}
-},
-"401": {
-"description": "로그인이 필요함",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseProfileResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인이 필요함",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProfileResponse"
                 }
               }
             }
@@ -235,35 +319,35 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseProfileResponse"
-}
-}
-}
-}
-}
-},
-"post": {
-"tags": [
-"Profile"
-],
-"summary": "프로필 생성",
-"description": "현재 로그인한 사용자의 프로필을 생성합니다. 한 사용자당 하나의 프로필만 생성할 수 있습니다.",
-"operationId": "createProfile",
-"parameters": [
-{
-"name": "userId",
-"in": "query",
-"required": true,
-"schema": {
-"type": "integer",
-"format": "int64"
-}
-}
-],
-"requestBody": {
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/ProfileCreateRequest"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "summary": "프로필 생성",
+        "description": "현재 로그인한 사용자의 프로필을 생성합니다. 한 사용자당 하나의 프로필만 생성할 수 있습니다.",
+        "operationId": "createProfile",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileCreateRequest"
               }
             }
           },
@@ -276,16 +360,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseProfileCreateResponse"
-}
-}
-}
-},
-"400": {
-"description": "잘못된 입력값",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseProfileCreateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 입력값",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProfileCreateResponse"
                 }
               }
             }
@@ -296,16 +380,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseProfileCreateResponse"
-}
-}
-}
-},
-"409": {
-"description": "이미 프로필 존재",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseProfileCreateResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "이미 프로필 존재",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProfileCreateResponse"
                 }
               }
             }
@@ -335,18 +419,18 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ProfileUpdateRequest"
-}
-}
-},
-"required": true
-},
-"responses": {
-"200": {
-"description": "프로필 수정 성공",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseProfileUpdateResponse"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "프로필 수정 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProfileUpdateResponse"
                 }
               }
             }
@@ -357,16 +441,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseProfileUpdateResponse"
-}
-}
-}
-},
-"401": {
-"description": "로그인이 필요함",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseProfileUpdateResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인이 필요함",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProfileUpdateResponse"
                 }
               }
             }
@@ -377,37 +461,37 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseProfileUpdateResponse"
-}
-}
-}
-}
-}
-}
-},
-"/api/portfolios": {
-"post": {
-"tags": [
-"Portfolio"
-],
-"summary": "포트폴리오 생성",
-"description": "현재 로그인한 사용자의 포트폴리오를 생성합니다.\n\n정책:\n- 로그인 필수\n- 대학 인증(universityVerified)이 완료된 사용자만 생성 가능\n- title은 필수\n- slug는 title 기반으로 자동 생성\n- slug 중복 시 -1, -2 형태로 자동 증가\n- 삭제된 slug도 재사용하지 않음\n",
-"operationId": "createPortfolio",
-"parameters": [
-{
-"name": "userId",
-"in": "query",
-"required": true,
-"schema": {
-"type": "integer",
-"format": "int64"
-}
-}
-],
-"requestBody": {
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/PortfolioCreateRequest"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/portfolios": {
+      "post": {
+        "tags": [
+          "Portfolio"
+        ],
+        "summary": "포트폴리오 생성",
+        "description": "현재 로그인한 사용자의 포트폴리오를 생성합니다.\n\n정책:\n- 로그인 필수\n- 대학 인증(universityVerified)이 완료된 사용자만 생성 가능\n- title은 필수\n- slug는 title 기반으로 자동 생성\n- slug 중복 시 -1, -2 형태로 자동 증가\n- 삭제된 slug도 재사용하지 않음\n",
+        "operationId": "createPortfolio",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortfolioCreateRequest"
               }
             }
           },
@@ -420,16 +504,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponsePortfolioCreateResponse"
-}
-}
-}
-},
-"400": {
-"description": "잘못된 요청 또는 제목 누락",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponsePortfolioCreateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 또는 제목 누락",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePortfolioCreateResponse"
                 }
               }
             }
@@ -440,16 +524,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponsePortfolioCreateResponse"
-}
-}
-}
-},
-"403": {
-"description": "대학 인증이 필요함",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponsePortfolioCreateResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "대학 인증이 필요함",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePortfolioCreateResponse"
                 }
               }
             }
@@ -483,28 +567,28 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseVoid"
-}
-}
-}
-}
-}
-}
-},
-"/api/auth/logout": {
-"post": {
-"tags": [
-"Auth"
-],
-"summary": "로그아웃",
-"description": "현재 세션을 만료시켜 로그아웃합니다.",
-"operationId": "logout",
-"responses": {
-"200": {
-"description": "로그아웃 성공",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "로그아웃",
+        "description": "현재 세션을 만료시켜 로그아웃합니다.",
+        "operationId": "logout",
+        "responses": {
+          "200": {
+            "description": "로그아웃 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
                 }
               }
             }
@@ -525,18 +609,18 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/LoginRequest"
-}
-}
-},
-"required": true
-},
-"responses": {
-"200": {
-"description": "로그인 성공",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseLoginResponse"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "로그인 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseLoginResponse"
                 }
               }
             }
@@ -547,16 +631,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseLoginResponse"
-}
-}
-}
-},
-"401": {
-"description": "유효하지 않은 Google 토큰",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseLoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "유효하지 않은 Google 토큰",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseLoginResponse"
                 }
               }
             }
@@ -588,18 +672,18 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/EmailVerifyRequest"
-}
-}
-},
-"required": true
-},
-"responses": {
-"200": {
-"description": "이메일 인증 성공",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseEmailAuthResponse"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "이메일 인증 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseEmailAuthResponse"
                 }
               }
             }
@@ -610,16 +694,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseEmailAuthResponse"
-}
-}
-}
-},
-"401": {
-"description": "로그인이 필요함",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseEmailAuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인이 필요함",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseEmailAuthResponse"
                 }
               }
             }
@@ -651,18 +735,18 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/EmailSendRequest"
-}
-}
-},
-"required": true
-},
-"responses": {
-"200": {
-"description": "인증번호 발송 성공",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseEmailAuthResponse"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "인증번호 발송 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseEmailAuthResponse"
                 }
               }
             }
@@ -673,16 +757,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseEmailAuthResponse"
-}
-}
-}
-},
-"401": {
-"description": "로그인이 필요함",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseEmailAuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인이 필요함",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseEmailAuthResponse"
                 }
               }
             }
@@ -714,18 +798,18 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/EmailSendRequest"
-}
-}
-},
-"required": true
-},
-"responses": {
-"200": {
-"description": "인증번호 재발송 성공",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseEmailAuthResponse"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "인증번호 재발송 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseEmailAuthResponse"
                 }
               }
             }
@@ -757,18 +841,18 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ProjectUpdateRequest"
-}
-}
-},
-"required": true
-},
-"responses": {
-"200": {
-"description": "OK",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseProjectUpdateResponse"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProjectUpdateResponse"
                 }
               }
             }
@@ -811,16 +895,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponsePortfolioDeleteResponse"
-}
-}
-}
-},
-"401": {
-"description": "로그인이 필요함",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponsePortfolioDeleteResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인이 필요함",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePortfolioDeleteResponse"
                 }
               }
             }
@@ -831,16 +915,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponsePortfolioDeleteResponse"
-}
-}
-}
-},
-"404": {
-"description": "포트폴리오 없음",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponsePortfolioDeleteResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "포트폴리오 없음",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePortfolioDeleteResponse"
                 }
               }
             }
@@ -879,18 +963,18 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PortfolioUpdateRequest"
-}
-}
-},
-"required": true
-},
-"responses": {
-"200": {
-"description": "포트폴리오 수정 성공",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponsePortfolioUpdateResponse"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "포트폴리오 수정 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePortfolioUpdateResponse"
                 }
               }
             }
@@ -901,16 +985,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponsePortfolioUpdateResponse"
-}
-}
-}
-},
-"401": {
-"description": "로그인이 필요함",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponsePortfolioUpdateResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인이 필요함",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePortfolioUpdateResponse"
                 }
               }
             }
@@ -921,16 +1005,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponsePortfolioUpdateResponse"
-}
-}
-}
-},
-"404": {
-"description": "포트폴리오 없음",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponsePortfolioUpdateResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "포트폴리오 없음",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePortfolioUpdateResponse"
                 }
               }
             }
@@ -971,18 +1055,18 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PortfolioVisibilityUpdateRequest"
-}
-}
-},
-"required": true
-},
-"responses": {
-"200": {
-"description": "포트폴리오 공개 상태 변경 성공",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponsePortfolioVisibilityUpdateResponse"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "포트폴리오 공개 상태 변경 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePortfolioVisibilityUpdateResponse"
                 }
               }
             }
@@ -993,16 +1077,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponsePortfolioVisibilityUpdateResponse"
-}
-}
-}
-},
-"401": {
-"description": "로그인이 필요함",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponsePortfolioVisibilityUpdateResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인이 필요함",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePortfolioVisibilityUpdateResponse"
                 }
               }
             }
@@ -1013,16 +1097,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponsePortfolioVisibilityUpdateResponse"
-}
-}
-}
-},
-"404": {
-"description": "포트폴리오 없음",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponsePortfolioVisibilityUpdateResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "포트폴리오 없음",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePortfolioVisibilityUpdateResponse"
                 }
               }
             }
@@ -1063,18 +1147,18 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PortfolioProjectUpdateRequest"
-}
-}
-},
-"required": true
-},
-"responses": {
-"200": {
-"description": "포트폴리오 프로젝트 수정 성공",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponsePortfolioProjectUpdateResponse"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "포트폴리오 프로젝트 수정 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePortfolioProjectUpdateResponse"
                 }
               }
             }
@@ -1085,16 +1169,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponsePortfolioProjectUpdateResponse"
-}
-}
-}
-},
-"401": {
-"description": "로그인이 필요함",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponsePortfolioProjectUpdateResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인이 필요함",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePortfolioProjectUpdateResponse"
                 }
               }
             }
@@ -1105,16 +1189,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponsePortfolioProjectUpdateResponse"
-}
-}
-}
-},
-"404": {
-"description": "포트폴리오 또는 프로젝트 없음",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponsePortfolioProjectUpdateResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "포트폴리오 또는 프로젝트 없음",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePortfolioProjectUpdateResponse"
                 }
               }
             }
@@ -1155,18 +1239,18 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PortfolioOrderUpdateRequest"
-}
-}
-},
-"required": true
-},
-"responses": {
-"200": {
-"description": "프로젝트 순서 변경 성공",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponsePortfolioOrderUpdateResponse"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "프로젝트 순서 변경 성공",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePortfolioOrderUpdateResponse"
                 }
               }
             }
@@ -1177,16 +1261,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponsePortfolioOrderUpdateResponse"
-}
-}
-}
-},
-"401": {
-"description": "로그인이 필요함",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponsePortfolioOrderUpdateResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인이 필요함",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePortfolioOrderUpdateResponse"
                 }
               }
             }
@@ -1197,16 +1281,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponsePortfolioOrderUpdateResponse"
-}
-}
-}
-},
-"404": {
-"description": "포트폴리오 없음",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponsePortfolioOrderUpdateResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "포트폴리오 없음",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePortfolioOrderUpdateResponse"
                 }
               }
             }
@@ -1240,16 +1324,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseUserMeResponse"
-}
-}
-}
-},
-"401": {
-"description": "인증 실패",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseUserMeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserMeResponse"
                 }
               }
             }
@@ -1260,58 +1344,58 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseUserMeResponse"
-}
-}
-}
-}
-}
-},
-"delete": {
-"tags": [
-"User"
-],
-"summary": "회원 탈퇴",
-"description": "로그인 세션에 저장된 사용자 ID를 기준으로 회원을 탈퇴 처리하고 세션을 무효화합니다.",
-"operationId": "withdraw",
-"parameters": [
-{
-"name": "userId",
-"in": "query",
-"required": true,
-"schema": {
-"type": "integer",
-"format": "int64"
-}
-}
-],
-"responses": {
-"204": {
-"description": "회원 탈퇴 성공"
-},
-"401": {
-"description": "인증 실패"
-},
-"404": {
-"description": "사용자 없음"
-}
-}
-}
-},
-"/api/users/me/projects": {
-"get": {
-"tags": [
-"My Project"
-],
-"summary": "내 프로젝트 목록 조회",
-"description": "내가 OWNER 또는 MEMBER로 참여중인\n프로젝트 목록을 조회합니다.\n",
-"operationId": "getMyProjects",
-"responses": {
-"200": {
-"description": "OK",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseListMyProjectResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "User"
+        ],
+        "summary": "회원 탈퇴",
+        "description": "로그인 세션에 저장된 사용자 ID를 기준으로 회원을 탈퇴 처리하고 세션을 무효화합니다.",
+        "operationId": "withdraw",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "회원 탈퇴 성공"
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "404": {
+            "description": "사용자 없음"
+          }
+        }
+      }
+    },
+    "/api/users/me/projects": {
+      "get": {
+        "tags": [
+          "My Project"
+        ],
+        "summary": "내 프로젝트 목록 조회",
+        "description": "내가 OWNER 또는 MEMBER로 참여중인\n프로젝트 목록을 조회합니다.\n",
+        "operationId": "getMyProjects",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListMyProjectResponse"
                 }
               }
             }
@@ -1373,16 +1457,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseMyPortfolioListResponse"
-}
-}
-}
-},
-"401": {
-"description": "로그인이 필요함",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponseMyPortfolioListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인이 필요함",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseMyPortfolioListResponse"
                 }
               }
             }
@@ -1415,16 +1499,16 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponsePortfolioDetailResponse"
-}
-}
-}
-},
-"404": {
-"description": "존재하지 않는 포트폴리오 또는 접근할 수 없는 비공개 포트폴리오",
-"content": {
-"_/_": {
-"schema": {
-"$ref": "#/components/schemas/ApiResponsePortfolioDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "존재하지 않는 포트폴리오 또는 접근할 수 없는 비공개 포트폴리오",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePortfolioDetailResponse"
                 }
               }
             }
@@ -1445,45 +1529,77 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseHomeResponse"
-}
-}
-}
-}
-}
-}
-}
-},
-"components": {
-"schemas": {
-"ProjectCreateRequest": {
-"type": "object",
-"properties": {
-"title": {
-"type": "string",
-"maxLength": 255,
-"minLength": 0
-},
-"description": {
-"type": "string",
-"maxLength": 1000,
-"minLength": 0
-}
-},
-"required": [
-"title"
-]
-},
-"ApiResponseProjectCreateResponse": {
-"type": "object",
-"description": "공통 API 응답 형식",
-"properties": {
-"success": {
-"type": "boolean",
-"description": "요청 성공 여부",
-"example": true
-},
-"data": {
-"$ref": "#/components/schemas/ProjectCreateResponse",
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/files/{fileId}": {
+      "delete": {
+        "tags": [
+          "Project File"
+        ],
+        "summary": "프로젝트 파일 삭제",
+        "operationId": "deleteFile",
+        "parameters": [
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ProjectCreateRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 0
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "ApiResponseProjectCreateResponse": {
+        "type": "object",
+        "description": "공통 API 응답 형식",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "요청 성공 여부",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProjectCreateResponse",
             "description": "응답 데이터"
           }
         }
@@ -1542,6 +1658,33 @@
           }
         }
       },
+      "ApiResponseProjectFileUploadResponse": {
+        "type": "object",
+        "description": "공통 API 응답 형식",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "요청 성공 여부",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProjectFileUploadResponse",
+            "description": "응답 데이터"
+          }
+        }
+      },
+      "ProjectFileUploadResponse": {
+        "type": "object",
+        "properties": {
+          "fileId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fileUrl": {
+            "type": "string"
+          }
+        }
+      },
       "ProfileCreateRequest": {
         "type": "object",
         "description": "프로필 생성 요청",
@@ -1576,54 +1719,54 @@
           },
           "data": {
             "$ref": "#/components/schemas/ProfileCreateResponse",
-"description": "응답 데이터"
-}
-}
-},
-"ProfileCreateResponse": {
-"type": "object",
-"description": "프로필 생성 응답",
-"properties": {
-"profileId": {
-"type": "integer",
-"format": "int64",
-"description": "프로필 ID",
-"example": 1
-},
-"message": {
-"type": "string",
-"description": "응답 메시지",
-"example": "프로필 생성 완료"
-}
-}
-},
-"PortfolioCreateRequest": {
-"type": "object",
-"description": "포트폴리오 생성 요청",
-"properties": {
-"title": {
-"type": "string",
-"description": "포트폴리오 제목",
-"example": "공모전 포트폴리오",
-"maxLength": 100,
-"minLength": 0
-}
-},
-"required": [
-"title"
-]
-},
-"ApiResponsePortfolioCreateResponse": {
-"type": "object",
-"description": "공통 API 응답 형식",
-"properties": {
-"success": {
-"type": "boolean",
-"description": "요청 성공 여부",
-"example": true
-},
-"data": {
-"$ref": "#/components/schemas/PortfolioCreateResponse",
+            "description": "응답 데이터"
+          }
+        }
+      },
+      "ProfileCreateResponse": {
+        "type": "object",
+        "description": "프로필 생성 응답",
+        "properties": {
+          "profileId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "프로필 ID",
+            "example": 1
+          },
+          "message": {
+            "type": "string",
+            "description": "응답 메시지",
+            "example": "프로필 생성 완료"
+          }
+        }
+      },
+      "PortfolioCreateRequest": {
+        "type": "object",
+        "description": "포트폴리오 생성 요청",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "포트폴리오 제목",
+            "example": "공모전 포트폴리오",
+            "maxLength": 100,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "ApiResponsePortfolioCreateResponse": {
+        "type": "object",
+        "description": "공통 API 응답 형식",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "요청 성공 여부",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/PortfolioCreateResponse",
             "description": "응답 데이터"
           }
         }
@@ -1671,49 +1814,49 @@
           },
           "data": {
             "$ref": "#/components/schemas/LoginResponse",
-"description": "응답 데이터"
-}
-}
-},
-"LoginResponse": {
-"type": "object",
-"description": "로그인 응답",
-"properties": {
-"id": {
-"type": "integer",
-"format": "int64",
-"description": "사용자 ID",
-"example": 1
-},
-"email": {
-"type": "string",
-"description": "사용자 이메일 (Google OAuth 계정 이메일)",
-"example": "user@gmail.com"
-},
-"universityVerified": {
-"type": "boolean",
-"description": "대학 인증 완료 여부 (ac.kr 인증)",
-"example": false
-}
-}
-},
-"EmailVerifyRequest": {
-"type": "object",
-"description": "학교 이메일 인증번호 검증 요청",
-"properties": {
-"email": {
-"type": "string",
-"format": "email",
-"description": "인증번호를 받은 대학 이메일",
-"example": "user@korea.ac.kr",
-"minLength": 1
-},
-"code": {
-"type": "string",
-"description": "이메일로 발송된 6자리 인증번호",
-"example": 123456,
-"minLength": 1,
-"pattern": "^[0-9]{6}$"
+            "description": "응답 데이터"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "description": "로그인 응답",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "사용자 ID",
+            "example": 1
+          },
+          "email": {
+            "type": "string",
+            "description": "사용자 이메일 (Google OAuth 계정 이메일)",
+            "example": "user@gmail.com"
+          },
+          "universityVerified": {
+            "type": "boolean",
+            "description": "대학 인증 완료 여부 (ac.kr 인증)",
+            "example": false
+          }
+        }
+      },
+      "EmailVerifyRequest": {
+        "type": "object",
+        "description": "학교 이메일 인증번호 검증 요청",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "인증번호를 받은 대학 이메일",
+            "example": "user@korea.ac.kr",
+            "minLength": 1
+          },
+          "code": {
+            "type": "string",
+            "description": "이메일로 발송된 6자리 인증번호",
+            "example": 123456,
+            "minLength": 1,
+            "pattern": "^[0-9]{6}$"
           }
         },
         "required": [
@@ -1732,75 +1875,75 @@
           },
           "data": {
             "$ref": "#/components/schemas/EmailAuthResponse",
-"description": "응답 데이터"
-}
-}
-},
-"EmailAuthResponse": {
-"type": "object",
-"description": "이메일 인증 응답",
-"properties": {
-"message": {
-"type": "string",
-"description": "응답 메시지",
-"example": "인증번호가 발송되었습니다."
-}
-}
-},
-"EmailSendRequest": {
-"type": "object",
-"description": "학교 이메일 인증번호 발송 요청",
-"properties": {
-"email": {
-"type": "string",
-"format": "email",
-"description": "인증번호를 발송할 대학 이메일",
-"example": "user@korea.ac.kr",
-"minLength": 1
-}
-},
-"required": [
-"email"
-]
-},
-"ProjectUpdateRequest": {
-"type": "object",
-"properties": {
-"title": {
-"type": "string",
-"maxLength": 255,
-"minLength": 0
-},
-"description": {
-"type": "string",
-"maxLength": 1000,
-"minLength": 0
-},
-"content": {
-"type": "string"
-},
-"thumbnail": {
-"type": "string"
-},
-"tags": {
-"type": "array",
-"items": {
-"type": "string"
-}
-}
-}
-},
-"ApiResponseProjectUpdateResponse": {
-"type": "object",
-"description": "공통 API 응답 형식",
-"properties": {
-"success": {
-"type": "boolean",
-"description": "요청 성공 여부",
-"example": true
-},
-"data": {
-"$ref": "#/components/schemas/ProjectUpdateResponse",
+            "description": "응답 데이터"
+          }
+        }
+      },
+      "EmailAuthResponse": {
+        "type": "object",
+        "description": "이메일 인증 응답",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "응답 메시지",
+            "example": "인증번호가 발송되었습니다."
+          }
+        }
+      },
+      "EmailSendRequest": {
+        "type": "object",
+        "description": "학교 이메일 인증번호 발송 요청",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "인증번호를 발송할 대학 이메일",
+            "example": "user@korea.ac.kr",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "ProjectUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 0
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 0
+          },
+          "content": {
+            "type": "string"
+          },
+          "thumbnail": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponseProjectUpdateResponse": {
+        "type": "object",
+        "description": "공통 API 응답 형식",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "요청 성공 여부",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProjectUpdateResponse",
             "description": "응답 데이터"
           }
         }
@@ -1872,71 +2015,71 @@
           },
           "data": {
             "$ref": "#/components/schemas/ProfileUpdateResponse",
-"description": "응답 데이터"
-}
-}
-},
-"ProfileUpdateResponse": {
-"type": "object",
-"description": "프로필 수정 응답",
-"properties": {
-"userId": {
-"type": "integer",
-"format": "int64",
-"description": "사용자 ID",
-"example": 1
-},
-"updatedAt": {
-"type": "string",
-"format": "date-time",
-"description": "수정 시각",
-"example": "2026-05-05T14:00:00"
-},
-"message": {
-"type": "string",
-"description": "응답 메시지",
-"example": "프로필 수정 완료"
-}
-}
-},
-"PortfolioUpdateRequest": {
-"type": "object",
-"description": "포트폴리오 정보 수정 요청",
-"properties": {
-"title": {
-"type": "string",
-"description": "포트폴리오 제목. null이면 기존 값 유지",
-"example": "수정된 공모전 포트폴리오",
-"maxLength": 100,
-"minLength": 0
-},
-"description": {
-"type": "string",
-"description": "포트폴리오 설명. null이면 기존 값 유지",
-"example": "공모전 프로젝트들을 모아둔 포트폴리오입니다.",
-"maxLength": 500,
-"minLength": 0
-},
-"thumbnailUrl": {
-"type": "string",
-"description": "포트폴리오 썸네일 URL. null이면 기존 값 유지",
-"example": "https://s3.amazonaws.com/portfolio-thumbnail.png",
-"maxLength": 500,
-"minLength": 0
-}
-}
-},
-"ApiResponsePortfolioUpdateResponse": {
-"type": "object",
-"description": "공통 API 응답 형식",
-"properties": {
-"success": {
-"type": "boolean",
-"description": "요청 성공 여부",
-"example": true
-},
-"data": {
-"$ref": "#/components/schemas/PortfolioUpdateResponse",
+            "description": "응답 데이터"
+          }
+        }
+      },
+      "ProfileUpdateResponse": {
+        "type": "object",
+        "description": "프로필 수정 응답",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "사용자 ID",
+            "example": 1
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "수정 시각",
+            "example": "2026-05-05T14:00:00"
+          },
+          "message": {
+            "type": "string",
+            "description": "응답 메시지",
+            "example": "프로필 수정 완료"
+          }
+        }
+      },
+      "PortfolioUpdateRequest": {
+        "type": "object",
+        "description": "포트폴리오 정보 수정 요청",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "포트폴리오 제목. null이면 기존 값 유지",
+            "example": "수정된 공모전 포트폴리오",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "description": {
+            "type": "string",
+            "description": "포트폴리오 설명. null이면 기존 값 유지",
+            "example": "공모전 프로젝트들을 모아둔 포트폴리오입니다.",
+            "maxLength": 500,
+            "minLength": 0
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "description": "포트폴리오 썸네일 URL. null이면 기존 값 유지",
+            "example": "https://s3.amazonaws.com/portfolio-thumbnail.png",
+            "maxLength": 500,
+            "minLength": 0
+          }
+        }
+      },
+      "ApiResponsePortfolioUpdateResponse": {
+        "type": "object",
+        "description": "공통 API 응답 형식",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "요청 성공 여부",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/PortfolioUpdateResponse",
             "description": "응답 데이터"
           }
         }
@@ -1989,67 +2132,67 @@
           },
           "data": {
             "$ref": "#/components/schemas/PortfolioVisibilityUpdateResponse",
-"description": "응답 데이터"
-}
-}
-},
-"PortfolioVisibilityUpdateResponse": {
-"type": "object",
-"description": "포트폴리오 공개 여부 변경 응답",
-"properties": {
-"portfolioId": {
-"type": "integer",
-"format": "int64",
-"description": "포트폴리오 ID",
-"example": 1
-},
-"isPublic": {
-"type": "boolean",
-"description": "공개 여부",
-"example": true
-},
-"message": {
-"type": "string",
-"description": "응답 메시지",
-"example": "포트폴리오 공개 상태 변경 완료"
-}
-}
-},
-"PortfolioProjectUpdateRequest": {
-"type": "object",
-"description": "포트폴리오 프로젝트 추가/제거 요청",
-"properties": {
-"add": {
-"type": "array",
-"description": "추가할 프로젝트 ID 목록",
-"example": [1, 2],
-"items": {
-"type": "integer",
-"format": "int64"
-}
-},
-"remove": {
-"type": "array",
-"description": "제거할 프로젝트 ID 목록",
-"example": [3],
-"items": {
-"type": "integer",
-"format": "int64"
-}
-}
-}
-},
-"ApiResponsePortfolioProjectUpdateResponse": {
-"type": "object",
-"description": "공통 API 응답 형식",
-"properties": {
-"success": {
-"type": "boolean",
-"description": "요청 성공 여부",
-"example": true
-},
-"data": {
-"$ref": "#/components/schemas/PortfolioProjectUpdateResponse",
+            "description": "응답 데이터"
+          }
+        }
+      },
+      "PortfolioVisibilityUpdateResponse": {
+        "type": "object",
+        "description": "포트폴리오 공개 여부 변경 응답",
+        "properties": {
+          "portfolioId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "포트폴리오 ID",
+            "example": 1
+          },
+          "isPublic": {
+            "type": "boolean",
+            "description": "공개 여부",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "description": "응답 메시지",
+            "example": "포트폴리오 공개 상태 변경 완료"
+          }
+        }
+      },
+      "PortfolioProjectUpdateRequest": {
+        "type": "object",
+        "description": "포트폴리오 프로젝트 추가/제거 요청",
+        "properties": {
+          "add": {
+            "type": "array",
+            "description": "추가할 프로젝트 ID 목록",
+            "example": [1, 2],
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "remove": {
+            "type": "array",
+            "description": "제거할 프로젝트 ID 목록",
+            "example": [3],
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "ApiResponsePortfolioProjectUpdateResponse": {
+        "type": "object",
+        "description": "공통 API 응답 형식",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "요청 성공 여부",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/PortfolioProjectUpdateResponse",
             "description": "응답 데이터"
           }
         }
@@ -2095,32 +2238,32 @@
           },
           "data": {
             "$ref": "#/components/schemas/PortfolioOrderUpdateResponse",
-"description": "응답 데이터"
-}
-}
-},
-"PortfolioOrderUpdateResponse": {
-"type": "object",
-"description": "포트폴리오 프로젝트 순서 변경 응답",
-"properties": {
-"message": {
-"type": "string",
-"description": "응답 메시지",
-"example": "프로젝트 순서 변경 완료"
-}
-}
-},
-"ApiResponseUserMeResponse": {
-"type": "object",
-"description": "공통 API 응답 형식",
-"properties": {
-"success": {
-"type": "boolean",
-"description": "요청 성공 여부",
-"example": true
-},
-"data": {
-"$ref": "#/components/schemas/UserMeResponse",
+            "description": "응답 데이터"
+          }
+        }
+      },
+      "PortfolioOrderUpdateResponse": {
+        "type": "object",
+        "description": "포트폴리오 프로젝트 순서 변경 응답",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "응답 메시지",
+            "example": "프로젝트 순서 변경 완료"
+          }
+        }
+      },
+      "ApiResponseUserMeResponse": {
+        "type": "object",
+        "description": "공통 API 응답 형식",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "요청 성공 여부",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/UserMeResponse",
             "description": "응답 데이터"
           }
         }
@@ -2161,54 +2304,54 @@
             "description": "응답 데이터",
             "items": {
               "$ref": "#/components/schemas/MyProjectResponse"
-}
-}
-}
-},
-"MyProjectResponse": {
-"type": "object",
-"properties": {
-"projectId": {
-"type": "integer",
-"format": "int64"
-},
-"title": {
-"type": "string"
-},
-"thumbnail": {
-"type": "string"
-},
-"status": {
-"type": "string",
-"enum": [
-"DRAFT",
-"PUBLISHED"
-]
-},
-"role": {
-"type": "string",
-"enum": [
-"OWNER",
-"MEMBER"
-]
-},
-"updatedAt": {
-"type": "string",
-"format": "date-time"
-}
-}
-},
-"ApiResponseMyPortfolioListResponse": {
-"type": "object",
-"description": "공통 API 응답 형식",
-"properties": {
-"success": {
-"type": "boolean",
-"description": "요청 성공 여부",
-"example": true
-},
-"data": {
-"$ref": "#/components/schemas/MyPortfolioListResponse",
+            }
+          }
+        }
+      },
+      "MyProjectResponse": {
+        "type": "object",
+        "properties": {
+          "projectId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "thumbnail": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "PUBLISHED"
+            ]
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "OWNER",
+              "MEMBER"
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ApiResponseMyPortfolioListResponse": {
+        "type": "object",
+        "description": "공통 API 응답 형식",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "요청 성공 여부",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/MyPortfolioListResponse",
             "description": "응답 데이터"
           }
         }
@@ -2222,98 +2365,98 @@
             "description": "포트폴리오 목록",
             "items": {
               "$ref": "#/components/schemas/MyPortfolioResponse"
-}
-},
-"page": {
-"type": "integer",
-"format": "int32",
-"description": "현재 페이지",
-"example": 0
-},
-"size": {
-"type": "integer",
-"format": "int32",
-"description": "페이지 크기",
-"example": 6
-},
-"totalElements": {
-"type": "integer",
-"format": "int64",
-"description": "전체 데이터 수",
-"example": 10
-},
-"totalPages": {
-"type": "integer",
-"format": "int32",
-"description": "전체 페이지 수",
-"example": 2
-}
-}
-},
-"MyPortfolioResponse": {
-"type": "object",
-"description": "내 포트폴리오 목록 항목 응답",
-"properties": {
-"portfolioId": {
-"type": "integer",
-"format": "int64",
-"description": "포트폴리오 ID",
-"example": 1
-},
-"title": {
-"type": "string",
-"description": "포트폴리오 제목",
-"example": "AI 프로젝트 모음"
-},
-"slug": {
-"type": "string",
-"description": "포트폴리오 slug",
-"example": "ai-projects"
-},
-"description": {
-"type": "string",
-"description": "포트폴리오 설명",
-"example": "AI 관련 프로젝트"
-},
-"thumbnailUrl": {
-"type": "string",
-"description": "썸네일 URL",
-"example": "https://s3.amazonaws.com/xxx.png"
-},
-"isPublic": {
-"type": "boolean",
-"description": "공개 여부",
-"example": false
-},
-"projectCount": {
-"type": "integer",
-"format": "int64",
-"description": "포함된 프로젝트 수",
-"example": 5
-},
-"createdAt": {
-"type": "string",
-"format": "date-time",
-"description": "생성일"
-},
-"updatedAt": {
-"type": "string",
-"format": "date-time",
-"description": "수정일"
-}
-}
-},
-"ApiResponseProjectSearchPageResponse": {
-"type": "object",
-"description": "공통 API 응답 형식",
-"properties": {
-"success": {
-"type": "boolean",
-"description": "요청 성공 여부",
-"example": true
-},
-"data": {
-"$ref": "#/components/schemas/ProjectSearchPageResponse",
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "description": "현재 페이지",
+            "example": 0
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32",
+            "description": "페이지 크기",
+            "example": 6
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64",
+            "description": "전체 데이터 수",
+            "example": 10
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "description": "전체 페이지 수",
+            "example": 2
+          }
+        }
+      },
+      "MyPortfolioResponse": {
+        "type": "object",
+        "description": "내 포트폴리오 목록 항목 응답",
+        "properties": {
+          "portfolioId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "포트폴리오 ID",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "description": "포트폴리오 제목",
+            "example": "AI 프로젝트 모음"
+          },
+          "slug": {
+            "type": "string",
+            "description": "포트폴리오 slug",
+            "example": "ai-projects"
+          },
+          "description": {
+            "type": "string",
+            "description": "포트폴리오 설명",
+            "example": "AI 관련 프로젝트"
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "description": "썸네일 URL",
+            "example": "https://s3.amazonaws.com/xxx.png"
+          },
+          "isPublic": {
+            "type": "boolean",
+            "description": "공개 여부",
+            "example": false
+          },
+          "projectCount": {
+            "type": "integer",
+            "format": "int64",
+            "description": "포함된 프로젝트 수",
+            "example": 5
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "생성일"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "수정일"
+          }
+        }
+      },
+      "ApiResponseProjectSearchPageResponse": {
+        "type": "object",
+        "description": "공통 API 응답 형식",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "요청 성공 여부",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProjectSearchPageResponse",
             "description": "응답 데이터"
           }
         }
@@ -2325,52 +2468,52 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ProjectSearchResponse"
-}
-},
-"page": {
-"type": "integer",
-"format": "int32"
-},
-"size": {
-"type": "integer",
-"format": "int32"
-},
-"totalElements": {
-"type": "integer",
-"format": "int64"
-},
-"totalPages": {
-"type": "integer",
-"format": "int32"
-}
-}
-},
-"ProjectSearchResponse": {
-"type": "object",
-"properties": {
-"projectId": {
-"type": "integer",
-"format": "int64"
-},
-"title": {
-"type": "string"
-},
-"description": {
-"type": "string"
-},
-"thumbnailUrl": {
-"type": "string"
-},
-"tags": {
-"type": "array",
-"items": {
-"type": "string"
-}
-},
-"users": {
-"type": "array",
-"items": {
-"$ref": "#/components/schemas/ProjectUserResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ProjectSearchResponse": {
+        "type": "object",
+        "properties": {
+          "projectId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "thumbnailUrl": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectUserResponse"
             }
           },
           "viewCount": {
@@ -2405,6 +2548,46 @@
           }
         }
       },
+      "ApiResponseListProjectFileResponse": {
+        "type": "object",
+        "description": "공통 API 응답 형식",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "요청 성공 여부",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "description": "응답 데이터",
+            "items": {
+              "$ref": "#/components/schemas/ProjectFileResponse"
+            }
+          }
+        }
+      },
+      "ProjectFileResponse": {
+        "type": "object",
+        "properties": {
+          "fileId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "originalName": {
+            "type": "string"
+          },
+          "fileUrl": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "fileSize": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "ApiResponseProfileResponse": {
         "type": "object",
         "description": "공통 API 응답 형식",
@@ -2416,70 +2599,70 @@
           },
           "data": {
             "$ref": "#/components/schemas/ProfileResponse",
-"description": "응답 데이터"
-}
-}
-},
-"ProfileResponse": {
-"type": "object",
-"description": "프로필 조회 응답",
-"properties": {
-"profileId": {
-"type": "integer",
-"format": "int64",
-"description": "프로필 ID",
-"example": 1
-},
-"userId": {
-"type": "integer",
-"format": "int64",
-"description": "사용자 ID",
-"example": 1
-},
-"name": {
-"type": "string",
-"description": "이름",
-"example": "홍길동"
-},
-"nickname": {
-"type": "string",
-"description": "닉네임",
-"example": "길동이"
-},
-"bio": {
-"type": "string",
-"description": "자기소개",
-"example": "백엔드 개발 및 AI 프로젝트를 진행합니다."
-},
-"major": {
-"type": "string",
-"description": "전공",
-"example": "컴퓨터공학과"
-},
-"grade": {
-"type": "integer",
-"format": "int32",
-"description": "학년",
-"example": 4
-},
-"profileImage": {
-"type": "string",
-"description": "프로필 이미지 URL",
-"example": "https://s3.amazonaws.com/profile.png"
-}
-}
-},
-"ApiResponsePortfolioDetailResponse": {
-"type": "object",
-"description": "공통 API 응답 형식",
-"properties": {
-"success": {
-"type": "boolean",
-"description": "요청 성공 여부",
-"example": true
-},
-"data": {
-"$ref": "#/components/schemas/PortfolioDetailResponse",
+            "description": "응답 데이터"
+          }
+        }
+      },
+      "ProfileResponse": {
+        "type": "object",
+        "description": "프로필 조회 응답",
+        "properties": {
+          "profileId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "프로필 ID",
+            "example": 1
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "사용자 ID",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "이름",
+            "example": "홍길동"
+          },
+          "nickname": {
+            "type": "string",
+            "description": "닉네임",
+            "example": "길동이"
+          },
+          "bio": {
+            "type": "string",
+            "description": "자기소개",
+            "example": "백엔드 개발 및 AI 프로젝트를 진행합니다."
+          },
+          "major": {
+            "type": "string",
+            "description": "전공",
+            "example": "컴퓨터공학과"
+          },
+          "grade": {
+            "type": "integer",
+            "format": "int32",
+            "description": "학년",
+            "example": 4
+          },
+          "profileImage": {
+            "type": "string",
+            "description": "프로필 이미지 URL",
+            "example": "https://s3.amazonaws.com/profile.png"
+          }
+        }
+      },
+      "ApiResponsePortfolioDetailResponse": {
+        "type": "object",
+        "description": "공통 API 응답 형식",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "요청 성공 여부",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/PortfolioDetailResponse",
             "description": "응답 데이터"
           }
         }
@@ -2557,21 +2740,21 @@
             "description": "포트폴리오에 포함된 프로젝트 목록",
             "items": {
               "$ref": "#/components/schemas/PortfolioDetailProjectResponse"
-}
-}
-}
-},
-"ApiResponseHomeResponse": {
-"type": "object",
-"description": "공통 API 응답 형식",
-"properties": {
-"success": {
-"type": "boolean",
-"description": "요청 성공 여부",
-"example": true
-},
-"data": {
-"$ref": "#/components/schemas/HomeResponse",
+            }
+          }
+        }
+      },
+      "ApiResponseHomeResponse": {
+        "type": "object",
+        "description": "공통 API 응답 형식",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "요청 성공 여부",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/HomeResponse",
             "description": "응답 데이터"
           }
         }
@@ -2586,82 +2769,82 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/HomeProjectResponse"
-}
-}
-}
-},
-"HomeProjectResponse": {
-"type": "object",
-"properties": {
-"projectId": {
-"type": "integer",
-"format": "int64"
-},
-"title": {
-"type": "string"
-},
-"thumbnailUrl": {
-"type": "string"
-},
-"tag": {
-"type": "string"
-},
-"authorName": {
-"type": "string"
-},
-"likeCount": {
-"type": "integer",
-"format": "int64"
-},
-"viewCount": {
-"type": "integer",
-"format": "int32"
-}
-}
-},
-"HomeResponse": {
-"type": "object",
-"properties": {
-"popularProjects": {
-"type": "array",
-"items": {
-"$ref": "#/components/schemas/HomeProjectResponse"
+            }
+          }
+        }
+      },
+      "HomeProjectResponse": {
+        "type": "object",
+        "properties": {
+          "projectId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "thumbnailUrl": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "authorName": {
+            "type": "string"
+          },
+          "likeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "viewCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "HomeResponse": {
+        "type": "object",
+        "properties": {
+          "popularProjects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HomeProjectResponse"
             }
           },
           "categories": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/HomeCategoryResponse"
-}
-}
-}
-},
-"ApiResponsePortfolioDeleteResponse": {
-"type": "object",
-"description": "공통 API 응답 형식",
-"properties": {
-"success": {
-"type": "boolean",
-"description": "요청 성공 여부",
-"example": true
-},
-"data": {
-"$ref": "#/components/schemas/PortfolioDeleteResponse",
-"description": "응답 데이터"
-}
-}
-},
-"PortfolioDeleteResponse": {
-"type": "object",
-"description": "포트폴리오 삭제 응답",
-"properties": {
-"message": {
-"type": "string",
-"description": "응답 메시지",
-"example": "포트폴리오 삭제 완료"
-}
-}
-}
-}
-}
+            }
+          }
+        }
+      },
+      "ApiResponsePortfolioDeleteResponse": {
+        "type": "object",
+        "description": "공통 API 응답 형식",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "요청 성공 여부",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/PortfolioDeleteResponse",
+            "description": "응답 데이터"
+          }
+        }
+      },
+      "PortfolioDeleteResponse": {
+        "type": "object",
+        "description": "포트폴리오 삭제 응답",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "응답 메시지",
+            "example": "포트폴리오 삭제 완료"
+          }
+        }
+      }
+    }
+  }
 }
