@@ -23,16 +23,36 @@ export const queryParams = {
  * @returns 프로젝트 상세 화면 경로
  */
 export function getProjectDetailPath(projectId: number | string) {
-  return appRoutes.projectDetail(projectId)
+  return `/projects/${projectId}`
 }
 
-const schoolVerificationRequiredPathPrefixes: readonly `/${string}`[] = []
+/**
+ * 프로젝트 수정 화면 경로를 생성한다.
+ * @param projectId 수정할 프로젝트 ID
+ * @returns 프로젝트 수정 화면 경로
+ */
+export function getProjectEditPath(projectId: number | string) {
+  return `/projects/${projectId}/edit`
+}
+
+const schoolVerificationRequiredPathPrefixes: readonly `/${string}`[] = [
+  appRoutes.projectCreate,
+]
 
 /**
- * 로그인 이후 이동할 next 경로가 안전한 내부 경로인지 검증한다.
+ * 프로젝트 수정 화면 경로인지 확인한다.
+ * @param path 검사할 앱 내부 경로
+ * @returns 프로젝트 수정 화면 경로 여부
+ */
+function isProjectEditPath(path: string) {
+  return /^\/projects\/[^/]+\/edit$/.test(path)
+}
+
+/**
+ * 로그인 이후 이동할 next 경로가 앱 내부 경로인지 검증한다.
  * @param value URL query에서 받은 next 값
  * @param fallback next 값이 없거나 안전하지 않을 때 사용할 경로
- * @returns 안전한 내부 경로 또는 fallback 경로
+ * @returns 앱 내부 경로 또는 fallback 경로
  */
 export function getSafeNextPath(
   value: string | null | undefined,
@@ -59,7 +79,7 @@ export function getSafeNextPath(
 
 /**
  * 학교 이메일 인증이 필요한 내부 경로인지 확인한다.
- * @param path 검사할 내부 경로
+ * @param path 검사할 앱 내부 경로
  * @returns 학교 이메일 인증이 필요한 경로 여부
  */
 export function requiresSchoolVerification(path: string) {
@@ -71,7 +91,11 @@ export function requiresSchoolVerification(path: string) {
 
   const url = new URL(candidate, "https://campus-polio.local")
 
-  return schoolVerificationRequiredPathPrefixes.some(
-    (prefix) => url.pathname === prefix || url.pathname.startsWith(`${prefix}/`)
+  return (
+    isProjectEditPath(url.pathname) ||
+    schoolVerificationRequiredPathPrefixes.some(
+      (prefix) =>
+        url.pathname === prefix || url.pathname.startsWith(`${prefix}/`)
+    )
   )
 }

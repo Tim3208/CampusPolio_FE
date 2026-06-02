@@ -7,8 +7,8 @@
   },
   "servers": [
     {
-      "url": "https://localhost:8080",
-      "description": "Local Server"
+      "url": "https://api.campuspolio.cloud",
+      "description": "Production Server"
     }
   ],
   "tags": [
@@ -35,6 +35,10 @@
     {
       "name": "Email Auth",
       "description": "학교 이메일 인증 API"
+    },
+    {
+      "name": "Project File",
+      "description": "프로젝트 파일 API"
     },
     {
       "name": "Auth",
@@ -182,6 +186,86 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/files": {
+      "get": {
+        "tags": [
+          "Project File"
+        ],
+        "summary": "프로젝트 파일 조회",
+        "operationId": "getFiles",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListProjectFileResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Project File"
+        ],
+        "summary": "프로젝트 파일 업로드",
+        "operationId": "uploadFile",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProjectFileUploadResponse"
                 }
               }
             }
@@ -1451,6 +1535,38 @@
           }
         }
       }
+    },
+    "/api/projects/files/{fileId}": {
+      "delete": {
+        "tags": [
+          "Project File"
+        ],
+        "summary": "프로젝트 파일 삭제",
+        "operationId": "deleteFile",
+        "parameters": [
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1539,6 +1655,33 @@
           },
           "data": {
             "description": "응답 데이터"
+          }
+        }
+      },
+      "ApiResponseProjectFileUploadResponse": {
+        "type": "object",
+        "description": "공통 API 응답 형식",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "요청 성공 여부",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProjectFileUploadResponse",
+            "description": "응답 데이터"
+          }
+        }
+      },
+      "ProjectFileUploadResponse": {
+        "type": "object",
+        "properties": {
+          "fileId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fileUrl": {
+            "type": "string"
           }
         }
       },
@@ -2402,6 +2545,46 @@
               "OWNER",
               "MEMBER"
             ]
+          }
+        }
+      },
+      "ApiResponseListProjectFileResponse": {
+        "type": "object",
+        "description": "공통 API 응답 형식",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "요청 성공 여부",
+            "example": true
+          },
+          "data": {
+            "type": "array",
+            "description": "응답 데이터",
+            "items": {
+              "$ref": "#/components/schemas/ProjectFileResponse"
+            }
+          }
+        }
+      },
+      "ProjectFileResponse": {
+        "type": "object",
+        "properties": {
+          "fileId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "originalName": {
+            "type": "string"
+          },
+          "fileUrl": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "fileSize": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },

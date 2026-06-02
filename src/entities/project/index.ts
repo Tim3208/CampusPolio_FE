@@ -1,15 +1,28 @@
+export { createProjectDraft } from "./api/create-project-draft"
+export { getHome } from "./api/get-home"
+export { getProject } from "./api/get-project"
 export { getMyProjects } from "./api/get-my-projects"
+export { publishProject } from "./api/publish-project"
+export { requestProjectFileUpload } from "./api/request-project-file-upload"
 export { searchProjects } from "./api/search-projects"
-export { getMockProjectDetail, mockProjectDetail } from "./model/mock-project"
+export { updateProject } from "./api/update-project"
 export type {
   MyProject,
+  MyProjectApiItem,
   MyProjectsPage,
   MyProjectsQuery,
   MyProjectsStatusFilter,
   MyProjectStatus,
-  ProjectAuthor,
+  HomeCategory,
+  HomeData,
+  HomeProject,
+  ProjectCreatePayload,
   ProjectDetail,
-  ProjectMember,
+  ProjectDraft,
+  ProjectFileUpload,
+  ProjectFileUploadPayload,
+  ProjectPublishPayload,
+  ProjectPublishResult,
   ProjectResource,
   ProjectSearchApiItem,
   ProjectSearchApiPage,
@@ -19,5 +32,7 @@ export type {
   ProjectSearchQuery,
   ProjectSearchUser,
   ProjectSection,
+  ProjectUpdatePayload,
+  ProjectUpdateResult,
   RelatedProject,
 } from "./model/types"
