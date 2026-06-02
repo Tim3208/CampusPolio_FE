@@ -30,6 +30,26 @@ type MockProjectsPage = {
   totalPages: number
 }
 
+type MockHomeProject = {
+  projectId: number
+  title: string
+  thumbnailUrl: string | null
+  tag: string
+  authorName: string
+  likeCount: number
+  viewCount: number
+}
+
+type MockHomeCategory = {
+  tag: string
+  projects: MockHomeProject[]
+}
+
+type MockHomeData = {
+  popularProjects: MockHomeProject[]
+  categories: MockHomeCategory[]
+}
+
 const mockUsers: Record<AuthMockState, MockUser> = {
   unverified: {
     id: 1,
@@ -114,6 +134,8 @@ const mockProjects: MockProject[] = [
 let mockNextProjectId = 5
 let mockEmailVerified = false
 
+const mockProjectAuthors = ["김민지", "박정우", "이다솜", "최하린"] as const
+
 /**
  * 현재 mock 인증 상태에 맞는 사용자 fixture를 반환한다.
  * @returns mock 인증 상태에 대응하는 사용자 정보
@@ -176,6 +198,52 @@ function getMockProjectsPage(url: URL): MockProjectsPage {
     size,
     totalElements: filteredProjects.length,
     totalPages: size === 0 ? 0 : Math.ceil(filteredProjects.length / size),
+  }
+}
+
+/**
+ * mock 프로젝트를 메인 페이지 API 프로젝트 항목으로 변환한다.
+ * @param project 메인 페이지에 노출할 mock 프로젝트
+ * @returns 홈 API 응답의 프로젝트 항목
+ */
+function toMockHomeProject(project: MockProject): MockHomeProject {
+  const primaryTag = project.tags[0] ?? "Project"
+
+  return {
+    projectId: project.projectId,
+    title: project.title,
+    thumbnailUrl: project.thumbnailUrl,
+    tag: primaryTag,
+    authorName:
+      mockProjectAuthors[(project.projectId - 1) % mockProjectAuthors.length],
+    likeCount: 60 + project.projectId * 37,
+    viewCount: 300 + project.projectId * 211,
+  }
+}
+
+/**
+ * mock 프로젝트 fixture로 메인 페이지 API 응답을 구성한다.
+ * @returns 인기 프로젝트와 카테고리별 프로젝트 mock 데이터
+ */
+function getMockHomeData(): MockHomeData {
+  const publishedProjects = mockProjects.filter(
+    (project) => project.status === "PUBLISHED"
+  )
+  const homeProjects = publishedProjects.map(toMockHomeProject)
+  const categoryMap = new Map<string, MockHomeProject[]>()
+
+  homeProjects.forEach((project) => {
+    const projects = categoryMap.get(project.tag) ?? []
+
+    categoryMap.set(project.tag, [...projects, project])
+  })
+
+  return {
+    popularProjects: homeProjects.slice(0, 6),
+    categories: Array.from(categoryMap, ([tag, projects]) => ({
+      tag,
+      projects,
+    })),
   }
 }
 
@@ -481,6 +549,13 @@ export function resolveMockApiResponse<TData>(
       data: {
         message: "학교 이메일 인증이 완료되었습니다.",
       } as TData,
+    }
+  }
+
+  if (url.pathname === "/api/home" && normalizedMethod === "GET") {
+    return {
+      success: true,
+      data: getMockHomeData() as TData,
     }
   }
 

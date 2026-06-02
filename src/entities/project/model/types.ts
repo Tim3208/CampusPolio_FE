@@ -103,3 +103,23 @@ export type ProjectPublishPayload = {
 }
 
 export type ProjectPublishResult = void
+
+export type HomeProject = {
+  projectId: number
+  title: string
+  thumbnailUrl: string | null
+  tag: string
+  authorName: string
+  likeCount: number
+  viewCount: number
+}
+
+export type HomeCategory = {
+  tag: string
+  projects: HomeProject[]
+}
+
+export type HomeData = {
+  popularProjects: HomeProject[]
+  categories: HomeCategory[]
+}
