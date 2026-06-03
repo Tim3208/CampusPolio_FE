@@ -10,6 +10,7 @@ export const appRoutes = {
   projects: "/projects",
   projectCreate: "/projects/new",
   verifyEmail: "/verify-email",
+  portfolioDetail: (slug: string) => `/portfolios/${slug}`,
   projectDetail: (projectId: number | string) => `/projects/${projectId}`,
 } as const
 

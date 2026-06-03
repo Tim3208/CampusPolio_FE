@@ -73,6 +73,47 @@ type MockProjectSearchPage = {
   totalPages: number
 }
 
+type MockProfile = {
+  profileId: number
+  userId: number
+  name: string
+  nickname: string
+  bio: string
+  major: string
+  grade: number | null
+  profileImage: string
+}
+
+type MockPortfolio = {
+  portfolioId: number
+  title: string
+  slug: string
+  description: string
+  thumbnailUrl: string | null
+  isPublic: boolean
+  projectIds: number[]
+  createdAt: string
+  updatedAt: string
+}
+
+type MockPortfoliosPage = {
+  content: Array<{
+    portfolioId: number
+    title: string
+    slug: string
+    description: string
+    thumbnailUrl: string | null
+    isPublic: boolean
+    projectCount: number
+    createdAt: string
+    updatedAt: string
+  }>
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
 const mockUsers: Record<AuthMockState, MockUser> = {
   unverified: {
     id: 1,
@@ -89,6 +130,17 @@ const mockUsers: Record<AuthMockState, MockUser> = {
     email: "user@gmail.com",
     universityVerified: false,
   },
+}
+
+let mockProfile: MockProfile | null = {
+  profileId: 1,
+  userId: 1,
+  name: "홍길동",
+  nickname: "길동이",
+  bio: "캠퍼스폴리오에서 학술 프로젝트를 정리하고 있습니다.",
+  major: "컴퓨터공학과",
+  grade: 4,
+  profileImage: "",
 }
 
 const mockProjects: MockProject[] = [
@@ -148,6 +200,33 @@ const mockProjects: MockProject[] = [
     createdAt: "2026-05-12T10:10:00+09:00",
     updatedAt: "2026-05-22T15:20:00+09:00",
     status: "PUBLISHED",
+  },
+]
+
+const mockPortfolios: MockPortfolio[] = [
+  {
+    portfolioId: 1,
+    title: "AI 프로젝트 모음",
+    slug: "ai-projects",
+    description: "AI와 데이터 기반 실험을 정리한 학술 포트폴리오입니다.",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=1200&auto=format&fit=crop",
+    isPublic: true,
+    projectIds: [2, 4],
+    createdAt: "2026-05-21T09:00:00+09:00",
+    updatedAt: "2026-05-30T10:00:00+09:00",
+  },
+  {
+    portfolioId: 2,
+    title: "캠퍼스 디자인 아카이브",
+    slug: "campus-design-archive",
+    description: "공간, 브랜드, 사용자 경험을 다룬 프로젝트를 모았습니다.",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1200&auto=format&fit=crop",
+    isPublic: false,
+    projectIds: [1, 3],
+    createdAt: "2026-05-24T09:00:00+09:00",
+    updatedAt: "2026-05-28T15:30:00+09:00",
   },
 ]
 
@@ -238,6 +317,7 @@ const mockSearchOnlyProjects: MockProject[] = [
 ]
 
 let mockNextProjectId = 11
+let mockNextPortfolioId = 3
 let mockEmailVerified = false
 
 const mockProjectAuthors = ["김민지", "박정우", "이다솜", "최하린"] as const
@@ -304,6 +384,385 @@ function getMockProjectsPage(url: URL): MockProjectsPage {
     size,
     totalElements: filteredProjects.length,
     totalPages: size === 0 ? 0 : Math.ceil(filteredProjects.length / size),
+  }
+}
+
+/**
+ * mock 포트폴리오 목록을 page, size, isPublic query 기준으로 잘라 반환한다.
+ * @param url 포트폴리오 목록 요청 URL
+ * @returns mock 포트폴리오 목록 페이지
+ */
+function getMockPortfoliosPage(url: URL): MockPortfoliosPage {
+  const page = getNonNegativeQueryNumber(url.searchParams.get("page"), 0)
+  const size = getNonNegativeQueryNumber(url.searchParams.get("size"), 8)
+  const isPublic = url.searchParams.get("isPublic")
+  const filteredPortfolios =
+    isPublic === null
+      ? mockPortfolios
+      : mockPortfolios.filter(
+          (portfolio) => portfolio.isPublic === (isPublic === "true")
+        )
+  const startIndex = page * size
+  const content = filteredPortfolios
+    .slice(startIndex, startIndex + size)
+    .map((portfolio) => ({
+      createdAt: portfolio.createdAt,
+      description: portfolio.description,
+      isPublic: portfolio.isPublic,
+      portfolioId: portfolio.portfolioId,
+      projectCount: portfolio.projectIds.length,
+      slug: portfolio.slug,
+      thumbnailUrl: portfolio.thumbnailUrl,
+      title: portfolio.title,
+      updatedAt: portfolio.updatedAt,
+    }))
+
+  return {
+    content,
+    page,
+    size,
+    totalElements: filteredPortfolios.length,
+    totalPages: size === 0 ? 0 : Math.ceil(filteredPortfolios.length / size),
+  }
+}
+
+/**
+ * slug와 일치하는 mock 포트폴리오를 찾는다.
+ * @param slug 조회할 포트폴리오 slug
+ * @returns mock 포트폴리오 또는 undefined
+ */
+function findMockPortfolioBySlug(slug: string) {
+  return mockPortfolios.find((portfolio) => portfolio.slug === slug)
+}
+
+/**
+ * ID와 일치하는 mock 포트폴리오를 찾는다.
+ * @param portfolioId 조회할 포트폴리오 ID
+ * @returns mock 포트폴리오 또는 undefined
+ */
+function findMockPortfolioById(portfolioId: number) {
+  return mockPortfolios.find(
+    (portfolio) => portfolio.portfolioId === portfolioId
+  )
+}
+
+/**
+ * 제목을 mock 포트폴리오 slug 기본값으로 변환한다.
+ * @param title 포트폴리오 제목
+ * @returns URL에 사용할 slug
+ */
+function createMockPortfolioSlugBase(title: string) {
+  const normalizedSlug = title
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9가-힣]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+
+  return normalizedSlug || "portfolio"
+}
+
+/**
+ * 기존 mock 포트폴리오와 중복되지 않는 slug를 만든다.
+ * @param title 포트폴리오 제목
+ * @returns 고유 slug
+ */
+function createUniqueMockPortfolioSlug(title: string) {
+  const baseSlug = createMockPortfolioSlugBase(title)
+  let slug = baseSlug
+  let suffix = 1
+
+  while (findMockPortfolioBySlug(slug)) {
+    slug = `${baseSlug}-${suffix}`
+    suffix += 1
+  }
+
+  return slug
+}
+
+/**
+ * API 경로에서 포트폴리오 ID를 추출한다.
+ * @param url mock URL 객체
+ * @returns 포트폴리오 ID. 없으면 undefined
+ */
+function getPortfolioIdFromUrl(url: URL) {
+  const match = url.pathname.match(/^\/api\/portfolios\/(\d+)(?:\/|$)/)
+
+  if (!match) {
+    return undefined
+  }
+
+  return Number(match[1])
+}
+
+/**
+ * mock 포트폴리오 상세 응답을 만든다.
+ * @param portfolio 상세로 변환할 mock 포트폴리오
+ * @returns 포트폴리오 상세 응답
+ */
+function getMockPortfolioDetail(portfolio: MockPortfolio) {
+  return {
+    description: portfolio.description,
+    isPublic: portfolio.isPublic,
+    portfolioId: portfolio.portfolioId,
+    projects: portfolio.projectIds
+      .map((projectId, index) => {
+        const project = findMockProject(projectId)
+
+        if (!project) {
+          return undefined
+        }
+
+        return {
+          description: project.description,
+          displayOrder: index,
+          projectId: project.projectId,
+          thumbnailUrl: project.thumbnailUrl,
+          title: project.title,
+        }
+      })
+      .filter((project) => !!project),
+    slug: portfolio.slug,
+    thumbnailUrl: portfolio.thumbnailUrl,
+    title: portfolio.title,
+  }
+}
+
+/**
+ * mock 포트폴리오 생성 요청을 처리한다.
+ * @param body 생성 요청 body
+ * @returns 생성 결과 응답
+ */
+function createMockPortfolio(body: unknown) {
+  const payload = isRecord(body) ? body : {}
+  const title = typeof payload.title === "string" ? payload.title.trim() : ""
+
+  if (!getMockUser().universityVerified) {
+    return {
+      success: false,
+      message: "대학 인증이 필요합니다.",
+    }
+  }
+
+  if (!title) {
+    return {
+      success: false,
+      message: "포트폴리오 제목을 입력해주세요.",
+    }
+  }
+
+  if (title.length > 100) {
+    return {
+      success: false,
+      message: "포트폴리오 제목은 100자 이하로 입력해주세요.",
+    }
+  }
+
+  const now = getMockNow()
+  const portfolio: MockPortfolio = {
+    createdAt: now,
+    description: "",
+    isPublic: false,
+    portfolioId: mockNextPortfolioId,
+    projectIds: [],
+    slug: createUniqueMockPortfolioSlug(title),
+    thumbnailUrl: null,
+    title,
+    updatedAt: now,
+  }
+
+  mockNextPortfolioId += 1
+  mockPortfolios.unshift(portfolio)
+
+  return {
+    success: true,
+    data: {
+      portfolioId: portfolio.portfolioId,
+      slug: portfolio.slug,
+    },
+  }
+}
+
+/**
+ * mock 포트폴리오 기본 정보 수정 요청을 처리한다.
+ * @param portfolio 수정할 mock 포트폴리오
+ * @param body 수정 요청 body
+ * @returns 수정 결과 응답
+ */
+function updateMockPortfolio(portfolio: MockPortfolio, body: unknown) {
+  const payload = isRecord(body) ? body : {}
+  const title =
+    typeof payload.title === "string" && payload.title.trim()
+      ? payload.title.trim()
+      : portfolio.title
+  const description =
+    typeof payload.description === "string"
+      ? payload.description.trim()
+      : portfolio.description
+  const thumbnailUrl =
+    typeof payload.thumbnailUrl === "string" || payload.thumbnailUrl === null
+      ? payload.thumbnailUrl
+      : portfolio.thumbnailUrl
+
+  if (title.length > 100) {
+    return {
+      success: false,
+      message: "포트폴리오 제목은 100자 이하로 입력해주세요.",
+    }
+  }
+
+  if (description.length > 500) {
+    return {
+      success: false,
+      message: "포트폴리오 설명은 500자 이하로 입력해주세요.",
+    }
+  }
+
+  portfolio.title = title
+  portfolio.description = description
+  portfolio.thumbnailUrl = thumbnailUrl
+  portfolio.updatedAt = getMockNow()
+
+  return {
+    success: true,
+    data: {
+      message: "포트폴리오 수정 완료",
+      portfolioId: portfolio.portfolioId,
+      updatedAt: portfolio.updatedAt,
+    },
+  }
+}
+
+/**
+ * mock 포트폴리오 프로젝트 연결 요청을 처리한다.
+ * @param portfolio 수정할 mock 포트폴리오
+ * @param body 프로젝트 추가/제거 요청 body
+ * @returns 프로젝트 연결 수정 결과
+ */
+function updateMockPortfolioProjects(portfolio: MockPortfolio, body: unknown) {
+  const payload = isRecord(body) ? body : {}
+  const add = Array.isArray(payload.add)
+    ? payload.add.filter(
+        (projectId): projectId is number =>
+          Number.isSafeInteger(projectId) && projectId > 0
+      )
+    : []
+  const remove = Array.isArray(payload.remove)
+    ? payload.remove.filter(
+        (projectId): projectId is number =>
+          Number.isSafeInteger(projectId) && projectId > 0
+      )
+    : []
+  const missingProjectId = add.find((projectId) => !findMockProject(projectId))
+
+  if (missingProjectId) {
+    return {
+      success: false,
+      message: "존재하지 않는 프로젝트가 포함되어 있습니다.",
+    }
+  }
+
+  const nextProjectIds = portfolio.projectIds.filter(
+    (projectId) => !remove.includes(projectId)
+  )
+
+  add.forEach((projectId) => {
+    if (!nextProjectIds.includes(projectId)) {
+      nextProjectIds.push(projectId)
+    }
+  })
+
+  if (nextProjectIds.length > 50) {
+    return {
+      success: false,
+      message: "포트폴리오에는 최대 50개 프로젝트만 추가할 수 있습니다.",
+    }
+  }
+
+  portfolio.projectIds = nextProjectIds
+  portfolio.updatedAt = getMockNow()
+
+  return {
+    success: true,
+    data: {
+      message: "포트폴리오 프로젝트 수정 완료",
+    },
+  }
+}
+
+/**
+ * mock 포트폴리오 프로젝트 순서 변경 요청을 처리한다.
+ * @param portfolio 수정할 mock 포트폴리오
+ * @param body 순서 변경 요청 body
+ * @returns 순서 변경 결과
+ */
+function updateMockPortfolioOrder(portfolio: MockPortfolio, body: unknown) {
+  const payload = isRecord(body) ? body : {}
+  const projectOrder = Array.isArray(payload.projectOrder)
+    ? payload.projectOrder.filter(
+        (projectId): projectId is number =>
+          Number.isSafeInteger(projectId) && projectId > 0
+      )
+    : []
+  const currentIds = [...portfolio.projectIds].sort((a, b) => a - b)
+  const requestedIds = [...projectOrder].sort((a, b) => a - b)
+  const hasSameIds =
+    currentIds.length === requestedIds.length &&
+    currentIds.every((projectId, index) => projectId === requestedIds[index])
+
+  if (!hasSameIds) {
+    return {
+      success: false,
+      message: "현재 포트폴리오 프로젝트와 동일한 ID 순서를 전달해주세요.",
+    }
+  }
+
+  portfolio.projectIds = projectOrder
+  portfolio.updatedAt = getMockNow()
+
+  return {
+    success: true,
+    data: {
+      message: "프로젝트 순서 변경 완료",
+    },
+  }
+}
+
+/**
+ * mock 포트폴리오 공개 상태 변경 요청을 처리한다.
+ * @param portfolio 수정할 mock 포트폴리오
+ * @param body 공개 상태 요청 body
+ * @returns 공개 상태 변경 결과
+ */
+function updateMockPortfolioVisibility(portfolio: MockPortfolio, body: unknown) {
+  const payload = isRecord(body) ? body : {}
+  const isPublic =
+    typeof payload.isPublic === "boolean" ? payload.isPublic : portfolio.isPublic
+
+  if (isPublic) {
+    const hasPublishedProject = portfolio.projectIds.some((projectId) => {
+      const project = findMockProject(projectId)
+
+      return project?.status === "PUBLISHED" && project.isPublic
+    })
+
+    if (!hasPublishedProject) {
+      return {
+        success: false,
+        message: "공개 포트폴리오는 공개 프로젝트를 1개 이상 포함해야 합니다.",
+      }
+    }
+  }
+
+  portfolio.isPublic = isPublic
+  portfolio.updatedAt = getMockNow()
+
+  return {
+    success: true,
+    data: {
+      isPublic: portfolio.isPublic,
+      message: "포트폴리오 공개 상태 변경 완료",
+      portfolioId: portfolio.portfolioId,
+    },
   }
 }
 
@@ -653,6 +1112,94 @@ function createMockFileUpload(projectId: number, body: unknown) {
 }
 
 /**
+ * mock 프로필 생성 요청을 처리하고 저장된 프로필을 갱신한다.
+ * @param body 프로필 생성 요청 body
+ * @returns 생성 결과
+ */
+function createMockProfile(body: unknown) {
+  const payload = isRecord(body) ? body : {}
+  const nickname =
+    typeof payload.nickname === "string" ? payload.nickname.trim() : ""
+  const bio = typeof payload.bio === "string" ? payload.bio.trim() : ""
+
+  if (!nickname) {
+    return {
+      success: false,
+      message: "닉네임을 입력해주세요.",
+    }
+  }
+
+  mockProfile = {
+    bio,
+    grade: null,
+    major: "",
+    name: "",
+    nickname,
+    profileId: 1,
+    profileImage: "",
+    userId: 1,
+  }
+
+  return {
+    success: true,
+    data: {
+      message: "프로필 생성 완료",
+      profileId: mockProfile.profileId,
+    },
+  }
+}
+
+/**
+ * mock 프로필 수정 요청을 처리하고 저장된 프로필을 갱신한다.
+ * @param body 프로필 수정 요청 body
+ * @returns 수정 결과
+ */
+function updateMockProfile(body: unknown) {
+  const payload = isRecord(body) ? body : {}
+  const currentProfile =
+    mockProfile ??
+    ({
+      bio: "",
+      grade: null,
+      major: "",
+      name: "",
+      nickname: "길동이",
+      profileId: 1,
+      profileImage: "",
+      userId: 1,
+    } satisfies MockProfile)
+
+  mockProfile = {
+    ...currentProfile,
+    bio: typeof payload.bio === "string" ? payload.bio : currentProfile.bio,
+    grade:
+      typeof payload.grade === "number" || payload.grade === null
+        ? payload.grade
+        : currentProfile.grade,
+    major:
+      typeof payload.major === "string" ? payload.major : currentProfile.major,
+    name: typeof payload.name === "string" ? payload.name : currentProfile.name,
+    nickname:
+      typeof payload.nickname === "string"
+        ? payload.nickname
+        : currentProfile.nickname,
+    profileImage:
+      typeof payload.profileImage === "string"
+        ? payload.profileImage
+        : currentProfile.profileImage,
+  }
+
+  return {
+    success: true,
+    data: {
+      message: "프로필 수정 완료",
+      updatedAt: new Date().toISOString(),
+      userId: mockProfile.userId,
+    },
+  }
+}
+
+/**
  * mock mode에서 지원하는 API 응답을 네트워크 요청 없이 반환한다.
  * @param path 요청 API path
  * @param method 요청 HTTP method
@@ -770,6 +1317,38 @@ export function resolveMockApiResponse<TData>(
     }
   }
 
+  if (
+    url.pathname === "/api/users/me/portfolios" &&
+    normalizedMethod === "GET"
+  ) {
+    return {
+      success: true,
+      data: getMockPortfoliosPage(url) as TData,
+    }
+  }
+
+  if (url.pathname === "/api/profile" && normalizedMethod === "GET") {
+    if (!mockProfile) {
+      return {
+        success: false,
+        message: "프로필이 없습니다.",
+      } as ApiResponse<TData>
+    }
+
+    return {
+      success: true,
+      data: mockProfile as TData,
+    }
+  }
+
+  if (url.pathname === "/api/profile" && normalizedMethod === "POST") {
+    return createMockProfile(body) as ApiResponse<TData>
+  }
+
+  if (url.pathname === "/api/profile" && normalizedMethod === "PATCH") {
+    return updateMockProfile(body) as ApiResponse<TData>
+  }
+
   if (url.pathname === "/api/projects" && normalizedMethod === "GET") {
     return {
       success: true,
@@ -781,6 +1360,84 @@ export function resolveMockApiResponse<TData>(
     return {
       success: true,
       data: createMockProjectDraft(body) as TData,
+    }
+  }
+
+  if (url.pathname === "/api/portfolios" && normalizedMethod === "POST") {
+    return createMockPortfolio(body) as ApiResponse<TData>
+  }
+
+  const portfolioId = getPortfolioIdFromUrl(url)
+  const portfolio = portfolioId ? findMockPortfolioById(portfolioId) : undefined
+
+  if (!portfolioId && /^\/api\/portfolios\/\d+(?:\/|$)/.test(url.pathname)) {
+    return {
+      success: false,
+      message: "포트폴리오 ID가 올바르지 않습니다.",
+    } as ApiResponse<TData>
+  }
+
+  if (
+    portfolioId &&
+    !portfolio &&
+    /^\/api\/portfolios\/\d+(?:\/|$)/.test(url.pathname)
+  ) {
+    return {
+      success: false,
+      message: "포트폴리오가 없습니다.",
+    } as ApiResponse<TData>
+  }
+
+  if (
+    portfolio &&
+    url.pathname === `/api/portfolios/${portfolioId}` &&
+    normalizedMethod === "PATCH"
+  ) {
+    return updateMockPortfolio(portfolio, body) as ApiResponse<TData>
+  }
+
+  if (
+    portfolio &&
+    url.pathname === `/api/portfolios/${portfolioId}/projects` &&
+    normalizedMethod === "PATCH"
+  ) {
+    return updateMockPortfolioProjects(portfolio, body) as ApiResponse<TData>
+  }
+
+  if (
+    portfolio &&
+    url.pathname === `/api/portfolios/${portfolioId}/order` &&
+    normalizedMethod === "PATCH"
+  ) {
+    return updateMockPortfolioOrder(portfolio, body) as ApiResponse<TData>
+  }
+
+  if (
+    portfolio &&
+    url.pathname === `/api/portfolios/${portfolioId}/visibility` &&
+    normalizedMethod === "PATCH"
+  ) {
+    return updateMockPortfolioVisibility(portfolio, body) as ApiResponse<TData>
+  }
+
+  const portfolioSlugMatch = /^\/api\/portfolios\/([^/]+)$/.exec(url.pathname)
+  const portfolioSlug = portfolioSlugMatch
+    ? decodeURIComponent(portfolioSlugMatch[1])
+    : undefined
+
+  if (portfolioSlug && normalizedMethod === "GET") {
+    const portfolio = findMockPortfolioBySlug(portfolioSlug)
+
+    if (!portfolio) {
+      return {
+        success: false,
+        message: "포트폴리오가 없습니다.",
+      } as ApiResponse<TData>
+    }
+
+    return {
+      success: true,
+      data: getMockPortfolioDetail(portfolio) as TData,
     }
   }
 

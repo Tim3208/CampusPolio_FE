@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import type { ChangeEvent, ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowDown,
   ArrowUp,
@@ -12,11 +13,21 @@ import {
   Eye,
   FilePlus2,
   Grid2X2,
+  ImagePlus,
+  Loader2,
   Search,
+  UploadCloud,
   X,
 } from "lucide-react";
 
 import type { MyProject, MyProjectsPage } from "@/entities/project";
+import {
+  createPortfolio,
+  updatePortfolio,
+  updatePortfolioOrder,
+  updatePortfolioProjects,
+  updatePortfolioVisibility,
+} from "@/entities/portfolio";
 import { appRoutes } from "@/shared/config";
 import { cn } from "@/shared/lib/utils";
 
@@ -36,6 +47,9 @@ const selectedTemplate: SelectedTemplate = {
   title: "My Projects",
   description: "읽기 전용 아카이브 느낌의 리스트형 포트폴리오 템플릿",
 };
+
+const TITLE_MAX_LENGTH = 100;
+const DESCRIPTION_MAX_LENGTH = 500;
 
 /**
  * 프로젝트 날짜를 포트폴리오 제작 화면 표시 형식으로 변환한다.
@@ -62,6 +76,39 @@ function getProjectDescription(project: MyProject) {
     project.description?.trim() ||
     "프로젝트 상세 설명은 다음 단계에서 연결됩니다."
   );
+}
+
+/**
+ * 선택된 첫 프로젝트에서 포트폴리오 기본 썸네일 URL을 찾는다.
+ * @param projects 선택된 프로젝트 목록
+ * @returns 저장 payload에 사용할 썸네일 URL
+ */
+function getDefaultThumbnailUrl(projects: MyProject[]) {
+  return projects.find((project) => project.thumbnailUrl)?.thumbnailUrl ?? null;
+}
+
+/**
+ * 포트폴리오 생성 입력값의 오류 메시지를 반환한다.
+ * @param title 입력한 제목
+ * @param description 입력한 설명
+ * @returns 유효성 오류 메시지. 통과하면 빈 문자열
+ */
+function getPortfolioValidationError(title: string, description: string) {
+  const trimmedTitle = title.trim();
+
+  if (!trimmedTitle) {
+    return "포트폴리오 제목을 입력해주세요.";
+  }
+
+  if (trimmedTitle.length > TITLE_MAX_LENGTH) {
+    return `포트폴리오 제목은 ${TITLE_MAX_LENGTH}자 이하로 입력해주세요.`;
+  }
+
+  if (description.length > DESCRIPTION_MAX_LENGTH) {
+    return `포트폴리오 설명은 ${DESCRIPTION_MAX_LENGTH}자 이하로 입력해주세요.`;
+  }
+
+  return "";
 }
 
 /**
@@ -101,11 +148,30 @@ export function PortfolioBuilder({
   errorMessage,
   projectsPage,
 }: PortfolioBuilderProps) {
+  const router = useRouter();
   const projects = useMemo(() => projectsPage?.content ?? [], [projectsPage]);
   const [keyword, setKeyword] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [thumbnailFileName, setThumbnailFileName] = useState("");
+  const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState("");
   const [selectedProjects, setSelectedProjects] = useState<MyProject[]>([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [notice, setNotice] = useState("");
+  const [formError, setFormError] = useState("");
+  const defaultThumbnailUrl = useMemo(
+    () => getDefaultThumbnailUrl(selectedProjects),
+    [selectedProjects],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (thumbnailPreviewUrl) {
+        URL.revokeObjectURL(thumbnailPreviewUrl);
+      }
+    };
+  }, [thumbnailPreviewUrl]);
 
   const filteredProjects = useMemo(() => {
     const normalizedKeyword = keyword.trim().toLowerCase();
@@ -133,6 +199,7 @@ export function PortfolioBuilder({
    */
   function toggleProject(project: MyProject) {
     setNotice("");
+    setFormError("");
     setSelectedProjects((currentProjects) => {
       const isSelected = currentProjects.some(
         (currentProject) => currentProject.projectId === project.projectId,
@@ -153,6 +220,7 @@ export function PortfolioBuilder({
    * @param projectId 제거할 프로젝트 ID
    */
   function removeSelectedProject(projectId: number) {
+    setFormError("");
     setSelectedProjects((currentProjects) =>
       currentProjects.filter((project) => project.projectId !== projectId),
     );
@@ -164,23 +232,113 @@ export function PortfolioBuilder({
    * @param direction 이동 방향
    */
   function handleMoveProject(projectId: number, direction: "up" | "down") {
+    setFormError("");
     setSelectedProjects((currentProjects) =>
       moveSelectedProject(currentProjects, projectId, direction),
     );
   }
 
   /**
-   * 다음 단계 버튼의 임시 안내 메시지를 표시한다.
+   * 포트폴리오 제목 입력을 상태에 반영한다.
+   * @param event 제목 입력 변경 이벤트
    */
-  function handleNextStep() {
-    setNotice("다음 단계 연동은 템플릿 생성 API 연결 단계에서 제공됩니다.");
+  function handleTitleChange(event: ChangeEvent<HTMLInputElement>) {
+    setTitle(event.target.value);
+    setFormError("");
   }
 
   /**
-   * 임시 저장 버튼의 임시 안내 메시지를 표시한다.
+   * 포트폴리오 설명 입력을 상태에 반영한다.
+   * @param event 설명 입력 변경 이벤트
    */
-  function handleTemporarySave() {
-    setNotice("임시 저장은 포트폴리오 저장 API 연결 단계에서 제공됩니다.");
+  function handleDescriptionChange(event: ChangeEvent<HTMLTextAreaElement>) {
+    setDescription(event.target.value);
+    setFormError("");
+  }
+
+  /**
+   * 포트폴리오 썸네일 파일 선택을 로컬 미리보기 상태에 반영한다.
+   * @param event 파일 input 변경 이벤트
+   */
+  function handleThumbnailInputChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (thumbnailPreviewUrl) {
+      URL.revokeObjectURL(thumbnailPreviewUrl);
+    }
+
+    setThumbnailFileName(file.name);
+    setThumbnailPreviewUrl(URL.createObjectURL(file));
+    setNotice(
+      "포트폴리오 썸네일 업로드 API 준비 중입니다. 저장에는 첫 번째 선택 프로젝트 썸네일이 사용됩니다.",
+    );
+  }
+
+  /**
+   * 현재 입력값과 선택 프로젝트로 비공개 포트폴리오를 생성한다.
+   */
+  async function handlePrivateSave() {
+    const validationError = getPortfolioValidationError(title, description);
+
+    setNotice("");
+    setFormError("");
+
+    if (validationError) {
+      setFormError(validationError);
+      return;
+    }
+
+    const trimmedTitle = title.trim();
+    const trimmedDescription = description.trim();
+    const projectIds = selectedProjects.map((project) => project.projectId);
+    const thumbnailUrl = defaultThumbnailUrl;
+
+    setIsSaving(true);
+
+    try {
+      const createdPortfolio = await createPortfolio({
+        title: trimmedTitle,
+      });
+
+      if (trimmedDescription || thumbnailUrl) {
+        await updatePortfolio(createdPortfolio.portfolioId, {
+          description: trimmedDescription,
+          thumbnailUrl,
+          title: trimmedTitle,
+        });
+      }
+
+      if (projectIds.length > 0) {
+        await updatePortfolioProjects(createdPortfolio.portfolioId, {
+          add: projectIds,
+          remove: [],
+        });
+      }
+
+      if (projectIds.length > 1) {
+        await updatePortfolioOrder(createdPortfolio.portfolioId, {
+          projectOrder: projectIds,
+        });
+      }
+
+      await updatePortfolioVisibility(createdPortfolio.portfolioId, {
+        isPublic: false,
+      });
+
+      router.push(appRoutes.portfolioDetail(createdPortfolio.slug));
+    } catch (error) {
+      setFormError(
+        error instanceof Error
+          ? error.message
+          : "포트폴리오를 저장하지 못했습니다.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -363,7 +521,118 @@ export function PortfolioBuilder({
         </Panel>
 
         <Panel className="lg:col-span-2 xl:col-span-1">
-          <div className="mb-5">
+          <div className="mb-6">
+            <h2 className="text-base font-extrabold text-slate-950">
+              기본 정보
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-slate-500">
+              비공개 포트폴리오로 저장한 뒤 상세 페이지에서 확인할 수
+              있습니다.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <label className="block">
+              <span className="text-sm font-bold text-slate-800">
+                제목 <span className="text-main-10">*</span>
+              </span>
+              <input
+                value={title}
+                onChange={handleTitleChange}
+                maxLength={TITLE_MAX_LENGTH}
+                placeholder="예: 공모전 포트폴리오"
+                className="mt-2 h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-main-10 focus:ring-2 focus:ring-main-20"
+              />
+              <span className="mt-1 block text-right text-xs font-medium text-slate-400">
+                {title.trim().length}/{TITLE_MAX_LENGTH}
+              </span>
+            </label>
+
+            <label className="block">
+              <span className="text-sm font-bold text-slate-800">설명</span>
+              <textarea
+                value={description}
+                onChange={handleDescriptionChange}
+                maxLength={DESCRIPTION_MAX_LENGTH + 1}
+                placeholder="포트폴리오 설명을 입력하세요"
+                className="mt-2 min-h-28 w-full resize-none rounded-md border border-slate-200 bg-white px-3 py-3 text-sm leading-6 outline-none transition placeholder:text-slate-400 focus:border-main-10 focus:ring-2 focus:ring-main-20"
+              />
+              <span
+                className={cn(
+                  "mt-1 block text-right text-xs font-medium",
+                  description.length > DESCRIPTION_MAX_LENGTH
+                    ? "text-red-600"
+                    : "text-slate-400",
+                )}
+              >
+                {description.length}/{DESCRIPTION_MAX_LENGTH}
+              </span>
+            </label>
+
+            <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 p-4">
+              <div className="flex items-start gap-3">
+                <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-md bg-white text-main-10">
+                  <ImagePlus className="size-5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-slate-900">
+                    썸네일 업로드
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    포트폴리오 전용 업로드 API 준비 중입니다. 파일 선택은
+                    미리보기만 제공하며, 저장 시 첫 번째 선택 프로젝트의
+                    썸네일을 사용합니다.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-[132px_1fr]">
+                <div className="h-24 overflow-hidden rounded-md bg-white">
+                  {thumbnailPreviewUrl ? (
+                    <div
+                      aria-label="선택한 썸네일 미리보기"
+                      className="size-full bg-cover bg-center"
+                      role="img"
+                      style={{ backgroundImage: `url(${thumbnailPreviewUrl})` }}
+                    />
+                  ) : defaultThumbnailUrl ? (
+                    <div
+                      aria-label="저장에 사용할 프로젝트 썸네일"
+                      className="size-full bg-cover bg-center"
+                      role="img"
+                      style={{ backgroundImage: `url(${defaultThumbnailUrl})` }}
+                    />
+                  ) : (
+                    <div className="flex size-full items-center justify-center text-slate-300">
+                      <Grid2X2 className="size-7" aria-hidden="true" />
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
+                    <UploadCloud className="size-4" aria-hidden="true" />
+                    파일 선택
+                    <input
+                      type="file"
+                      accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                      onChange={handleThumbnailInputChange}
+                      className="sr-only"
+                    />
+                  </label>
+                  <p className="mt-3 text-sm leading-6 text-slate-500">
+                    {thumbnailFileName
+                      ? `${thumbnailFileName} 미리보기 중`
+                      : defaultThumbnailUrl
+                        ? "첫 번째 선택 프로젝트 썸네일이 저장에 사용됩니다."
+                        : "저장할 썸네일이 아직 없습니다."}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-5 mt-8">
             <h2 className="text-base font-extrabold text-slate-950">
               템플릿 선택
             </h2>
@@ -408,10 +677,17 @@ export function PortfolioBuilder({
         </Panel>
       </section>
 
-      {notice && (
+      {(formError || notice) && (
         <div className="mx-auto mt-4 w-full max-w-[1504px] px-8">
-          <p className="rounded-md border border-main-20 bg-main-22 px-4 py-3 text-sm font-medium text-main-10">
-            {notice}
+          <p
+            className={cn(
+              "rounded-md border px-4 py-3 text-sm font-medium",
+              formError
+                ? "border-red-100 bg-red-50 text-red-700"
+                : "border-main-20 bg-main-22 text-main-10",
+            )}
+          >
+            {formError || notice}
           </p>
         </div>
       )}
@@ -420,24 +696,20 @@ export function PortfolioBuilder({
         <div className="mx-auto flex w-full max-w-[1504px] flex-col gap-3 px-8 py-4 sm:flex-row sm:justify-end">
           <button
             type="button"
-            onClick={handleTemporarySave}
-            className="h-12 rounded-md border border-slate-200 bg-white px-10 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
-          >
-            임시 저장
-          </button>
-          <button
-            type="button"
             onClick={() => setIsPreviewOpen(true)}
+            disabled={isSaving}
             className="h-12 rounded-md border border-main-20 bg-main-22 px-10 text-sm font-bold text-main-10 transition hover:bg-main-20"
           >
             미리보기
           </button>
           <button
             type="button"
-            onClick={handleNextStep}
-            className="h-12 rounded-md bg-slate-900 px-14 text-sm font-bold text-white transition hover:bg-slate-800"
+            onClick={handlePrivateSave}
+            disabled={isSaving}
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-slate-900 px-14 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
           >
-            다음 단계로
+            {isSaving && <Loader2 className="size-4 animate-spin" />}
+            {isSaving ? "저장 중" : "비공개 저장"}
           </button>
         </div>
       </section>
