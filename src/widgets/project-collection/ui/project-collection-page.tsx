@@ -274,23 +274,25 @@ export function ProjectCollectionPage({
               <div className="inline-flex h-11 rounded-lg bg-slate-100 p-1">
                 <Link
                   href={getProjectsHref({ ...query, page: 0 }, "grid")}
+                  aria-label="그리드 뷰"
+                  title="그리드 뷰"
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-md px-3 text-sm font-bold text-slate-500",
+                    "inline-flex size-9 items-center justify-center rounded-md text-slate-500",
                     viewMode === "grid" && "bg-white text-main-10 shadow-sm",
                   )}
                 >
                   <Grid2X2 className="size-4" aria-hidden="true" />
-                  그리드 뷰
                 </Link>
                 <Link
                   href={getProjectsHref({ ...query, page: 0 }, "list")}
+                  aria-label="리스트 뷰"
+                  title="리스트 뷰"
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-md px-3 text-sm font-bold text-slate-500",
+                    "inline-flex size-9 items-center justify-center rounded-md text-slate-500",
                     viewMode === "list" && "bg-white text-main-10 shadow-sm",
                   )}
                 >
                   <List className="size-4" aria-hidden="true" />
-                  리스트 뷰
                 </Link>
               </div>
             </div>
