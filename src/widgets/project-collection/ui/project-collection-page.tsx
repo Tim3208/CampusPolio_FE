@@ -347,7 +347,7 @@ function ProjectCollectionSidebar({
   viewMode: ViewMode;
 }) {
   return (
-    <aside className="sticky top-20 hidden h-[calc(100vh-5rem)] w-56 shrink-0 flex-col py-3 lg:flex">
+    <aside className="sticky top-20 hidden h-[calc(100vh-5rem)] w-56 shrink-0 flex-col overflow-y-auto overscroll-contain py-3 pr-2 lg:flex">
       <div className="space-y-1">
         <p className="text-xl font-extrabold text-main-02">삼육 아카이브</p>
         <p className="text-xs font-semibold text-slate-400">프로젝트 저장소</p>
@@ -456,7 +456,7 @@ function ProjectCollectionSidebar({
         </div>
       </div>
 
-      <div className="mt-auto space-y-3 text-sm font-bold text-slate-400">
+      <div className="mt-4 space-y-3 text-sm font-bold text-slate-400">
         <span className="flex items-center gap-3">
           <Settings className="size-4" aria-hidden="true" />
           설정
