@@ -9,9 +9,17 @@
     {
       "url": "https://api.campuspolio.cloud",
       "description": "Production Server"
+    },
+    {
+      "url": "http://localhost:8080",
+      "description": "Local Server"
     }
   ],
   "tags": [
+    {
+      "name": "Project Query",
+      "description": "프로젝트 조회 API"
+    },
     {
       "name": "Profile",
       "description": "프로필 API"
@@ -29,6 +37,10 @@
       "description": "포트폴리오 API"
     },
     {
+      "name": "Home",
+      "description": "메인 페이지 API"
+    },
+    {
       "name": "My Project",
       "description": "내 프로젝트 조회 API"
     },
@@ -43,19 +55,26 @@
     {
       "name": "Auth",
       "description": "로그인/로그아웃 API"
+    },
+    {
+      "name": "Project Review",
+      "description": "AI 코드 리뷰"
     }
   ],
   "paths": {
     "/api/projects": {
       "get": {
         "tags": [
-          "project-query-controller"
+          "Project Query"
         ],
+        "summary": "프로젝트 검색",
+        "description": "키워드, 태그, 정렬 조건을 이용하여 공개된 프로젝트를 검색합니다.",
         "operationId": "search",
         "parameters": [
           {
             "name": "keyword",
             "in": "query",
+            "description": "검색 키워드",
             "required": false,
             "schema": {
               "type": "string"
@@ -64,6 +83,7 @@
           {
             "name": "tags",
             "in": "query",
+            "description": "태그 목록",
             "required": false,
             "schema": {
               "type": "array",
@@ -75,6 +95,7 @@
           {
             "name": "page",
             "in": "query",
+            "description": "페이지 번호 (0부터 시작)",
             "required": false,
             "schema": {
               "type": "integer",
@@ -85,6 +106,7 @@
           {
             "name": "size",
             "in": "query",
+            "description": "페이지 크기",
             "required": false,
             "schema": {
               "type": "integer",
@@ -95,6 +117,7 @@
           {
             "name": "filterType",
             "in": "query",
+            "description": "정렬 조건 (LATEST, POPULAR)",
             "required": false,
             "schema": {
               "type": "string",
@@ -143,6 +166,38 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseProjectCreateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{projectId}/review": {
+      "post": {
+        "tags": [
+          "Project Review"
+        ],
+        "summary": "AI 코드 리뷰",
+        "operationId": "reviewProject",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProjectReviewResponse"
                 }
               }
             }
@@ -818,6 +873,39 @@
       }
     },
     "/api/projects/{projectId}": {
+      "get": {
+        "tags": [
+          "Project Query"
+        ],
+        "summary": "프로젝트 상세 조회",
+        "description": "프로젝트 ID를 이용하여 프로젝트 상세 정보를 조회합니다.",
+        "operationId": "getProjectDetail",
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "조회할 프로젝트 ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProjectDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      },
       "patch": {
         "tags": [
           "Project"
@@ -1519,8 +1607,10 @@
     "/api/home": {
       "get": {
         "tags": [
-          "home-controller"
+          "Home"
         ],
+        "summary": "메인 페이지 조회",
+        "description": "메인 페이지에 표시할 주요 프로젝트, 인기 프로젝트, 최신 프로젝트 등의 정보를 조회합니다.",
         "operationId": "getHome",
         "responses": {
           "200": {
@@ -1610,6 +1700,123 @@
           "projectId": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "ApiResponseProjectReviewResponse": {
+        "type": "object",
+        "description": "공통 API 응답 형식",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "요청 성공 여부",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProjectReviewResponse",
+            "description": "응답 데이터"
+          }
+        }
+      },
+      "ProjectReviewResponse": {
+        "type": "object",
+        "properties": {
+          "totalScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReviewCategory"
+            }
+          },
+          "criticalIssues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReviewIssue"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReviewIssue"
+            }
+          },
+          "strengths": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReviewStrength"
+            }
+          },
+          "interviewQuestions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "refactoringSuggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefactoringSuggestion"
+            }
+          }
+        }
+      },
+      "RefactoringSuggestion": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "exampleCode": {
+            "type": "string"
+          }
+        }
+      },
+      "ReviewCategory": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comment": {
+            "type": "string"
+          }
+        }
+      },
+      "ReviewIssue": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "solution": {
+            "type": "string"
+          }
+        }
+      },
+      "ReviewStrength": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
           }
         }
       },
@@ -2530,6 +2737,109 @@
         }
       },
       "ProjectUserResponse": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "OWNER",
+              "MEMBER"
+            ]
+          }
+        }
+      },
+      "ApiResponseProjectDetailResponse": {
+        "type": "object",
+        "description": "공통 API 응답 형식",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "요청 성공 여부",
+            "example": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProjectDetailResponse",
+            "description": "응답 데이터"
+          }
+        }
+      },
+      "ProjectDetailFileResponse": {
+        "type": "object",
+        "properties": {
+          "fileId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "originalName": {
+            "type": "string"
+          },
+          "fileUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "ProjectDetailResponse": {
+        "type": "object",
+        "properties": {
+          "projectId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "thumbnailUrl": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectDetailUserResponse"
+            }
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectDetailFileResponse"
+            }
+          },
+          "viewCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "likeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "isLiked": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProjectDetailUserResponse": {
         "type": "object",
         "properties": {
           "userId": {

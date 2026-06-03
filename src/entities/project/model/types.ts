@@ -155,6 +155,7 @@ export type ProjectSearchFilterType = "LATEST" | "VIEW_COUNT"
 export type ProjectSearchUser = {
   userId: number
   name: string
+  role: "OWNER" | "MEMBER"
 }
 
 export type ProjectSearchItem = {

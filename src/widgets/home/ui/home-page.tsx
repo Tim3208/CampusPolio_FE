@@ -1,18 +1,24 @@
-"use client"
+"use client";
 
-import { useMemo, useState } from "react"
-import Link from "next/link"
-import { ArrowRight, ChevronLeft, ChevronRight, Eye, Heart } from "lucide-react"
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import {
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Heart,
+} from "lucide-react";
 
-import type { HomeData, HomeProject } from "@/entities/project"
-import { appRoutes, getProjectDetailPath } from "@/shared/config"
+import type { HomeData, HomeProject } from "@/entities/project";
+import { appRoutes, getProjectDetailPath } from "@/shared/config";
 
 type HomePageProps = {
-  data?: HomeData
-  errorMessage?: string
-}
+  data?: HomeData;
+  errorMessage?: string;
+};
 
-const allCategoryLabel = "전체"
+const allCategoryLabel = "전체";
 
 /**
  * 조회수를 사용자가 읽기 쉬운 짧은 숫자 표기로 변환한다.
@@ -21,10 +27,10 @@ const allCategoryLabel = "전체"
  */
 function formatCount(count: number) {
   if (count >= 1000) {
-    return `${(count / 1000).toFixed(count >= 10000 ? 0 : 1)}k`
+    return `${(count / 1000).toFixed(count >= 10000 ? 0 : 1)}k`;
   }
 
-  return String(count)
+  return String(count);
 }
 
 /**
@@ -33,49 +39,55 @@ function formatCount(count: number) {
  * @returns projectId 기준으로 중복이 제거된 프로젝트 목록
  */
 function getUniqueCategoryProjects(data?: HomeData) {
-  const projects = data?.categories.flatMap((category) => category.projects) ?? []
-  const projectMap = new Map<number, HomeProject>()
+  const projects =
+    data?.categories.flatMap((category) => category.projects) ?? [];
+  const projectMap = new Map<number, HomeProject>();
 
   projects.forEach((project) => {
-    projectMap.set(project.projectId, project)
-  })
+    projectMap.set(project.projectId, project);
+  });
 
-  return Array.from(projectMap.values())
+  return Array.from(projectMap.values());
 }
 
 export function HomePage({ data, errorMessage }: HomePageProps) {
-  const [slideIndex, setSlideIndex] = useState(0)
-  const [selectedCategory, setSelectedCategory] = useState(allCategoryLabel)
+  const [slideIndex, setSlideIndex] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState(allCategoryLabel);
   const categoryLabels = useMemo(
     () => [
       allCategoryLabel,
       ...(data?.categories.map((category) => category.tag) ?? []),
     ],
-    [data?.categories]
-  )
-  const categoryProjects = useMemo(() => getUniqueCategoryProjects(data), [data])
+    [data?.categories],
+  );
+  const categoryProjects = useMemo(
+    () => getUniqueCategoryProjects(data),
+    [data],
+  );
   const filteredFeaturedProjects =
     selectedCategory === allCategoryLabel
-      ? data?.popularProjects ?? []
-      : data?.categories.find((category) => category.tag === selectedCategory)
-          ?.projects ?? []
+      ? (data?.popularProjects ?? [])
+      : (data?.categories.find((category) => category.tag === selectedCategory)
+          ?.projects ?? []);
   const projects =
-    categoryProjects.length > 0 ? categoryProjects : data?.popularProjects ?? []
-  const maxSlideIndex = Math.max(filteredFeaturedProjects.length - 3, 0)
-  const totalProjectCount = projects.length
+    categoryProjects.length > 0
+      ? categoryProjects
+      : (data?.popularProjects ?? []);
+  const maxSlideIndex = Math.max(filteredFeaturedProjects.length - 3, 0);
+  const totalProjectCount = projects.length;
 
   const handlePrev = () => {
-    setSlideIndex((prev) => Math.max(prev - 1, 0))
-  }
+    setSlideIndex((prev) => Math.max(prev - 1, 0));
+  };
 
   const handleNext = () => {
-    setSlideIndex((prev) => Math.min(prev + 1, maxSlideIndex))
-  }
+    setSlideIndex((prev) => Math.min(prev + 1, maxSlideIndex));
+  };
 
   const handleCategoryClick = (category: string) => {
-    setSelectedCategory(category)
-    setSlideIndex(0)
-  }
+    setSelectedCategory(category);
+    setSlideIndex(0);
+  };
 
   return (
     <main className="min-h-screen bg-[#F5F8FB]">
@@ -91,7 +103,7 @@ export function HomePage({ data, errorMessage }: HomePageProps) {
 
             <div className="flex items-center gap-3">
               <Link
-                href={appRoutes.home}
+                href={appRoutes.projects}
                 className="inline-flex items-center gap-1 text-xs font-semibold text-[#005E9C]"
               >
                 전체 컬렉션 보기
@@ -138,7 +150,10 @@ export function HomePage({ data, errorMessage }: HomePageProps) {
           </div>
 
           {errorMessage ? (
-            <HomeNotice message={errorMessage} title="프로젝트를 불러오지 못했습니다" />
+            <HomeNotice
+              message={errorMessage}
+              title="프로젝트를 불러오지 못했습니다"
+            />
           ) : filteredFeaturedProjects.length > 0 ? (
             <div className="overflow-hidden">
               <div
@@ -168,7 +183,10 @@ export function HomePage({ data, errorMessage }: HomePageProps) {
           </div>
 
           {errorMessage ? (
-            <HomeNotice message={errorMessage} title="프로젝트 목록을 불러오지 못했습니다" />
+            <HomeNotice
+              message={errorMessage}
+              title="프로젝트 목록을 불러오지 못했습니다"
+            />
           ) : projects.length > 0 ? (
             <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
               {projects.map((project) => (
@@ -215,7 +233,9 @@ export function HomePage({ data, errorMessage }: HomePageProps) {
               <div className="absolute h-32 w-32 rounded-full bg-white/10" />
 
               <div className="z-10 text-center">
-                <p className="text-3xl font-bold">{data?.popularProjects.length ?? 0}</p>
+                <p className="text-3xl font-bold">
+                  {data?.popularProjects.length ?? 0}
+                </p>
                 <p className="text-xs text-blue-100">POPULAR</p>
 
                 <div className="my-4 h-px bg-white/30" />
@@ -240,21 +260,23 @@ export function HomePage({ data, errorMessage }: HomePageProps) {
         </div>
       </footer>
     </main>
-  )
+  );
 }
 
 type HomeNoticeProps = {
-  title?: string
-  message: string
-}
+  title?: string;
+  message: string;
+};
 
 function HomeNotice({ message, title }: HomeNoticeProps) {
   return (
     <div className="rounded-md bg-white p-10 text-center">
-      {title ? <p className="mb-2 text-base font-bold text-slate-900">{title}</p> : null}
+      {title ? (
+        <p className="mb-2 text-base font-bold text-slate-900">{title}</p>
+      ) : null}
       <p className="text-sm text-slate-500">{message}</p>
     </div>
-  )
+  );
 }
 
 function FeaturedCard({ project }: { project: HomeProject }) {
@@ -294,7 +316,7 @@ function FeaturedCard({ project }: { project: HomeProject }) {
         </div>
       </div>
     </article>
-  )
+  );
 }
 
 function ProjectCard({ project }: { project: HomeProject }) {
@@ -336,20 +358,20 @@ function ProjectCard({ project }: { project: HomeProject }) {
         <ProjectStats project={project} />
       </div>
     </article>
-  )
+  );
 }
 
 function ProjectStats({
   project,
   variant = "default",
 }: {
-  project: HomeProject
-  variant?: "default" | "featured"
+  project: HomeProject;
+  variant?: "default" | "featured";
 }) {
   const className =
     variant === "featured"
       ? "mt-4 flex items-center gap-4 text-xs text-white/80"
-      : "mt-4 flex items-center gap-4 text-xs text-slate-500"
+      : "mt-4 flex items-center gap-4 text-xs text-slate-500";
 
   return (
     <div className={className}>
@@ -363,5 +385,5 @@ function ProjectStats({
         {formatCount(project.viewCount)}
       </span>
     </div>
-  )
+  );
 }

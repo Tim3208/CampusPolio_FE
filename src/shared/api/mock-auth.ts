@@ -5,8 +5,7 @@ import type { ApiResponse } from "./types"
 type MockUser = {
   id: number
   email: string
-  isDomainValid: boolean
-  isVerified: boolean
+  universityVerified: boolean
 }
 
 type MockProject = {
@@ -59,6 +58,7 @@ type MockProjectSearchItem = {
   users: Array<{
     userId: number
     name: string
+    role: "OWNER" | "MEMBER"
   }>
   viewCount: number
   likeCount: number
@@ -77,20 +77,17 @@ const mockUsers: Record<AuthMockState, MockUser> = {
   unverified: {
     id: 1,
     email: "user@syu.ac.kr",
-    isDomainValid: true,
-    isVerified: false,
+    universityVerified: false,
   },
   verified: {
     id: 1,
     email: "user@syu.ac.kr",
-    isDomainValid: true,
-    isVerified: true,
+    universityVerified: true,
   },
   "invalid-domain": {
     id: 1,
     email: "user@gmail.com",
-    isDomainValid: false,
-    isVerified: false,
+    universityVerified: false,
   },
 }
 
@@ -253,7 +250,7 @@ function getMockUser() {
   if (mockConfig.authState === "unverified" && mockEmailVerified) {
     return {
       ...mockUsers.unverified,
-      isVerified: true,
+      universityVerified: true,
     }
   }
 
@@ -336,6 +333,7 @@ function toMockProjectSearchItem(project: MockProject): MockProjectSearchItem {
         name: mockProjectAuthors[
           (project.projectId - 1) % mockProjectAuthors.length
         ],
+        role: "OWNER",
       },
     ],
     viewCount: 300 + project.projectId * 211,
@@ -505,7 +503,7 @@ function getMockEmailValidationError(body: unknown) {
     }
   }
 
-  if (getMockUser().isVerified) {
+  if (getMockUser().universityVerified) {
     return {
       success: false,
       message: "이미 학교 이메일 인증이 완료되었습니다.",

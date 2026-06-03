@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { type FormEvent, type ReactNode, useMemo, useState } from "react"
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { type FormEvent, type ReactNode, useMemo, useState } from "react";
 import {
   BookOpen,
   Building2,
@@ -13,31 +13,30 @@ import {
   Heart,
   ImageIcon,
   List,
-  Mail,
   Palette,
   Search,
   Settings,
-  Share2,
   Upload,
   UsersRound,
-} from "lucide-react"
+} from "lucide-react";
 
 import type {
   ProjectSearchFilterType,
   ProjectSearchItem,
   ProjectSearchPage,
   ProjectSearchQuery,
-} from "@/entities/project"
-import { appRoutes, getProjectDetailPath } from "@/shared/config"
-import { cn } from "@/shared/lib/utils"
+} from "@/entities/project";
+import { appRoutes, getProjectDetailPath } from "@/shared/config";
+import { cn } from "@/shared/lib/utils";
 
 type ProjectCollectionPageProps = {
-  errorMessage?: string
-  projectsPage: ProjectSearchPage
-  query: ProjectSearchQuery
-}
+  errorMessage?: string;
+  projectsPage: ProjectSearchPage;
+  query: ProjectSearchQuery;
+  viewMode: ViewMode;
+};
 
-type ViewMode = "grid" | "list"
+type ViewMode = "grid" | "list";
 
 const featuredTags = [
   { icon: Palette, label: "시각 디자인" },
@@ -45,38 +44,47 @@ const featuredTags = [
   { icon: BookOpen, label: "신학" },
   { icon: UsersRound, label: "공학" },
   { icon: ImageIcon, label: "인문학" },
-] as const
+] as const;
 
-const quickTags = ["졸업작품", "논문", "디자인", "역사"] as const
+const quickTags = ["졸업작품", "논문", "디자인", "역사"] as const;
 
 /**
  * 프로젝트 검색 URL을 생성한다.
  * @param query 검색 조건
  * @returns 프로젝트 모음 페이지 경로
  */
-function getProjectsHref(query: ProjectSearchQuery) {
-  const params = new URLSearchParams()
+function getProjectsHref(
+  query: ProjectSearchQuery,
+  viewMode: ViewMode = "grid",
+) {
+  const params = new URLSearchParams();
 
   if (query.keyword?.trim()) {
-    params.set("keyword", query.keyword.trim())
+    params.set("keyword", query.keyword.trim());
   }
 
   query.tags
     ?.map((tag) => tag.trim())
     .filter(Boolean)
-    .forEach((tag) => params.append("tags", tag))
+    .forEach((tag) => params.append("tags", tag));
 
   if (query.page && query.page > 0) {
-    params.set("page", String(query.page))
+    params.set("page", String(query.page));
   }
 
   if (query.filterType && query.filterType !== "LATEST") {
-    params.set("filterType", query.filterType)
+    params.set("filterType", query.filterType);
   }
 
-  const queryString = params.toString()
+  if (viewMode === "list") {
+    params.set("view", viewMode);
+  }
 
-  return queryString ? `${appRoutes.projects}?${queryString}` : appRoutes.projects
+  const queryString = params.toString();
+
+  return queryString
+    ? `${appRoutes.projects}?${queryString}`
+    : appRoutes.projects;
 }
 
 /**
@@ -88,7 +96,7 @@ function getProjectsHref(query: ProjectSearchQuery) {
 function toggleTag(tags: string[] = [], tag: string) {
   return tags.includes(tag)
     ? tags.filter((currentTag) => currentTag !== tag)
-    : [...tags, tag]
+    : [...tags, tag];
 }
 
 /**
@@ -99,33 +107,33 @@ function toggleTag(tags: string[] = [], tag: string) {
  */
 function getPaginationItems(currentPage: number, totalPages: number) {
   if (totalPages <= 7) {
-    return Array.from({ length: totalPages }, (_, page) => page)
+    return Array.from({ length: totalPages }, (_, page) => page);
   }
 
-  const pages = new Set([0, totalPages - 1, currentPage])
+  const pages = new Set([0, totalPages - 1, currentPage]);
 
   if (currentPage > 0) {
-    pages.add(currentPage - 1)
+    pages.add(currentPage - 1);
   }
 
   if (currentPage < totalPages - 1) {
-    pages.add(currentPage + 1)
+    pages.add(currentPage + 1);
   }
 
-  const sortedPages = Array.from(pages).sort((first, second) => first - second)
-  const items: Array<number | "ellipsis"> = []
+  const sortedPages = Array.from(pages).sort((first, second) => first - second);
+  const items: Array<number | "ellipsis"> = [];
 
   sortedPages.forEach((page, index) => {
-    const previousPage = sortedPages[index - 1]
+    const previousPage = sortedPages[index - 1];
 
     if (index > 0 && page - previousPage > 1) {
-      items.push("ellipsis")
+      items.push("ellipsis");
     }
 
-    items.push(page)
-  })
+    items.push(page);
+  });
 
-  return items
+  return items;
 }
 
 /**
@@ -135,10 +143,10 @@ function getPaginationItems(currentPage: number, totalPages: number) {
  */
 function formatCount(count: number) {
   if (count >= 1000) {
-    return `${(count / 1000).toFixed(count >= 10000 ? 0 : 1)}k`
+    return `${(count / 1000).toFixed(count >= 10000 ? 0 : 1)}k`;
   }
 
-  return String(count)
+  return String(count);
 }
 
 /**
@@ -147,7 +155,7 @@ function formatCount(count: number) {
  * @returns 작성자 이름 또는 기본 문구
  */
 function getProjectAuthorName(project: ProjectSearchItem) {
-  return project.users[0]?.name ?? "작성자 정보 없음"
+  return project.users[0]?.name ?? "작성자 정보 없음";
 }
 
 /**
@@ -159,33 +167,36 @@ export function ProjectCollectionPage({
   errorMessage,
   projectsPage,
   query,
+  viewMode,
 }: ProjectCollectionPageProps) {
-  const router = useRouter()
-  const [viewMode, setViewMode] = useState<ViewMode>("grid")
-  const [keyword, setKeyword] = useState(query.keyword ?? "")
-  const [selectedYear, setSelectedYear] = useState("2024")
-  const [selectedTerms, setSelectedTerms] = useState<string[]>(["1"])
-  const currentTags = query.tags ?? []
-  const currentPage = projectsPage.page
+  const router = useRouter();
+  const [keyword, setKeyword] = useState(query.keyword ?? "");
+  const [selectedYear, setSelectedYear] = useState("2024");
+  const [selectedTerms, setSelectedTerms] = useState<string[]>(["1"]);
+  const currentTags = query.tags ?? [];
+  const currentPage = projectsPage.page;
   const pageItems = useMemo(
     () => getPaginationItems(currentPage, projectsPage.totalPages),
-    [currentPage, projectsPage.totalPages]
-  )
+    [currentPage, projectsPage.totalPages],
+  );
 
   /**
    * 검색어를 URL query에 반영한다.
    * @param event 검색 폼 제출 이벤트
    */
   function handleSearch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+    event.preventDefault();
 
     router.push(
-      getProjectsHref({
-        ...query,
-        keyword,
-        page: 0,
-      })
-    )
+      getProjectsHref(
+        {
+          ...query,
+          keyword,
+          page: 0,
+        },
+        viewMode,
+      ),
+    );
   }
 
   /**
@@ -196,8 +207,8 @@ export function ProjectCollectionPage({
     setSelectedTerms((currentTerms) =>
       currentTerms.includes(term)
         ? currentTerms.filter((currentTerm) => currentTerm !== term)
-        : [...currentTerms, term]
-    )
+        : [...currentTerms, term],
+    );
   }
 
   return (
@@ -210,15 +221,16 @@ export function ProjectCollectionPage({
           onTermToggle={handleTermToggle}
           onYearChange={setSelectedYear}
           query={query}
+          viewMode={viewMode}
         />
 
-        <section className="min-w-0 flex-1 pb-28">
+        <section className="min-w-0 flex-1 pb-12">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <h1 className="text-5xl font-extrabold leading-tight text-[#171f24]">
+              <h1 className="text-4xl font-extrabold leading-tight text-[#171f24]">
                 프로젝트 모음
               </h1>
-              <p className="mt-4 text-base font-medium text-slate-600">
+              <p className="mt-3 text-sm font-medium text-slate-600">
                 내 프로젝트 모음 아니고 모든 프로젝트 모아져 있는 페이지입니다
               </p>
             </div>
@@ -241,12 +253,15 @@ export function ProjectCollectionPage({
                 value={query.filterType ?? "LATEST"}
                 onChange={(event) =>
                   router.push(
-                    getProjectsHref({
-                      ...query,
-                      filterType: event.target
-                        .value as ProjectSearchFilterType,
-                      page: 0,
-                    })
+                    getProjectsHref(
+                      {
+                        ...query,
+                        filterType: event.target
+                          .value as ProjectSearchFilterType,
+                        page: 0,
+                      },
+                      viewMode,
+                    ),
                   )
                 }
                 className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-600 shadow-sm outline-none"
@@ -257,33 +272,31 @@ export function ProjectCollectionPage({
               </select>
 
               <div className="inline-flex h-11 rounded-lg bg-slate-100 p-1">
-                <button
-                  type="button"
-                  onClick={() => setViewMode("grid")}
+                <Link
+                  href={getProjectsHref({ ...query, page: 0 }, "grid")}
                   className={cn(
                     "inline-flex items-center gap-2 rounded-md px-3 text-sm font-bold text-slate-500",
-                    viewMode === "grid" && "bg-white text-main-10 shadow-sm"
+                    viewMode === "grid" && "bg-white text-main-10 shadow-sm",
                   )}
                 >
                   <Grid2X2 className="size-4" aria-hidden="true" />
                   그리드 뷰
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("list")}
+                </Link>
+                <Link
+                  href={getProjectsHref({ ...query, page: 0 }, "list")}
                   className={cn(
                     "inline-flex items-center gap-2 rounded-md px-3 text-sm font-bold text-slate-500",
-                    viewMode === "list" && "bg-white text-main-10 shadow-sm"
+                    viewMode === "list" && "bg-white text-main-10 shadow-sm",
                   )}
                 >
                   <List className="size-4" aria-hidden="true" />
                   리스트 뷰
-                </button>
+                </Link>
               </div>
             </div>
           </div>
 
-          <div className="mt-12">
+          <div className="mt-8">
             {errorMessage ? (
               <ProjectCollectionNotice
                 message={errorMessage}
@@ -308,13 +321,12 @@ export function ProjectCollectionPage({
             pageItems={pageItems}
             projectsPage={projectsPage}
             query={query}
+            viewMode={viewMode}
           />
         </section>
       </div>
-
-      <ProjectCollectionFooter />
     </main>
-  )
+  );
 }
 
 function ProjectCollectionSidebar({
@@ -324,16 +336,18 @@ function ProjectCollectionSidebar({
   query,
   selectedTerms,
   selectedYear,
+  viewMode,
 }: {
-  currentTags: string[]
-  onTermToggle: (term: string) => void
-  onYearChange: (year: string) => void
-  query: ProjectSearchQuery
-  selectedTerms: string[]
-  selectedYear: string
+  currentTags: string[];
+  onTermToggle: (term: string) => void;
+  onYearChange: (year: string) => void;
+  query: ProjectSearchQuery;
+  selectedTerms: string[];
+  selectedYear: string;
+  viewMode: ViewMode;
 }) {
   return (
-    <aside className="sticky top-20 hidden h-[calc(100vh-5rem)] w-56 shrink-0 flex-col py-3 lg:flex">
+    <aside className="sticky top-20 hidden h-[calc(100vh-5rem)] w-56 shrink-0 flex-col overflow-y-auto overscroll-contain py-3 pr-2 lg:flex">
       <div className="space-y-1">
         <p className="text-xl font-extrabold text-main-02">삼육 아카이브</p>
         <p className="text-xs font-semibold text-slate-400">프로젝트 저장소</p>
@@ -341,7 +355,7 @@ function ProjectCollectionSidebar({
 
       <Link
         href={appRoutes.projectCreate}
-        className="mt-10 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#006DAA] px-4 text-sm font-bold text-white shadow-lg shadow-blue-900/15 transition hover:bg-main-10"
+        className="mt-10 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#006DAA] px-4 py-2 text-sm font-bold text-white shadow-lg shadow-blue-900/15 transition hover:bg-main-10"
       >
         <Upload className="size-4" aria-hidden="true" />
         프로젝트 제출
@@ -349,26 +363,29 @@ function ProjectCollectionSidebar({
 
       <nav className="mt-10 flex flex-col gap-2" aria-label="대표 태그">
         {featuredTags.map(({ icon: Icon, label }) => {
-          const active = currentTags.includes(label)
+          const active = currentTags.includes(label);
 
           return (
             <Link
               key={label}
-              href={getProjectsHref({
-                ...query,
-                page: 0,
-                tags: toggleTag(currentTags, label),
-              })}
+              href={getProjectsHref(
+                {
+                  ...query,
+                  page: 0,
+                  tags: toggleTag(currentTags, label),
+                },
+                viewMode,
+              )}
               className={cn(
                 "inline-flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-bold text-slate-500 transition hover:bg-white hover:text-main-10",
-                active && "bg-white text-main-10"
+                active && "bg-white text-main-10",
               )}
               aria-current={active ? "true" : undefined}
             >
               <Icon className="size-5" aria-hidden="true" />
               {label}
             </Link>
-          )
+          );
         })}
       </nav>
 
@@ -390,7 +407,7 @@ function ProjectCollectionSidebar({
           <p className="text-xs font-bold text-slate-400">학기</p>
           <div className="mt-3 flex gap-2">
             {["1", "2"].map((term) => {
-              const active = selectedTerms.includes(term)
+              const active = selectedTerms.includes(term);
 
               return (
                 <button
@@ -399,12 +416,12 @@ function ProjectCollectionSidebar({
                   onClick={() => onTermToggle(term)}
                   className={cn(
                     "h-8 rounded px-4 text-xs font-bold text-slate-500",
-                    active ? "bg-main-22 text-main-10" : "bg-slate-200"
+                    active ? "bg-main-22 text-main-10" : "bg-slate-200",
                   )}
                 >
                   {term}학기
                 </button>
-              )
+              );
             })}
           </div>
         </div>
@@ -413,30 +430,33 @@ function ProjectCollectionSidebar({
           <p className="text-xs font-bold text-slate-400">태그</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {quickTags.map((tag) => {
-              const active = currentTags.includes(tag)
+              const active = currentTags.includes(tag);
 
               return (
                 <Link
                   key={tag}
-                  href={getProjectsHref({
-                    ...query,
-                    page: 0,
-                    tags: toggleTag(currentTags, tag),
-                  })}
+                  href={getProjectsHref(
+                    {
+                      ...query,
+                      page: 0,
+                      tags: toggleTag(currentTags, tag),
+                    },
+                    viewMode,
+                  )}
                   className={cn(
                     "rounded border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-500",
-                    active && "border-main-20 bg-main-22 text-main-10"
+                    active && "border-main-20 bg-main-22 text-main-10",
                   )}
                 >
                   {tag}
                 </Link>
-              )
+              );
             })}
           </div>
         </div>
       </div>
 
-      <div className="mt-auto space-y-3 text-sm font-bold text-slate-400">
+      <div className="mt-4 space-y-3 text-sm font-bold text-slate-400">
         <span className="flex items-center gap-3">
           <Settings className="size-4" aria-hidden="true" />
           설정
@@ -447,65 +467,17 @@ function ProjectCollectionSidebar({
         </span>
       </div>
     </aside>
-  )
+  );
 }
 
 function ProjectGrid({ projects }: { projects: ProjectSearchItem[] }) {
-  const [firstProject, ...restProjects] = projects
-
   return (
-    <div className="grid grid-cols-1 gap-8 xl:grid-cols-3">
-      {firstProject ? <FeaturedProjectCard project={firstProject} /> : null}
-      {restProjects.map((project) => (
+    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+      {projects.map((project) => (
         <ProjectCard key={project.projectId} project={project} />
       ))}
     </div>
-  )
-}
-
-function FeaturedProjectCard({ project }: { project: ProjectSearchItem }) {
-  return (
-    <Link
-      href={getProjectDetailPath(project.projectId)}
-      className="group overflow-hidden rounded-lg bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md xl:col-span-2"
-    >
-      <ProjectThumbnail project={project} className="h-80" />
-      <div className="px-8 py-8">
-        <div className="flex flex-wrap gap-2">
-          {project.tags.slice(0, 3).map((tag) => (
-            <span
-              key={tag}
-              className="rounded bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-
-        <h2 className="mt-6 text-3xl font-extrabold leading-tight text-[#171f24]">
-          {project.title}
-        </h2>
-        <p className="mt-4 line-clamp-2 text-base font-medium leading-7 text-slate-600">
-          {project.description || "프로젝트 설명이 없습니다."}
-        </p>
-
-        <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-6">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex size-9 items-center justify-center rounded-xl bg-main-22 text-xs font-extrabold text-main-10">
-              {getProjectAuthorName(project).slice(0, 2)}
-            </span>
-            <div>
-              <p className="text-sm font-bold text-slate-800">
-                {getProjectAuthorName(project)}
-              </p>
-              <ProjectStats project={project} />
-            </div>
-          </div>
-          <ChevronRight className="size-6 text-slate-400 transition group-hover:translate-x-1" />
-        </div>
-      </div>
-    </Link>
-  )
+  );
 }
 
 function ProjectCard({ project }: { project: ProjectSearchItem }) {
@@ -514,82 +486,95 @@ function ProjectCard({ project }: { project: ProjectSearchItem }) {
       href={getProjectDetailPath(project.projectId)}
       className="group overflow-hidden rounded-lg bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
     >
-      <ProjectThumbnail project={project} className="h-44" />
-      <div className="px-6 py-6">
-        <p className="text-xs font-extrabold text-main-10">
+      <ProjectThumbnail project={project} className="h-36 sm:h-40" />
+      <div className="px-4 py-4">
+        <p className="truncate text-[11px] font-extrabold text-main-10">
           {project.tags[0] ?? "태그 없음"}
         </p>
-        <h2 className="mt-4 line-clamp-2 min-h-14 text-xl font-extrabold leading-7 text-[#171f24]">
+        <h2 className="mt-3 line-clamp-2 min-h-12 text-lg font-extrabold leading-6 text-[#171f24]">
           {project.title}
         </h2>
-        <p className="mt-3 line-clamp-2 min-h-12 text-sm font-medium leading-6 text-slate-600">
+        <p className="mt-2 line-clamp-2 min-h-10 text-xs font-medium leading-5 text-slate-600">
           {project.description || "프로젝트 설명이 없습니다."}
         </p>
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="mt-3 flex min-h-6 flex-wrap gap-1.5">
           {project.tags.slice(1, 3).map((tag) => (
             <span
               key={tag}
-              className="rounded bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-500"
+              className="rounded bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-500"
             >
               {tag}
             </span>
           ))}
         </div>
-        <div className="mt-7 flex items-center justify-between text-xs font-bold text-slate-400">
-          <span>{getProjectAuthorName(project)}</span>
+        <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs font-bold text-slate-400">
+          <span className="truncate">{getProjectAuthorName(project)}</span>
           <Heart
-            className={cn("size-4", project.isLiked && "fill-current text-main-10")}
+            className={cn(
+              "size-4",
+              project.isLiked && "fill-current text-main-10",
+            )}
             aria-hidden="true"
           />
         </div>
       </div>
     </Link>
-  )
+  );
 }
 
 function ProjectList({ projects }: { projects: ProjectSearchItem[] }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {projects.map((project) => (
         <Link
           key={project.projectId}
           href={getProjectDetailPath(project.projectId)}
-          className="grid gap-5 rounded-lg bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md md:grid-cols-[220px_1fr]"
+          className="grid gap-4 rounded-lg bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md md:grid-cols-[148px_1fr]"
         >
-          <ProjectThumbnail project={project} className="h-44 md:h-full" />
-          <div className="min-w-0 py-2">
-            <p className="text-xs font-extrabold text-main-10">
+          <ProjectThumbnail project={project} className="h-32 md:h-full" />
+          <div className="min-w-0 py-1">
+            <p className="truncate text-[11px] font-extrabold text-main-10">
               {project.tags[0] ?? "태그 없음"}
             </p>
-            <h2 className="mt-3 text-2xl font-extrabold text-[#171f24]">
+            <h2 className="mt-2 line-clamp-1 text-lg font-extrabold text-[#171f24]">
               {project.title}
             </h2>
-            <p className="mt-3 line-clamp-2 text-sm font-medium leading-6 text-slate-600">
+            <p className="mt-2 line-clamp-2 text-xs font-medium leading-5 text-slate-600">
               {project.description || "프로젝트 설명이 없습니다."}
             </p>
-            <div className="mt-5 flex flex-wrap items-center gap-3 text-xs font-bold text-slate-500">
-              <span>{getProjectAuthorName(project)}</span>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {project.tags.slice(1, 4).map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-500"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-bold text-slate-500">
+              <span className="truncate">{getProjectAuthorName(project)}</span>
               <ProjectStats project={project} />
             </div>
           </div>
         </Link>
       ))}
     </div>
-  )
+  );
 }
 
 function ProjectThumbnail({
   className,
   project,
 }: {
-  className: string
-  project: ProjectSearchItem
+  className: string;
+  project: ProjectSearchItem;
 }) {
   return project.thumbnailUrl ? (
     <div
       className={cn(
         "bg-cover bg-center transition duration-500 group-hover:scale-[1.02]",
-        className
+        className,
       )}
       style={{ backgroundImage: `url(${project.thumbnailUrl})` }}
     />
@@ -597,12 +582,12 @@ function ProjectThumbnail({
     <div
       className={cn(
         "flex items-center justify-center bg-main-22 text-main-20",
-        className
+        className,
       )}
     >
       <BookOpen className="size-12" aria-hidden="true" />
     </div>
-  )
+  );
 }
 
 function ProjectStats({ project }: { project: ProjectSearchItem }) {
@@ -611,15 +596,15 @@ function ProjectStats({ project }: { project: ProjectSearchItem }) {
       <span>{formatCount(project.viewCount)} views</span>
       <span>{formatCount(project.likeCount)} likes</span>
     </span>
-  )
+  );
 }
 
 function ProjectCollectionNotice({
   message,
   title,
 }: {
-  message: string
-  title: string
+  message: string;
+  title: string;
 }) {
   return (
     <div className="flex min-h-80 items-center justify-center rounded-lg bg-white px-6 text-center shadow-sm">
@@ -628,7 +613,7 @@ function ProjectCollectionNotice({
         <p className="mt-3 text-sm font-medium text-slate-500">{message}</p>
       </div>
     </div>
-  )
+  );
 }
 
 function ProjectCollectionPagination({
@@ -636,18 +621,20 @@ function ProjectCollectionPagination({
   pageItems,
   projectsPage,
   query,
+  viewMode,
 }: {
-  page: number
-  pageItems: Array<number | "ellipsis">
-  projectsPage: ProjectSearchPage
-  query: ProjectSearchQuery
+  page: number;
+  pageItems: Array<number | "ellipsis">;
+  projectsPage: ProjectSearchPage;
+  query: ProjectSearchQuery;
+  viewMode: ViewMode;
 }) {
   if (projectsPage.totalPages <= 1) {
     return (
       <p className="mt-16 text-center text-xs font-bold text-slate-400">
         {projectsPage.totalElements}개의 프로젝트 표시 중
       </p>
-    )
+    );
   }
 
   return (
@@ -655,7 +642,10 @@ function ProjectCollectionPagination({
       <div className="flex items-center gap-2">
         <PaginationButton
           disabled={page <= 0}
-          href={getProjectsHref({ ...query, page: Math.max(page - 1, 0) })}
+          href={getProjectsHref(
+            { ...query, page: Math.max(page - 1, 0) },
+            viewMode,
+          )}
           label="이전 페이지"
         >
           <ChevronLeft className="size-5" aria-hidden="true" />
@@ -672,26 +662,29 @@ function ProjectCollectionPagination({
           ) : (
             <Link
               key={item}
-              href={getProjectsHref({ ...query, page: item })}
+              href={getProjectsHref({ ...query, page: item }, viewMode)}
               className={cn(
                 "inline-flex size-10 items-center justify-center rounded-xl text-sm font-extrabold text-slate-500",
                 page === item
                   ? "bg-[#006DAA] text-white shadow-lg shadow-blue-900/20"
-                  : "bg-transparent hover:bg-white"
+                  : "bg-transparent hover:bg-white",
               )}
               aria-current={page === item ? "page" : undefined}
             >
               {item + 1}
             </Link>
-          )
+          ),
         )}
 
         <PaginationButton
           disabled={page >= projectsPage.totalPages - 1}
-          href={getProjectsHref({
-            ...query,
-            page: Math.min(page + 1, projectsPage.totalPages - 1),
-          })}
+          href={getProjectsHref(
+            {
+              ...query,
+              page: Math.min(page + 1, projectsPage.totalPages - 1),
+            },
+            viewMode,
+          )}
           label="다음 페이지"
         >
           <ChevronRight className="size-5" aria-hidden="true" />
@@ -704,7 +697,7 @@ function ProjectCollectionPagination({
         표시 중
       </p>
     </div>
-  )
+  );
 }
 
 function PaginationButton({
@@ -713,17 +706,17 @@ function PaginationButton({
   href,
   label,
 }: {
-  children: ReactNode
-  disabled: boolean
-  href: string
-  label: string
+  children: ReactNode;
+  disabled: boolean;
+  href: string;
+  label: string;
 }) {
   if (disabled) {
     return (
       <span className="inline-flex size-10 items-center justify-center rounded-xl bg-white text-slate-300">
         {children}
       </span>
-    )
+    );
   }
 
   return (
@@ -734,37 +727,5 @@ function PaginationButton({
     >
       {children}
     </Link>
-  )
-}
-
-function ProjectCollectionFooter() {
-  return (
-    <footer className="mt-20 border-t border-slate-200 bg-[#edf3f8] px-6 py-10">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 text-xs font-bold text-slate-400 md:flex-row md:items-center md:justify-between">
-        <p>© COPYRIGHT 애써고 저쩌고.. ALL RIGHTS RESERVED.</p>
-        <div className="flex flex-wrap gap-8">
-          <span>대학교 홈페이지</span>
-          <span>아카이브 정책</span>
-          <span>큐레이터 문의</span>
-          <span>디지털 아카이브</span>
-        </div>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            className="inline-flex size-10 items-center justify-center rounded-xl bg-slate-200 text-slate-500"
-            aria-label="공유"
-          >
-            <Share2 className="size-4" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            className="inline-flex size-10 items-center justify-center rounded-xl bg-slate-200 text-slate-500"
-            aria-label="메일"
-          >
-            <Mail className="size-4" aria-hidden="true" />
-          </button>
-        </div>
-      </div>
-    </footer>
-  )
+  );
 }
