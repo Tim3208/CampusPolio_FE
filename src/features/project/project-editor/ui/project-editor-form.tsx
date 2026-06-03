@@ -359,7 +359,6 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
         setTitle(project.title);
         setContent(project.content || project.description);
         setTags(project.tags);
-        setIsPublic(project.isPublic);
         setLoadState("success");
       } catch (error) {
         if (ignore) {
