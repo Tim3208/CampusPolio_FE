@@ -64,7 +64,7 @@ type UploadedProjectAsset = {
 };
 
 type LoadState = "idle" | "loading" | "error" | "success";
-type SavingAction = "draft" | "publish";
+type SavingAction = "draft" | "publish" | "save";
 
 const recommendedTags = [
   "건축학",
@@ -646,7 +646,9 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
     }
 
     if (!isValidProjectTitle(title)) {
-      setNotice(`프로젝트 제목은 최대 ${MAX_PROJECT_TITLE_LENGTH}자까지 입력할 수 있습니다.`);
+      setNotice(
+        `프로젝트 제목은 최대 ${MAX_PROJECT_TITLE_LENGTH}자까지 입력할 수 있습니다.`,
+      );
       return;
     }
 
@@ -681,7 +683,9 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
       }
 
       if (!isValidProjectTitle(title)) {
-        setNotice(`프로젝트 제목은 최대 ${MAX_PROJECT_TITLE_LENGTH}자까지 입력할 수 있습니다.`);
+        setNotice(
+          `프로젝트 제목은 최대 ${MAX_PROJECT_TITLE_LENGTH}자까지 입력할 수 있습니다.`,
+        );
         return;
       }
 
@@ -710,7 +714,29 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
     }
 
     if (!isValidProjectTitle(title)) {
-      setNotice(`프로젝트 제목은 최대 ${MAX_PROJECT_TITLE_LENGTH}자까지 입력할 수 있습니다.`);
+      setNotice(
+        `프로젝트 제목은 최대 ${MAX_PROJECT_TITLE_LENGTH}자까지 입력할 수 있습니다.`,
+      );
+      return;
+    }
+
+    if (mode === "edit") {
+      setSavingAction("save");
+      setNotice("");
+
+      try {
+        await ensureVerifiedUser();
+
+        const targetProjectId = await ensureDraftProjectId();
+
+        await saveProjectDetail(targetProjectId);
+        router.push(appRoutes.mypageProjects);
+      } catch (error) {
+        setDialogError(getProjectEditorDialogError(error));
+      } finally {
+        setSavingAction(null);
+      }
+
       return;
     }
 
@@ -726,6 +752,7 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
       await saveProjectDetail(targetProjectId);
       await publishProject(targetProjectId, {
         content: payload.content,
+        tags: payload.tags,
         title: payload.title,
       });
 
@@ -989,56 +1016,58 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
 
       <aside className="lg:sticky lg:top-24 lg:self-start">
         <div className="rounded-lg bg-white p-8 shadow-lg shadow-slate-200/70 ring-1 ring-slate-200">
-          <button
-            type="button"
-            onClick={() => setIsPublic((currentValue) => !currentValue)}
-            aria-pressed={isPublic}
-            className={cn(
-              "mb-6 flex w-full items-center justify-between gap-4 rounded-lg border px-4 py-4 text-left transition",
-              isPublic
-                ? "border-main-20 bg-main-22 text-main-10"
-                : "border-slate-200 bg-slate-50 text-slate-700",
-            )}
-          >
-            <span className="flex min-w-0 items-center gap-3">
-              <span
-                className={cn(
-                  "inline-flex size-10 shrink-0 items-center justify-center rounded-md",
-                  isPublic ? "bg-white" : "bg-white text-slate-500",
-                )}
-              >
-                {isPublic ? (
-                  <Globe2 className="size-5" aria-hidden="true" />
-                ) : (
-                  <Lock className="size-5" aria-hidden="true" />
-                )}
-              </span>
-              <span className="min-w-0">
-                <span className="block text-sm font-extrabold">
-                  {isPublic ? "공개 등록" : "비공개 저장"}
-                </span>
-                <span className="mt-1 block text-xs font-medium leading-5 text-slate-500">
-                  {isPublic
-                    ? "등록하면 프로젝트 모음에 공개됩니다."
-                    : "내 프로젝트 모음에만 저장됩니다."}
-                </span>
-              </span>
-            </span>
-            <span
+          {mode === "create" ? (
+            <button
+              type="button"
+              onClick={() => setIsPublic((currentValue) => !currentValue)}
+              aria-pressed={isPublic}
               className={cn(
-                "relative h-6 w-11 shrink-0 rounded-full transition",
-                isPublic ? "bg-main-10" : "bg-slate-300",
+                "mb-6 flex w-full items-center justify-between gap-4 rounded-lg border px-4 py-4 text-left transition",
+                isPublic
+                  ? "border-main-20 bg-main-22 text-main-10"
+                  : "border-slate-200 bg-slate-50 text-slate-700",
               )}
-              aria-hidden="true"
             >
+              <span className="flex min-w-0 items-center gap-3">
+                <span
+                  className={cn(
+                    "inline-flex size-10 shrink-0 items-center justify-center rounded-md",
+                    isPublic ? "bg-white" : "bg-white text-slate-500",
+                  )}
+                >
+                  {isPublic ? (
+                    <Globe2 className="size-5" aria-hidden="true" />
+                  ) : (
+                    <Lock className="size-5" aria-hidden="true" />
+                  )}
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-extrabold">
+                    {isPublic ? "공개 등록" : "비공개 저장"}
+                  </span>
+                  <span className="mt-1 block text-xs font-medium leading-5 text-slate-500">
+                    {isPublic
+                      ? "등록하면 프로젝트 모음에 공개됩니다."
+                      : "내 프로젝트 모음에만 저장됩니다."}
+                  </span>
+                </span>
+              </span>
               <span
                 className={cn(
-                  "absolute top-1 size-4 rounded-full bg-white transition",
-                  isPublic ? "left-6" : "left-1",
+                  "relative h-6 w-11 shrink-0 rounded-full transition",
+                  isPublic ? "bg-main-10" : "bg-slate-300",
                 )}
-              />
-            </span>
-          </button>
+                aria-hidden="true"
+              >
+                <span
+                  className={cn(
+                    "absolute top-1 size-4 rounded-full bg-white transition",
+                    isPublic ? "left-6" : "left-1",
+                  )}
+                />
+              </span>
+            </button>
+          ) : null}
 
           <h2 className="text-xl font-extrabold text-slate-950">
             저장 및 등록
@@ -1106,31 +1135,39 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
           )}
 
           <div className="mt-6 space-y-3">
-            <button
-              type="button"
-              disabled={isSaving || isUploading}
-              onClick={handleDraftSave}
-              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-slate-200 px-4 text-base font-bold text-slate-800 transition hover:bg-slate-300 disabled:opacity-50"
-            >
-              <Save className="size-5" aria-hidden="true" />
-              {savingAction === "draft" ? "임시 저장 중..." : "임시 저장"}
-            </button>
+            {mode === "create" ? (
+              <button
+                type="button"
+                disabled={isSaving || isUploading}
+                onClick={handleDraftSave}
+                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-slate-200 px-4 text-base font-bold text-slate-800 transition hover:bg-slate-300 disabled:opacity-50"
+              >
+                <Save className="size-5" aria-hidden="true" />
+                {savingAction === "draft" ? "임시 저장 중..." : "임시 저장"}
+              </button>
+            ) : null}
 
             <button
               type="submit"
               disabled={isSaving || isUploading}
               className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-lg bg-main-10 px-4 text-base font-bold text-white shadow-sm transition hover:bg-main-11 disabled:opacity-50"
             >
-              {isPublic ? (
+              {mode === "edit" ? (
+                <Save className="size-5" aria-hidden="true" />
+              ) : isPublic ? (
                 <UploadCloud className="size-5" aria-hidden="true" />
               ) : (
                 <Lock className="size-5" aria-hidden="true" />
               )}
-              {savingAction === "publish"
+              {savingAction === "save"
+                ? "저장 중..."
+                : savingAction === "publish"
                 ? "등록 중..."
                 : savingAction === "draft" && !isPublic
                   ? "저장 중..."
-                  : isPublic
+                  : mode === "edit"
+                    ? "수정 저장"
+                    : isPublic
                     ? "등록하기"
                     : "비공개 저장"}
             </button>
