@@ -38,7 +38,7 @@ function normalizeProjectSearchItem(
  */
 function createProjectSearchParams(query: ProjectSearchQuery) {
   const params = new URLSearchParams()
-  const { filterType = "LATEST", keyword, page = 0, size = 6, tags = [] } = query
+  const { filterType = "LATEST", keyword, page = 0, size = 9, tags = [] } = query
 
   if (keyword?.trim()) {
     params.set("keyword", keyword.trim())
@@ -66,7 +66,7 @@ export async function searchProjects(
   query: ProjectSearchQuery = {},
   init: Pick<ApiRequestInit, "cache" | "headers"> = {}
 ): Promise<ProjectSearchPage> {
-  const { page = 0, size = 6 } = query
+  const { page = 0, size = 9 } = query
   const params = createProjectSearchParams(query)
   const response = await apiRequest<ProjectSearchApiPage>(
     `${projectsSearchPath}?${params.toString()}` as `/${string}`,

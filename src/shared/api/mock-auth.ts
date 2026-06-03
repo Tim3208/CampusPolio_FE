@@ -59,6 +59,7 @@ type MockProjectSearchItem = {
   users: Array<{
     userId: number
     name: string
+    role: "OWNER" | "MEMBER"
   }>
   viewCount: number
   likeCount: number
@@ -336,6 +337,7 @@ function toMockProjectSearchItem(project: MockProject): MockProjectSearchItem {
         name: mockProjectAuthors[
           (project.projectId - 1) % mockProjectAuthors.length
         ],
+        role: "OWNER",
       },
     ],
     viewCount: 300 + project.projectId * 211,

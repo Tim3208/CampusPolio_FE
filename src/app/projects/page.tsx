@@ -10,7 +10,10 @@ type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
-const projectPageSize = 6
+type ProjectCollectionViewMode = "grid" | "list"
+
+const gridProjectPageSize = 6
+const listProjectPageSize = 9
 
 export const dynamic = "force-dynamic"
 
@@ -65,12 +68,36 @@ function getFilterTypeParam(
 }
 
 /**
+ * URL query의 보기 방식을 프로젝트 모음 화면 값으로 보정한다.
+ * @param value view query 값
+ * @returns 프로젝트 모음 보기 방식
+ */
+function getViewModeParam(
+  value: string | string[] | undefined
+): ProjectCollectionViewMode {
+  const viewMode = getFirstParam(value)
+
+  return viewMode === "list" ? "list" : "grid"
+}
+
+/**
+ * 보기 방식에 맞는 프로젝트 페이지 크기를 반환한다.
+ * @param viewMode 프로젝트 모음 보기 방식
+ * @returns API 요청에 사용할 페이지 크기
+ */
+function getProjectPageSize(viewMode: ProjectCollectionViewMode) {
+  return viewMode === "list" ? listProjectPageSize : gridProjectPageSize
+}
+
+/**
  * 프로젝트 모음 페이지 URL query를 검색 API query로 변환한다.
  * @param params URL searchParams
+ * @param viewMode 프로젝트 모음 보기 방식
  * @returns 프로젝트 검색 조건
  */
 function getProjectSearchQuery(
-  params: Record<string, string | string[] | undefined>
+  params: Record<string, string | string[] | undefined>,
+  viewMode: ProjectCollectionViewMode
 ): ProjectSearchQuery {
   const keyword = getFirstParam(params.keyword)?.trim()
   const tags = getArrayParam(params.tags)
@@ -81,7 +108,7 @@ function getProjectSearchQuery(
     filterType: getFilterTypeParam(params.filterType),
     keyword,
     page: getPageParam(params.page),
-    size: projectPageSize,
+    size: getProjectPageSize(viewMode),
     tags,
   }
 }
@@ -95,7 +122,7 @@ function createEmptyProjectsPage(query: ProjectSearchQuery): ProjectSearchPage {
   return {
     content: [],
     page: query.page ?? 0,
-    size: query.size ?? projectPageSize,
+    size: query.size ?? gridProjectPageSize,
     totalElements: 0,
     totalPages: 0,
   }
@@ -108,7 +135,8 @@ function createEmptyProjectsPage(query: ProjectSearchQuery): ProjectSearchPage {
  */
 export default async function Page({ searchParams }: PageProps) {
   const params = await searchParams
-  const query = getProjectSearchQuery(params)
+  const viewMode = getViewModeParam(params.view)
+  const query = getProjectSearchQuery(params, viewMode)
   let projectsPage: ProjectSearchPage = createEmptyProjectsPage(query)
   let errorMessage: string | undefined
 
@@ -126,6 +154,7 @@ export default async function Page({ searchParams }: PageProps) {
       errorMessage={errorMessage}
       projectsPage={projectsPage}
       query={query}
+      viewMode={viewMode}
     />
   )
 }
