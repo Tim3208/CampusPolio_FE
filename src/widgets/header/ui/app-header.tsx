@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
@@ -72,10 +73,20 @@ export function AppHeader() {
       <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-6">
         <Link
           href={appRoutes.home}
-          className="text-xl font-bold text-[#005E9C]"
+          className="flex min-w-0 items-center gap-2.5"
           aria-label="CampusPolio 홈으로 이동"
         >
-          Campus Polio
+          <Image
+            src="/images/syu_logo.png"
+            alt=""
+            width={42}
+            height={42}
+            className="h-[42px] w-[42px] shrink-0"
+            priority
+          />
+          <span className="text-2xl font-black leading-none text-[#005E9C]">
+            Campus Polio
+          </span>
         </Link>
 
         <div className="flex items-center gap-3">
