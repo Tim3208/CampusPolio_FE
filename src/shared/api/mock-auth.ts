@@ -73,6 +73,17 @@ type MockProjectSearchPage = {
   totalPages: number
 }
 
+type MockProfile = {
+  profileId: number
+  userId: number
+  name: string
+  nickname: string
+  bio: string
+  major: string
+  grade: number | null
+  profileImage: string
+}
+
 const mockUsers: Record<AuthMockState, MockUser> = {
   unverified: {
     id: 1,
@@ -89,6 +100,17 @@ const mockUsers: Record<AuthMockState, MockUser> = {
     email: "user@gmail.com",
     universityVerified: false,
   },
+}
+
+let mockProfile: MockProfile | null = {
+  profileId: 1,
+  userId: 1,
+  name: "홍길동",
+  nickname: "길동이",
+  bio: "캠퍼스폴리오에서 학술 프로젝트를 정리하고 있습니다.",
+  major: "컴퓨터공학과",
+  grade: 4,
+  profileImage: "",
 }
 
 const mockProjects: MockProject[] = [
@@ -653,6 +675,94 @@ function createMockFileUpload(projectId: number, body: unknown) {
 }
 
 /**
+ * mock 프로필 생성 요청을 처리하고 저장된 프로필을 갱신한다.
+ * @param body 프로필 생성 요청 body
+ * @returns 생성 결과
+ */
+function createMockProfile(body: unknown) {
+  const payload = isRecord(body) ? body : {}
+  const nickname =
+    typeof payload.nickname === "string" ? payload.nickname.trim() : ""
+  const bio = typeof payload.bio === "string" ? payload.bio.trim() : ""
+
+  if (!nickname) {
+    return {
+      success: false,
+      message: "닉네임을 입력해주세요.",
+    }
+  }
+
+  mockProfile = {
+    bio,
+    grade: null,
+    major: "",
+    name: "",
+    nickname,
+    profileId: 1,
+    profileImage: "",
+    userId: 1,
+  }
+
+  return {
+    success: true,
+    data: {
+      message: "프로필 생성 완료",
+      profileId: mockProfile.profileId,
+    },
+  }
+}
+
+/**
+ * mock 프로필 수정 요청을 처리하고 저장된 프로필을 갱신한다.
+ * @param body 프로필 수정 요청 body
+ * @returns 수정 결과
+ */
+function updateMockProfile(body: unknown) {
+  const payload = isRecord(body) ? body : {}
+  const currentProfile =
+    mockProfile ??
+    ({
+      bio: "",
+      grade: null,
+      major: "",
+      name: "",
+      nickname: "길동이",
+      profileId: 1,
+      profileImage: "",
+      userId: 1,
+    } satisfies MockProfile)
+
+  mockProfile = {
+    ...currentProfile,
+    bio: typeof payload.bio === "string" ? payload.bio : currentProfile.bio,
+    grade:
+      typeof payload.grade === "number" || payload.grade === null
+        ? payload.grade
+        : currentProfile.grade,
+    major:
+      typeof payload.major === "string" ? payload.major : currentProfile.major,
+    name: typeof payload.name === "string" ? payload.name : currentProfile.name,
+    nickname:
+      typeof payload.nickname === "string"
+        ? payload.nickname
+        : currentProfile.nickname,
+    profileImage:
+      typeof payload.profileImage === "string"
+        ? payload.profileImage
+        : currentProfile.profileImage,
+  }
+
+  return {
+    success: true,
+    data: {
+      message: "프로필 수정 완료",
+      updatedAt: new Date().toISOString(),
+      userId: mockProfile.userId,
+    },
+  }
+}
+
+/**
  * mock mode에서 지원하는 API 응답을 네트워크 요청 없이 반환한다.
  * @param path 요청 API path
  * @param method 요청 HTTP method
@@ -768,6 +878,28 @@ export function resolveMockApiResponse<TData>(
       success: true,
       data: getMockProjectsPage(url) as TData,
     }
+  }
+
+  if (url.pathname === "/api/profile" && normalizedMethod === "GET") {
+    if (!mockProfile) {
+      return {
+        success: false,
+        message: "프로필이 없습니다.",
+      } as ApiResponse<TData>
+    }
+
+    return {
+      success: true,
+      data: mockProfile as TData,
+    }
+  }
+
+  if (url.pathname === "/api/profile" && normalizedMethod === "POST") {
+    return createMockProfile(body) as ApiResponse<TData>
+  }
+
+  if (url.pathname === "/api/profile" && normalizedMethod === "PATCH") {
+    return updateMockProfile(body) as ApiResponse<TData>
   }
 
   if (url.pathname === "/api/projects" && normalizedMethod === "GET") {
