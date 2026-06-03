@@ -23,7 +23,6 @@ export type {
   ProjectDetailUser,
   ProjectDraft,
   ProjectFileUpload,
-  ProjectFileUploadPayload,
   ProjectPublishPayload,
   ProjectPublishResult,
   ProjectReview,

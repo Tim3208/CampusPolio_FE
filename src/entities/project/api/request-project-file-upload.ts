@@ -1,24 +1,24 @@
 import { apiRequest } from "@/shared/api"
 
-import type {
-  ProjectFileUpload,
-  ProjectFileUploadPayload,
-} from "../model/types"
+import type { ProjectFileUpload } from "../model/types"
 
 /**
- * 프로젝트 본문 또는 첨부 파일 업로드용 presigned URL을 요청한다.
+ * 프로젝트 본문 또는 첨부 파일을 업로드한다.
  * @param projectId 파일을 연결할 프로젝트 ID
- * @param payload 업로드할 파일 이름과 MIME 타입
- * @returns 업로드 URL과 공개 파일 URL
+ * @param file 업로드할 파일
+ * @returns 업로드된 파일 ID와 공개 파일 URL
  */
 export async function requestProjectFileUpload(
   projectId: number,
-  payload: ProjectFileUploadPayload
+  file: File
 ) {
+  const formData = new FormData()
+  formData.append("file", file)
+
   const response = await apiRequest<ProjectFileUpload>(
     `/api/projects/${projectId}/files` as `/${string}`,
     {
-      body: payload,
+      body: formData,
       method: "POST",
     }
   )

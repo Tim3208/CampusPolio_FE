@@ -470,26 +470,11 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
     await ensureVerifiedUser();
 
     const targetProjectId = await ensureDraftProjectId();
-    const upload = await requestProjectFileUpload(targetProjectId, {
-      fileName: file.name,
-      fileType: file.type || "application/octet-stream",
-    });
-
-    if (!upload.uploadUrl.startsWith("mock://")) {
-      const uploadResponse = await fetch(upload.uploadUrl, {
-        body: file,
-        headers: file.type ? { "content-type": file.type } : undefined,
-        method: "PUT",
-      });
-
-      if (!uploadResponse.ok) {
-        throw new Error(`${file.name} 업로드에 실패했습니다.`);
-      }
-    }
+    const upload = await requestProjectFileUpload(targetProjectId, file);
 
     return {
       fileUrl: upload.fileUrl,
-      id: `${Date.now()}-${file.name}`,
+      id: `${upload.fileId}-${file.name}`,
       kind: isImageFile(file) ? "image" : "document",
       name: file.name,
       size: file.size,

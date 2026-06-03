@@ -1266,19 +1266,24 @@ function publishMockProject(project: MockProject, body: unknown) {
 }
 
 /**
- * mock 파일 업로드 URL 응답을 만든다.
+ * mock 파일 업로드 응답을 만든다.
  * @param projectId 파일을 연결할 프로젝트 ID
  * @param body API 요청 body
- * @returns mock 업로드 URL과 파일 URL
+ * @returns mock 파일 ID와 파일 URL
  */
 function createMockFileUpload(projectId: number, body: unknown) {
-  const payload = isRecord(body) ? body : {}
+  const formFile =
+    typeof FormData !== "undefined" && body instanceof FormData
+      ? body.get("file")
+      : undefined
   const fileName =
-    typeof payload.fileName === "string" ? payload.fileName : "upload.bin"
+    typeof File !== "undefined" && formFile instanceof File && formFile.name
+      ? formFile.name
+      : "upload.bin"
   const encodedName = encodeURIComponent(fileName)
 
   return {
-    uploadUrl: `mock://projects/${projectId}/files/${encodedName}`,
+    fileId: Date.now(),
     fileUrl: `https://campus-polio.local/mock/projects/${projectId}/${encodedName}`,
   }
 }

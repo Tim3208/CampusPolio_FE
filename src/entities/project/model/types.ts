@@ -87,13 +87,8 @@ export type ProjectUpdateResult = {
   projectId: number
 }
 
-export type ProjectFileUploadPayload = {
-  fileName: string
-  fileType: string
-}
-
 export type ProjectFileUpload = {
-  uploadUrl: string
+  fileId: number
   fileUrl: string
 }
 
