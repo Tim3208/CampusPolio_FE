@@ -1,4 +1,5 @@
 export { MypageAuthGate } from "./ui/mypage-auth-gate"
+export { MypagePortfoliosPage } from "./ui/mypage-portfolios-page"
 export { MypageProjectsPage } from "./ui/mypage-projects-page"
 export { MypageRoutePlaceholder } from "./ui/mypage-route-placeholder"
 export { MypageSettingsPage } from "./ui/mypage-settings-page"

@@ -84,6 +84,36 @@ type MockProfile = {
   profileImage: string
 }
 
+type MockPortfolio = {
+  portfolioId: number
+  title: string
+  slug: string
+  description: string
+  thumbnailUrl: string | null
+  isPublic: boolean
+  projectIds: number[]
+  createdAt: string
+  updatedAt: string
+}
+
+type MockPortfoliosPage = {
+  content: Array<{
+    portfolioId: number
+    title: string
+    slug: string
+    description: string
+    thumbnailUrl: string | null
+    isPublic: boolean
+    projectCount: number
+    createdAt: string
+    updatedAt: string
+  }>
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
 const mockUsers: Record<AuthMockState, MockUser> = {
   unverified: {
     id: 1,
@@ -170,6 +200,33 @@ const mockProjects: MockProject[] = [
     createdAt: "2026-05-12T10:10:00+09:00",
     updatedAt: "2026-05-22T15:20:00+09:00",
     status: "PUBLISHED",
+  },
+]
+
+const mockPortfolios: MockPortfolio[] = [
+  {
+    portfolioId: 1,
+    title: "AI 프로젝트 모음",
+    slug: "ai-projects",
+    description: "AI와 데이터 기반 실험을 정리한 학술 포트폴리오입니다.",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=1200&auto=format&fit=crop",
+    isPublic: true,
+    projectIds: [2, 4],
+    createdAt: "2026-05-21T09:00:00+09:00",
+    updatedAt: "2026-05-30T10:00:00+09:00",
+  },
+  {
+    portfolioId: 2,
+    title: "캠퍼스 디자인 아카이브",
+    slug: "campus-design-archive",
+    description: "공간, 브랜드, 사용자 경험을 다룬 프로젝트를 모았습니다.",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1200&auto=format&fit=crop",
+    isPublic: false,
+    projectIds: [1, 3],
+    createdAt: "2026-05-24T09:00:00+09:00",
+    updatedAt: "2026-05-28T15:30:00+09:00",
   },
 ]
 
@@ -326,6 +383,87 @@ function getMockProjectsPage(url: URL): MockProjectsPage {
     size,
     totalElements: filteredProjects.length,
     totalPages: size === 0 ? 0 : Math.ceil(filteredProjects.length / size),
+  }
+}
+
+/**
+ * mock 포트폴리오 목록을 page, size, isPublic query 기준으로 잘라 반환한다.
+ * @param url 포트폴리오 목록 요청 URL
+ * @returns mock 포트폴리오 목록 페이지
+ */
+function getMockPortfoliosPage(url: URL): MockPortfoliosPage {
+  const page = getNonNegativeQueryNumber(url.searchParams.get("page"), 0)
+  const size = getNonNegativeQueryNumber(url.searchParams.get("size"), 8)
+  const isPublic = url.searchParams.get("isPublic")
+  const filteredPortfolios =
+    isPublic === null
+      ? mockPortfolios
+      : mockPortfolios.filter(
+          (portfolio) => portfolio.isPublic === (isPublic === "true")
+        )
+  const startIndex = page * size
+  const content = filteredPortfolios
+    .slice(startIndex, startIndex + size)
+    .map((portfolio) => ({
+      createdAt: portfolio.createdAt,
+      description: portfolio.description,
+      isPublic: portfolio.isPublic,
+      portfolioId: portfolio.portfolioId,
+      projectCount: portfolio.projectIds.length,
+      slug: portfolio.slug,
+      thumbnailUrl: portfolio.thumbnailUrl,
+      title: portfolio.title,
+      updatedAt: portfolio.updatedAt,
+    }))
+
+  return {
+    content,
+    page,
+    size,
+    totalElements: filteredPortfolios.length,
+    totalPages: size === 0 ? 0 : Math.ceil(filteredPortfolios.length / size),
+  }
+}
+
+/**
+ * slug와 일치하는 mock 포트폴리오를 찾는다.
+ * @param slug 조회할 포트폴리오 slug
+ * @returns mock 포트폴리오 또는 undefined
+ */
+function findMockPortfolioBySlug(slug: string) {
+  return mockPortfolios.find((portfolio) => portfolio.slug === slug)
+}
+
+/**
+ * mock 포트폴리오 상세 응답을 만든다.
+ * @param portfolio 상세로 변환할 mock 포트폴리오
+ * @returns 포트폴리오 상세 응답
+ */
+function getMockPortfolioDetail(portfolio: MockPortfolio) {
+  return {
+    description: portfolio.description,
+    isPublic: portfolio.isPublic,
+    portfolioId: portfolio.portfolioId,
+    projects: portfolio.projectIds
+      .map((projectId, index) => {
+        const project = findMockProject(projectId)
+
+        if (!project) {
+          return undefined
+        }
+
+        return {
+          description: project.description,
+          displayOrder: index,
+          projectId: project.projectId,
+          thumbnailUrl: project.thumbnailUrl,
+          title: project.title,
+        }
+      })
+      .filter((project) => !!project),
+    slug: portfolio.slug,
+    thumbnailUrl: portfolio.thumbnailUrl,
+    title: portfolio.title,
   }
 }
 
@@ -880,6 +1018,16 @@ export function resolveMockApiResponse<TData>(
     }
   }
 
+  if (
+    url.pathname === "/api/users/me/portfolios" &&
+    normalizedMethod === "GET"
+  ) {
+    return {
+      success: true,
+      data: getMockPortfoliosPage(url) as TData,
+    }
+  }
+
   if (url.pathname === "/api/profile" && normalizedMethod === "GET") {
     if (!mockProfile) {
       return {
@@ -913,6 +1061,27 @@ export function resolveMockApiResponse<TData>(
     return {
       success: true,
       data: createMockProjectDraft(body) as TData,
+    }
+  }
+
+  const portfolioSlugMatch = /^\/api\/portfolios\/([^/]+)$/.exec(url.pathname)
+  const portfolioSlug = portfolioSlugMatch
+    ? decodeURIComponent(portfolioSlugMatch[1])
+    : undefined
+
+  if (portfolioSlug && normalizedMethod === "GET") {
+    const portfolio = findMockPortfolioBySlug(portfolioSlug)
+
+    if (!portfolio) {
+      return {
+        success: false,
+        message: "포트폴리오가 없습니다.",
+      } as ApiResponse<TData>
+    }
+
+    return {
+      success: true,
+      data: getMockPortfolioDetail(portfolio) as TData,
     }
   }
 
