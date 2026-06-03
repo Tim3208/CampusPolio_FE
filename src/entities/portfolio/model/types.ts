@@ -79,3 +79,51 @@ export type PortfolioDetailApiResponse = {
   isPublic: boolean
   projects?: PortfolioDetailProjectApiItem[] | null
 }
+
+export type PortfolioCreatePayload = {
+  title: string
+}
+
+export type PortfolioCreateResult = {
+  portfolioId: number
+  slug: string
+}
+
+export type PortfolioUpdatePayload = {
+  description?: string | null
+  thumbnailUrl?: string | null
+  title?: string | null
+}
+
+export type PortfolioUpdateResult = {
+  message?: string
+  portfolioId: number
+  updatedAt?: string
+}
+
+export type PortfolioProjectUpdatePayload = {
+  add: number[]
+  remove: number[]
+}
+
+export type PortfolioProjectUpdateResult = {
+  message?: string
+}
+
+export type PortfolioOrderUpdatePayload = {
+  projectOrder: number[]
+}
+
+export type PortfolioOrderUpdateResult = {
+  message?: string
+}
+
+export type PortfolioVisibilityUpdatePayload = {
+  isPublic: boolean
+}
+
+export type PortfolioVisibilityUpdateResult = {
+  isPublic: boolean
+  message?: string
+  portfolioId: number
+}

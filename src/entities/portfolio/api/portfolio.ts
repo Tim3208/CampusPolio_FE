@@ -6,15 +6,40 @@ import type {
   MyPortfoliosApiPage,
   MyPortfoliosPage,
   MyPortfoliosQuery,
+  PortfolioCreatePayload,
+  PortfolioCreateResult,
   PortfolioDetail,
   PortfolioDetailApiResponse,
   PortfolioDetailProject,
   PortfolioDetailProjectApiItem,
+  PortfolioOrderUpdatePayload,
+  PortfolioOrderUpdateResult,
+  PortfolioProjectUpdatePayload,
+  PortfolioProjectUpdateResult,
+  PortfolioUpdatePayload,
+  PortfolioUpdateResult,
+  PortfolioVisibilityUpdatePayload,
+  PortfolioVisibilityUpdateResult,
 } from "../model/types"
 
 const myPortfoliosPath = "/api/users/me/portfolios"
+const portfoliosPath = "/api/portfolios"
 
 type MyPortfoliosResponse = MyPortfoliosApiPage | MyPortfolioApiItem[]
+
+/**
+ * API 실패 응답을 포트폴리오 도메인 오류로 변환한다.
+ * @param response API 공통 응답
+ * @param fallbackMessage 기본 오류 메시지
+ * @param status HTTP 상태 fallback
+ */
+function throwPortfolioApiError(
+  response: { success: boolean; message?: string },
+  fallbackMessage: string,
+  status: number
+): never {
+  throw new ApiError(response.message ?? fallbackMessage, status, response)
+}
 
 /**
  * 내 포트폴리오 목록 API 항목을 카드 UI에서 사용하는 형태로 정규화한다.
@@ -173,4 +198,154 @@ export async function getPortfolioBySlug(
   }
 
   return normalizePortfolioDetail(response.data)
+}
+
+/**
+ * 포트폴리오를 생성한다.
+ * @param payload 포트폴리오 생성 요청 값
+ * @returns 생성된 포트폴리오 ID와 slug
+ */
+export async function createPortfolio(payload: PortfolioCreatePayload) {
+  const response = await apiRequest<PortfolioCreateResult>(portfoliosPath, {
+    body: payload,
+    method: "POST",
+  })
+
+  if (response.success === false) {
+    throwPortfolioApiError(response, "포트폴리오를 생성하지 못했습니다.", 400)
+  }
+
+  if (!response.data) {
+    throw new Error("포트폴리오 생성 응답이 비어 있습니다.")
+  }
+
+  return response.data
+}
+
+/**
+ * 포트폴리오 기본 정보를 수정한다.
+ * @param portfolioId 수정할 포트폴리오 ID
+ * @param payload 수정 요청 값
+ * @returns 수정 결과
+ */
+export async function updatePortfolio(
+  portfolioId: number,
+  payload: PortfolioUpdatePayload
+) {
+  const response = await apiRequest<PortfolioUpdateResult>(
+    `/api/portfolios/${portfolioId}` as `/${string}`,
+    {
+      body: payload,
+      method: "PATCH",
+    }
+  )
+
+  if (response.success === false) {
+    throwPortfolioApiError(response, "포트폴리오를 수정하지 못했습니다.", 400)
+  }
+
+  if (!response.data) {
+    throw new Error("포트폴리오 수정 응답이 비어 있습니다.")
+  }
+
+  return response.data
+}
+
+/**
+ * 포트폴리오에 연결된 프로젝트 목록을 수정한다.
+ * @param portfolioId 수정할 포트폴리오 ID
+ * @param payload 추가/제거할 프로젝트 ID 목록
+ * @returns 프로젝트 연결 수정 결과
+ */
+export async function updatePortfolioProjects(
+  portfolioId: number,
+  payload: PortfolioProjectUpdatePayload
+) {
+  const response = await apiRequest<PortfolioProjectUpdateResult>(
+    `/api/portfolios/${portfolioId}/projects` as `/${string}`,
+    {
+      body: payload,
+      method: "PATCH",
+    }
+  )
+
+  if (response.success === false) {
+    throwPortfolioApiError(
+      response,
+      "포트폴리오 프로젝트를 수정하지 못했습니다.",
+      400
+    )
+  }
+
+  if (!response.data) {
+    throw new Error("포트폴리오 프로젝트 수정 응답이 비어 있습니다.")
+  }
+
+  return response.data
+}
+
+/**
+ * 포트폴리오 프로젝트 표시 순서를 변경한다.
+ * @param portfolioId 수정할 포트폴리오 ID
+ * @param payload 프로젝트 ID 순서
+ * @returns 순서 변경 결과
+ */
+export async function updatePortfolioOrder(
+  portfolioId: number,
+  payload: PortfolioOrderUpdatePayload
+) {
+  const response = await apiRequest<PortfolioOrderUpdateResult>(
+    `/api/portfolios/${portfolioId}/order` as `/${string}`,
+    {
+      body: payload,
+      method: "PATCH",
+    }
+  )
+
+  if (response.success === false) {
+    throwPortfolioApiError(
+      response,
+      "포트폴리오 프로젝트 순서를 저장하지 못했습니다.",
+      400
+    )
+  }
+
+  if (!response.data) {
+    throw new Error("포트폴리오 프로젝트 순서 응답이 비어 있습니다.")
+  }
+
+  return response.data
+}
+
+/**
+ * 포트폴리오 공개 여부를 변경한다.
+ * @param portfolioId 수정할 포트폴리오 ID
+ * @param payload 공개 여부 값
+ * @returns 공개 상태 변경 결과
+ */
+export async function updatePortfolioVisibility(
+  portfolioId: number,
+  payload: PortfolioVisibilityUpdatePayload
+) {
+  const response = await apiRequest<PortfolioVisibilityUpdateResult>(
+    `/api/portfolios/${portfolioId}/visibility` as `/${string}`,
+    {
+      body: payload,
+      method: "PATCH",
+    }
+  )
+
+  if (response.success === false) {
+    throwPortfolioApiError(
+      response,
+      "포트폴리오 공개 상태를 저장하지 못했습니다.",
+      400
+    )
+  }
+
+  if (!response.data) {
+    throw new Error("포트폴리오 공개 상태 응답이 비어 있습니다.")
+  }
+
+  return response.data
 }

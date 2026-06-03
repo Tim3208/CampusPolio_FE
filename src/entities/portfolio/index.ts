@@ -1,12 +1,30 @@
-export { getMyPortfolios, getPortfolioBySlug } from "./api/portfolio"
+export {
+  createPortfolio,
+  getMyPortfolios,
+  getPortfolioBySlug,
+  updatePortfolio,
+  updatePortfolioOrder,
+  updatePortfolioProjects,
+  updatePortfolioVisibility,
+} from "./api/portfolio"
 export type {
   MyPortfolio,
   MyPortfolioApiItem,
   MyPortfoliosApiPage,
   MyPortfoliosPage,
   MyPortfoliosQuery,
+  PortfolioCreatePayload,
+  PortfolioCreateResult,
   PortfolioDetail,
   PortfolioDetailApiResponse,
   PortfolioDetailProject,
   PortfolioDetailProjectApiItem,
+  PortfolioOrderUpdatePayload,
+  PortfolioOrderUpdateResult,
+  PortfolioProjectUpdatePayload,
+  PortfolioProjectUpdateResult,
+  PortfolioUpdatePayload,
+  PortfolioUpdateResult,
+  PortfolioVisibilityUpdatePayload,
+  PortfolioVisibilityUpdateResult,
 } from "./model/types"
