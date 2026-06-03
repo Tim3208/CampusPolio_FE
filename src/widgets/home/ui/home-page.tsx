@@ -106,7 +106,7 @@ export function HomePage({ data, errorMessage }: HomePageProps) {
                 href={appRoutes.projects}
                 className="inline-flex items-center gap-1 text-xs font-semibold text-[#005E9C]"
               >
-                전체 컬렉션 보기
+                전체 프로젝트 보기
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
               </Link>
 

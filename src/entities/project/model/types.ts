@@ -39,35 +39,16 @@ export type MyProjectApiItem = {
   role?: "OWNER" | "MEMBER" | string
 }
 
-export type ProjectAuthor = {
+export type ProjectDetailUser = {
   userId: number
   name: string
-  profileImage: string
+  role: "OWNER" | "MEMBER"
 }
 
-export type ProjectMember = {
-  userId: number
-  name: string
-}
-
-export type ProjectSection = {
-  sectionId: number
-  title: string
-  content: string
-  imageUrl?: string
-}
-
-export type ProjectResource = {
-  resourceId: number
-  title: string
-  href: string
-}
-
-export type RelatedProject = {
-  projectId: number
-  title: string
-  authorName: string
-  imageUrl: string
+export type ProjectDetailFile = {
+  fileId: number
+  originalName: string
+  fileUrl: string
 }
 
 export type ProjectDetail = {
@@ -75,19 +56,14 @@ export type ProjectDetail = {
   title: string
   description: string
   content: string
-  thumbnailUrl: string
-  author: ProjectAuthor
+  thumbnailUrl: string | null
   tags: string[]
-  members: ProjectMember[]
-  likes: number
-  views: number
+  users: ProjectDetailUser[]
+  files: ProjectDetailFile[]
+  viewCount: number
+  likeCount: number
   isLiked: boolean
-  isPublic: boolean
   createdAt: string
-  updatedAt: string
-  sections: ProjectSection[]
-  resources: ProjectResource[]
-  relatedWorks: RelatedProject[]
 }
 
 export type ProjectDraft = {
