@@ -96,7 +96,7 @@ export type ProjectPublishPayload = {
   title: string
   description?: string
   content: string
-  tags: string[]
+  tags?: string[]
 }
 
 export type ProjectPublishResult = void

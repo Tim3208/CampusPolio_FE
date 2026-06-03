@@ -108,6 +108,7 @@ const departments = [
 type Department = (typeof departments)[number];
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
+const MAX_PROJECT_TITLE_LENGTH = 255;
 const MAX_TAG_COUNT = 10;
 
 /**
@@ -188,6 +189,15 @@ function getMarkdownSummary(content: string) {
     .trim();
 
   return summary.slice(0, 180);
+}
+
+/**
+ * 프로젝트 제목이 API 저장 제한을 만족하는지 확인한다.
+ * @param value 사용자가 입력한 프로젝트 제목
+ * @returns 저장 가능하면 true
+ */
+function isValidProjectTitle(value: string) {
+  return value.trim().length <= MAX_PROJECT_TITLE_LENGTH;
 }
 
 /**
@@ -635,6 +645,11 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
       return;
     }
 
+    if (!isValidProjectTitle(title)) {
+      setNotice(`프로젝트 제목은 최대 ${MAX_PROJECT_TITLE_LENGTH}자까지 입력할 수 있습니다.`);
+      return;
+    }
+
     setSavingAction("draft");
     setNotice("");
 
@@ -665,6 +680,11 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
         return;
       }
 
+      if (!isValidProjectTitle(title)) {
+        setNotice(`프로젝트 제목은 최대 ${MAX_PROJECT_TITLE_LENGTH}자까지 입력할 수 있습니다.`);
+        return;
+      }
+
       setSavingAction("draft");
       setNotice("");
 
@@ -689,6 +709,11 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
       return;
     }
 
+    if (!isValidProjectTitle(title)) {
+      setNotice(`프로젝트 제목은 최대 ${MAX_PROJECT_TITLE_LENGTH}자까지 입력할 수 있습니다.`);
+      return;
+    }
+
     setSavingAction("publish");
     setNotice("");
 
@@ -701,8 +726,6 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
       await saveProjectDetail(targetProjectId);
       await publishProject(targetProjectId, {
         content: payload.content,
-        description: payload.description,
-        tags: payload.tags,
         title: payload.title,
       });
 
@@ -775,6 +798,7 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
                 id="project-title"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
+                maxLength={MAX_PROJECT_TITLE_LENGTH}
                 placeholder="프로젝트 제목을 입력하세요"
                 className="mt-3 h-14 w-full border border-slate-400 bg-white px-3 text-xl font-semibold text-slate-950 outline-none transition focus:border-main-10 focus:ring-2 focus:ring-main-20"
               />
