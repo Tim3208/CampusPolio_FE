@@ -106,6 +106,40 @@ export type ProjectPublishPayload = {
 
 export type ProjectPublishResult = void
 
+export type ReviewCategory = {
+  category: string
+  score: number
+  comment: string
+}
+
+export type ReviewIssue = {
+  title: string
+  description: string
+  solution: string
+}
+
+export type ReviewStrength = {
+  title: string
+  description: string
+}
+
+export type RefactoringSuggestion = {
+  title: string
+  description: string
+  exampleCode: string
+}
+
+export type ProjectReview = {
+  totalScore: number
+  summary: string
+  categories: ReviewCategory[]
+  criticalIssues: ReviewIssue[]
+  warnings: ReviewIssue[]
+  strengths: ReviewStrength[]
+  interviewQuestions: string[]
+  refactoringSuggestions: RefactoringSuggestion[]
+}
+
 export type HomeProject = {
   projectId: number
   title: string

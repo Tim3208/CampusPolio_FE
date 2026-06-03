@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 
 import type { ProjectDetail, ProjectDetailUser } from "@/entities/project"
+import { ProjectReviewPanel } from "@/features/project/project-review"
 import { appRoutes } from "@/shared/config"
 
 type ProjectDetailPageProps = {
@@ -190,6 +191,8 @@ export function ProjectDetailPage({
 
         <aside className="lg:pt-24">
           <div className="sticky top-20 space-y-4">
+            <ProjectReviewPanel projectId={project.projectId} />
+
             <section className="rounded-md bg-white p-4 shadow-sm ring-1 ring-slate-200">
               <h2 className="text-[11px] font-black uppercase tracking-wide text-[#151B23]">
                 Resources & Links

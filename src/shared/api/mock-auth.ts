@@ -75,6 +75,36 @@ type MockProjectDetail = MockProjectSearchItem & {
   createdAt: string
 }
 
+type MockProjectReview = {
+  totalScore: number
+  summary: string
+  categories: Array<{
+    category: string
+    score: number
+    comment: string
+  }>
+  criticalIssues: Array<{
+    title: string
+    description: string
+    solution: string
+  }>
+  warnings: Array<{
+    title: string
+    description: string
+    solution: string
+  }>
+  strengths: Array<{
+    title: string
+    description: string
+  }>
+  interviewQuestions: string[]
+  refactoringSuggestions: Array<{
+    title: string
+    description: string
+    exampleCode: string
+  }>
+}
+
 type MockProjectSearchPage = {
   content: MockProjectSearchItem[]
   page: number
@@ -860,6 +890,90 @@ function toMockProjectDetail(project: MockProject): MockProjectDetail {
 }
 
 /**
+ * mock 프로젝트에 대한 AI 코드 리뷰 응답을 생성한다.
+ * @param project 리뷰 결과를 생성할 mock 프로젝트
+ * @returns AI 코드 리뷰 mock 응답
+ */
+function createMockProjectReview(project: MockProject): MockProjectReview {
+  const hasContent = project.content.trim().length > 0
+  const tagSummary =
+    project.tags.length > 0 ? project.tags.join(", ") : "분류 태그 없음"
+
+  return {
+    totalScore: project.status === "PUBLISHED" ? 88 : 74,
+    summary: `${project.title}는 ${tagSummary} 맥락이 분명한 프로젝트입니다. 설명과 산출물 연결은 좋지만, 코드 구조와 예외 처리 의도를 더 명확히 남기면 리뷰 완성도가 높아집니다.`,
+    categories: [
+      {
+        category: "구조",
+        score: hasContent ? 86 : 70,
+        comment: "기능 단위 설명은 분리되어 있으나 핵심 흐름을 더 짧게 요약하면 좋습니다.",
+      },
+      {
+        category: "안정성",
+        score: 82,
+        comment: "주요 오류 상황을 사용자 메시지와 재시도 흐름으로 보완할 여지가 있습니다.",
+      },
+      {
+        category: "협업성",
+        score: 90,
+        comment: "역할과 산출물이 잘 드러나 팀 프로젝트 맥락을 파악하기 쉽습니다.",
+      },
+    ],
+    criticalIssues: [
+      {
+        title: "핵심 실패 경로 문서화 부족",
+        description:
+          "프로젝트 설명에서 API 실패, 빈 데이터, 권한 오류 같은 주요 실패 시나리오가 충분히 드러나지 않습니다.",
+        solution:
+          "README 또는 본문에 실패 상태별 대응 방식과 검증 결과를 짧게 추가하세요.",
+      },
+    ],
+    warnings: [
+      {
+        title: "리팩토링 근거 보강 필요",
+        description:
+          "기능 구현 결과는 확인되지만 왜 현재 구조를 선택했는지 판단 근거가 부족합니다.",
+        solution:
+          "컴포넌트 분리 기준, API 경계, 상태 관리 범위를 한 단락으로 정리하세요.",
+      },
+      {
+        title: "테스트 관점 확장 필요",
+        description:
+          "성공 흐름 외에 인증 실패, 네트워크 실패, 빈 응답 테스트 관점이 더 필요합니다.",
+        solution:
+          "실패 응답과 edge case를 검증한 체크리스트를 프로젝트 본문에 추가하세요.",
+      },
+    ],
+    strengths: [
+      {
+        title: "문제 정의가 명확함",
+        description:
+          "사용자 문제와 해결 방향이 제목, 설명, 태그를 통해 빠르게 파악됩니다.",
+      },
+      {
+        title: "산출물 연결성",
+        description:
+          "첨부 파일과 프로젝트 소개가 함께 제공되어 구현 맥락을 추적하기 쉽습니다.",
+      },
+    ],
+    interviewQuestions: [
+      "가장 복잡했던 상태 전이는 무엇이고, 어떻게 단순화했나요?",
+      "현재 구조에서 API 응답 형식이 바뀐다면 어떤 계층을 먼저 수정하나요?",
+      "사용자에게 노출되는 오류 메시지는 어떤 기준으로 분류했나요?",
+    ],
+    refactoringSuggestions: [
+      {
+        title: "API 경계 정규화 함수 분리",
+        description:
+          "서버 응답을 화면 모델로 바꾸는 코드가 커지면 entity 계층에 정규화 함수를 두는 편이 유지보수에 유리합니다.",
+        exampleCode:
+          "function normalizeProject(response) {\n  return {\n    ...response,\n    tags: Array.isArray(response.tags) ? response.tags : [],\n  }\n}",
+      },
+    ],
+  }
+}
+
+/**
  * mock 프로젝트 검색 결과를 query 조건에 맞춰 반환한다.
  * @param url 프로젝트 검색 요청 URL
  * @returns 프로젝트 검색 페이지 mock 응답
@@ -1515,6 +1629,17 @@ export function resolveMockApiResponse<TData>(
         success: true,
         data: updateMockProject(project, body) as TData,
       }
+    }
+  }
+
+  if (
+    project &&
+    url.pathname === `/api/projects/${projectId}/review` &&
+    normalizedMethod === "POST"
+  ) {
+    return {
+      success: true,
+      data: createMockProjectReview(project) as TData,
     }
   }
 

@@ -4,6 +4,7 @@ export { getProject } from "./api/get-project"
 export { getMyProjects } from "./api/get-my-projects"
 export { publishProject } from "./api/publish-project"
 export { requestProjectFileUpload } from "./api/request-project-file-upload"
+export { reviewProject } from "./api/review-project"
 export { searchProjects } from "./api/search-projects"
 export { updateProject } from "./api/update-project"
 export type {
@@ -25,6 +26,7 @@ export type {
   ProjectFileUploadPayload,
   ProjectPublishPayload,
   ProjectPublishResult,
+  ProjectReview,
   ProjectSearchApiItem,
   ProjectSearchApiPage,
   ProjectSearchFilterType,
@@ -34,4 +36,8 @@ export type {
   ProjectSearchUser,
   ProjectUpdatePayload,
   ProjectUpdateResult,
+  RefactoringSuggestion,
+  ReviewCategory,
+  ReviewIssue,
+  ReviewStrength,
 } from "./model/types"
