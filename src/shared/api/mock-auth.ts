@@ -65,6 +65,16 @@ type MockProjectSearchItem = {
   isLiked: boolean
 }
 
+type MockProjectDetail = MockProjectSearchItem & {
+  content: string
+  files: Array<{
+    fileId: number
+    originalName: string
+    fileUrl: string
+  }>
+  createdAt: string
+}
+
 type MockProjectSearchPage = {
   content: MockProjectSearchItem[]
   page: number
@@ -339,6 +349,54 @@ function toMockProjectSearchItem(project: MockProject): MockProjectSearchItem {
     viewCount: 300 + project.projectId * 211,
     likeCount: 60 + project.projectId * 37,
     isLiked: project.projectId % 2 === 0,
+  }
+}
+
+/**
+ * mock 프로젝트를 상세 조회 API 응답 형태로 변환한다.
+ * @param project 상세 조회로 반환할 mock 프로젝트
+ * @returns 프로젝트 상세 API mock 응답
+ */
+function toMockProjectDetail(project: MockProject): MockProjectDetail {
+  const ownerName =
+    mockProjectAuthors[(project.projectId - 1) % mockProjectAuthors.length]
+
+  return {
+    ...toMockProjectSearchItem(project),
+    content: project.content,
+    users: [
+      {
+        userId: project.projectId,
+        name: ownerName,
+        role: "OWNER",
+      },
+      {
+        userId: project.projectId + 100,
+        name: "박지훈",
+        role: "MEMBER",
+      },
+      {
+        userId: project.projectId + 200,
+        name: "이은서",
+        role: "MEMBER",
+      },
+    ],
+    files:
+      project.projectId === 1
+        ? [
+            {
+              fileId: 1,
+              originalName: "프로젝트 발표 PDF",
+              fileUrl: "#",
+            },
+            {
+              fileId: 2,
+              originalName: "GitHub Repository",
+              fileUrl: "#",
+            },
+          ]
+        : [],
+    createdAt: project.createdAt,
   }
 }
 
@@ -791,7 +849,7 @@ export function resolveMockApiResponse<TData>(
     if (normalizedMethod === "GET") {
       return {
         success: true,
-        data: project as TData,
+        data: toMockProjectDetail(project) as TData,
       }
     }
 
