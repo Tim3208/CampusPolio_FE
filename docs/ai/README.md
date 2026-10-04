@@ -18,6 +18,8 @@
 | [Campus Polio Figma](https://www.figma.com/design/hWgpBU1pri3aJg9JkVoE6L/Campus-Polio?node-id=0-1) | 기존 화면 디자인과 일부 플로우 | HTML 시안과 대조할 기존 자료 |
 | [이슈 #18의 작업 계획](https://github.com/Tim3208/CampusPolio_FE/issues/18) | 1차 범위·작업 순서·완료 기준 | 범위 참조; 디자인 우선순위는 본 문서의 미정 상태를 함께 확인 |
 
+기준안 선택과 별개로, 공통 토큰·라이브러리·코드 배치는 2026-10-04에 사용자가 결정했다. 내용은 [디자인 명세 8절](uiux-phase1-design-spec.md#8-공통-구현-사항-결정)에 기록되어 있다. 이 중 `--ring` 토큰 변경과 `react-markdown`·`remark-gfm` 설치는 코드에 반영했고, 화면 구현은 기준안 선택 후 진행한다.
+
 기존 Figma의 주요 대조 노드:
 
 - [홈 75:349](https://www.figma.com/design/hWgpBU1pri3aJg9JkVoE6L/Campus-Polio?node-id=75-349)

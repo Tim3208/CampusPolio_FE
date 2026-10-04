@@ -2,7 +2,7 @@
 
 작성일: 2026-10-04
 대상 범위: 공통 헤더, 홈 `/`, 프로젝트 탐색 `/projects`, 프로젝트 상세 `/projects/[projectId]`, 마이페이지 공통 틀 `/mypage/*`
-상태: 시안 문서 작성 완료. 실제 코드에는 아직 반영하지 않았으며, 구현 기준안은 미정이다.
+상태: 시안 문서 작성 완료. 구현 기준안은 미정이다. 코드에는 8절에서 사용자가 결정한 공통 사항 중 `--ring` 토큰 변경과 Markdown 라이브러리 설치만 반영했다(2026-10-04). 화면 구현은 아직 하지 않았다.
 
 > 2026-10-04 사용자 확인: 두 HTML 시안과 기존 Figma 중 구현 기준은 구현 착수 전에 선택한다. 아래 수치와 ‘시안 내 결정’은 기존 설계 내용을 보존한 기록이며, 구현 적용 여부는 [설계 문서 안내](README.md)의 기준 선택 상태를 따른다.
 
@@ -94,7 +94,7 @@ Figma 팔레트는 `src/app/globals.css`의 `main-*`, `gray-*` 토큰과 같다.
 
 | 요소 | 사양 | 현재 `shared/ui` 대응 |
 |---|---|---|
-| 주요 버튼 | `main-10` 바탕, 흰 글자, 높이 40 / 큰 버튼 48 / 작은 버튼 36, hover `main-11`, 눌림 `scale(.98)` | `Button` `default` (색·높이 조정 필요, 7절 참고) |
+| 주요 버튼 | `main-10` 바탕, 흰 글자, 높이 40 / 큰 버튼 48 / 작은 버튼 36, hover `main-11`, 눌림 `scale(.98)` | `Button` `default` + 대상 화면에서 `bg-main-10 hover:bg-main-11` 지정. 공통 `--primary`는 바꾸지 않음(8절 1번) |
 | 보조 버튼 | `surface` 바탕, `line-strong` 테두리, hover 시 테두리 `main-20` + 글자 `main-10` | `Button` `outline` |
 | 텍스트 버튼 | 바탕 없음, `gray-03`, hover `canvas` 바탕 | `Button` `ghost` |
 | 반전 버튼 | 등록 유도 영역(진한 면) 위 `surface` 바탕 + `main-00` 글자, 보조는 흰 테두리 | 새 변형 필요 |
@@ -141,21 +141,33 @@ Tailwind 기본 구간(`md` 768, `lg` 1024, `xl` 1280)을 그대로 쓴다.
 | 상세 | `src/widgets/project/ui/project-detail-page.tsx`, `src/app/projects/[projectId]/page.tsx` | 돌아가기 링크를 "프로젝트 모음으로"(`/projects`)로, 메타 줄 한국어 라벨, Markdown 읽기 렌더링, 자료 패널, 오른쪽 작성자 카드 제거 |
 | 마이페이지 틀 | `src/widgets/mypage/ui/mypage-shell.tsx`, `mypage-sidebar.tsx`, `mypage-projects-page.tsx` | 1024 미만에서 사이드바를 상단 메뉴로, 메뉴 이름 한국어 통일("지원", "프로젝트 등록"), 상태 배지를 사진 밖 본문으로 이동 |
 
-새로 필요한 조각과 배치 제안은 아래와 같다. 실제 배치는 [AGENTS.md](../../AGENTS.md)의 FSD와 public API 규칙을 따른다. 기존 구조 안의 컴포넌트 추가와 구조 재설계를 구분하고, 계층·slice 경계의 재설계가 필요하면 이유와 범위를 사용자에게 확인한다.
+새로 필요한 조각의 배치는 아래와 같다(2026-10-04 사용자 승인, 8절 5번). 실제 배치는 [AGENTS.md](../../AGENTS.md)의 FSD와 public API 규칙을 따른다. 구현 중 아래 표로 해결되지 않는 계층·slice 경계 재설계가 필요하면 이유와 범위를 사용자에게 다시 확인한다.
 
-| 조각 | 제안 위치 | 비고 |
+| 조각 | 위치 | 이유와 비고 |
 |---|---|---|
-| 하단 시트(Dialog) | `src/shared/ui/sheet.tsx` | `radix-ui`가 이미 설치되어 있으므로 shadcn Sheet 방식으로 추가 |
+| 하단 시트(Dialog) | `src/shared/ui/sheet.tsx` | 도메인과 무관한 공통 UI. 설치된 `radix-ui` 기반의 shadcn Sheet 방식 |
+| 계정 메뉴 드롭다운 | `src/shared/ui/dropdown-menu.tsx` | 도메인과 무관한 공통 UI. shadcn Dropdown Menu 방식 |
 | 불러오는 중 자리 표시 | `src/shared/ui/skeleton.tsx` | shadcn Skeleton |
-| 태그 필터(편집용 복사·적용·선택 초기화) | `src/features/project/project-search-filter/` 또는 탐색 위젯 내부 | 사용자 행동 중심이라 features 후보. 기존 탐색 코드와의 책임 경계를 확인 |
-| Markdown 읽기 렌더러 | `src/shared/ui/markdown-viewer.tsx` | 라이브러리 미설치. 8절 결정 필요 |
-| 경로별 불러오는 중 화면 | `src/app/projects/loading.tsx`, `src/app/projects/[projectId]/loading.tsx`, `src/app/loading.tsx` | app 레이어는 연결만 하고 화면은 widgets에서 가져옴 |
+| Markdown 읽기 렌더러 | `src/shared/ui/markdown-viewer.tsx` | 프로젝트 도메인과 무관하고 편집기 미리보기(T08 후속)에서도 재사용. `react-markdown` + `remark-gfm` 사용(8절 4번) |
+| 태그 필터 | `src/features/project/project-search-filter/` (새 slice) | 사용자 행동 중심이라 features. 탐색 위젯은 조합만 한다 |
+| 태그 필터 > 데스크톱 체크 목록 | `ui/project-tag-filter-list.tsx` | 선택 즉시 URL `tags` 갱신 |
+| 태그 필터 > 모바일·태블릿 시트 | `ui/project-tag-filter-sheet.tsx` | 열 때 적용 조건 복사, 적용·닫기·선택 초기화 |
+| 태그 필터 > 적용 조건 칩 | `ui/applied-filter-chips.tsx` | 칩별 해제, 전체 조건 초기화 |
+| 태그 필터 > 검색 URL 생성 | `lib/search-query.ts` | 현재 탐색 위젯 내부의 `getProjectsHref`, `toggleTag`를 이동 |
+| 태그 필터 > public API | `index.ts` | 탐색 위젯은 이 파일로만 가져온다 |
+| 홈 강조 카드·일반 카드 | `src/widgets/home/ui/featured-project-card.tsx`, `project-card.tsx` | 홈 카드와 탐색 카드는 용도에 따라 따로 둔다(작업 계획 UX-01) |
+| 탐색 카드·리스트 카드 | `src/widgets/project-collection/ui/project-card.tsx`, `project-list-item.tsx` | 같은 이유 |
+| 홈 슬라이더 | `src/widgets/home/ui/featured-project-slider.tsx` | 스크롤 위치·버튼 상태만 다루는 화면 조합 |
+| 마이페이지 메뉴 | `src/widgets/mypage/ui/mypage-nav.tsx` | 사이드바(데스크톱)와 상단 메뉴(모바일·태블릿)가 같은 메뉴 목록 사용 |
+| 화면별 불러오는 중 | 각 위젯의 `*-skeleton.tsx` + `src/app/loading.tsx`, `src/app/projects/loading.tsx`, `src/app/projects/[projectId]/loading.tsx` | app 레이어는 위젯 public API로 스켈레톤을 연결만 함 |
 
-## 8. 기준안 선택 후 검토할 구현 사항
+## 8. 공통 구현 사항 결정
 
-1. **`--primary` 색**: 현재 `#1E40AF`(main-02)이고 시안의 강조색은 `main-10`이다. `Button`·`Badge`의 `default` 변형이 이 값을 쓴다. 사용처는 로그인 화면, 프로필 설정 폼, 헤더, 마이페이지 사이드바다. 제안: `--primary`를 `main-10` 값으로 바꾸고 위 화면을 함께 확인한다. 대안: 대상 화면에서만 클래스로 덮어쓴다.
-2. **`--ring` 색 (시안 내 결정)**: 현재 회색(`oklch(0.708 0 0)`)이라 포커스 외곽선 대비가 부족하다. `main-10`(`#005E9C`)으로 바꾼다.
-3. **버튼 높이 (시안 내 결정)**: 기존 크기 키(`default` 32px, `lg` 36px 등)는 그대로 두고 새 키를 추가한다. 로그인·프로필 설정 등 기존 화면의 버튼 크기가 바뀌지 않게 하기 위함이다. 대상 화면은 새 키를 쓰고, 시안의 작은 버튼(36px)은 기존 `lg`를 쓴다.
+2026-10-04 사용자 결정. 화면 구현의 기준안 선택([설계 문서 안내](README.md))과는 별개다.
+
+1. **`--primary` 색 (결정: 유지)**: 공통 토큰은 현재 `#1E40AF`(main-02)를 유지한다. `Button`·`Badge`의 `default` 변형을 쓰는 로그인 화면, 프로필 설정 폼은 지금 색을 그대로 둔다. 시안의 강조색 `main-10`은 대상 화면(헤더·홈·탐색·상세·마이페이지 틀)에서 클래스로 지정한다.
+2. **`--ring` 색 (결정: 적용 완료)**: 회색(`oklch(0.708 0 0)`)이던 라이트 테마 `--ring`을 `var(--main-10)`으로 바꿨다(`src/app/globals.css`). 다크 테마 값은 1차 범위가 아니라 그대로 두었다. `Button`·`Input`의 포커스는 `border-ring`(진한 1px 테두리)과 `ring-ring/50`(반투명 3px 링)을 함께 쓴다. 대비 기준을 채우는 것은 진한 테두리 쪽이고, 반투명 링은 보조 표시다.
+3. **버튼 높이 (결정: 새 크기 키 추가, 미적용)**: 기존 크기 키(`default` 32px, `lg` 36px 등)는 그대로 두고 새 키를 추가한다. 로그인·프로필 설정 등 기존 화면의 버튼 크기가 바뀌지 않게 하기 위함이다. 대상 화면은 새 키를 쓰고, 시안의 작은 버튼(36px)은 기존 `lg`를 쓴다.
 
    | 새 크기 키 | 값 | 용도 |
    |---|---|---|
@@ -165,8 +177,13 @@ Tailwind 기본 구간(`md` 768, `lg` 1024, `xl` 1280)을 그대로 쓴다.
    | `icon-xl` | `size-12` | 모바일 아이콘 버튼 48px |
 
    비활성 모양(회색 바탕 + 흐린 글자)은 공통 `disabled:opacity-50`을 바꾸지 않고, 대상 화면 컴포넌트의 `className`으로 지정한다.
-4. **Markdown 라이브러리**: `react-markdown` + `remark-gfm`(표 지원) 추가를 제안한다. 원시 HTML은 허용하지 않고(`rehype-raw` 미사용), 위험한 URL은 기본 `urlTransform`으로 걸러낸다. 적용 시 실제 채택 버전의 동작과 지원 문법을 검증하고, 라이브러리 선택이 기능 범위나 문서의 전제를 바꾸면 사용자에게 확인한다.
-5. **새 slice·공통 컴포넌트 위치**: 7절의 제안 위치.
+4. **Markdown 라이브러리 (결정: 설치 완료, 렌더러 미구현)**: `react-markdown` 10.1.0과 `remark-gfm` 4.0.1을 `dependencies`에 추가했다.
+   - **필요한 이유**: 편집기는 본문을 Markdown 글자(`## 제목`, `- 목록`, `**굵게**`)로 저장하는데, 상세 화면은 이를 그대로 출력해 기호가 보인다(T08).
+   - **편집기 변환 함수를 쓰지 않는 이유**: 편집기 안의 `markdownToHtml`은 `##` 제목, 목록, 굵게, 기울임, 링크, 이미지만 지원하고 결과가 HTML 문자열이다. 링크 주소도 거르지 않는다.
+   - **적용 원칙**: 원시 HTML은 허용하지 않고(`rehype-raw` 미사용), 위험한 URL은 기본 `urlTransform`으로 걸러낸다. 상세 화면은 서버 컴포넌트이므로 서버에서 변환한다.
+   - **남은 일**: 렌더러를 구현할 때 실제 버전의 지원 문법과 위험 URL 처리를 검증한다.
+   - **보안 점검**: 설치 후 `npm audit`에 두 패키지와 하위 의존성은 나오지 않았다. 기존 의존성(next 등)의 경고는 별도 확인 대상이다.
+5. **새 slice·공통 컴포넌트 위치 (결정: 제안대로)**: 7절 표의 위치를 따른다. `src/features/project/project-search-filter/` 신설을 승인받았다.
 
 ## 9. 접근성 확인 결과
 
