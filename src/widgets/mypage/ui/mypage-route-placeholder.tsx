@@ -11,7 +11,7 @@ export function MypageRoutePlaceholder({
   title,
 }: MypageRoutePlaceholderProps) {
   return (
-    <section className="flex min-h-[360px] flex-1 flex-col gap-3 px-8 py-10">
+    <section className="flex min-w-0 min-h-[360px] flex-1 flex-col gap-3 px-4 py-7 md:px-8 md:py-8 lg:px-10 lg:py-10 xl:px-12 xl:pt-11 xl:pb-16">
       <h1 className="text-2xl font-bold text-gray-01">{title}</h1>
       <div className="rounded-lg border border-dashed border-gray-300 bg-white/70 px-6 py-10 text-sm text-gray-05">
         본문 영역은 다음 단계에서 구현됩니다.

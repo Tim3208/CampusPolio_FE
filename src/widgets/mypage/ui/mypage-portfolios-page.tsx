@@ -127,7 +127,7 @@ function PortfolioCard({ onOpen, portfolio }: PortfolioCardProps) {
   return (
     <article
       aria-label={`${portfolio.title} 상세 보기`}
-      className="group flex min-h-[360px] cursor-pointer flex-col overflow-hidden rounded-lg bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-main-02"
+      className="group flex min-w-0 min-h-[360px] cursor-pointer flex-col overflow-hidden rounded-lg bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-main-02"
       onClick={handleOpen}
       onKeyDown={handleKeyDown}
       role="link"
@@ -249,12 +249,12 @@ export function MypagePortfoliosPage({
   }
 
   return (
-    <section className="flex flex-col gap-8 px-8 py-10">
+    <section className="flex min-w-0 flex-col gap-8 px-4 py-7 md:px-8 md:py-8 lg:px-10 lg:py-10 xl:px-12 xl:pt-11 xl:pb-16">
       <h1 className="text-[32px] font-extrabold leading-tight text-[#171f24]">
         포트폴리오 모음
       </h1>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid min-w-0 grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
         <PortfolioCreateCard />
 
         {errorMessage ? (

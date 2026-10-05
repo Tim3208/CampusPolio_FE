@@ -1,23 +1,14 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from "react"
+import { MypageNav } from "./mypage-nav"
+import { MypageSidebar } from "./mypage-sidebar"
 
-import { MypageSidebar } from "./mypage-sidebar";
-
-type MypageShellProps = {
-  children: ReactNode;
-};
-
-/**
- * 마이페이지 내부에서 사이드바를 유지하는 공통 화면 틀을 구성한다.
- * @param children 현재 탭 본문 영역
- * @returns 마이페이지 shell UI
- */
-export function MypageShell({ children }: MypageShellProps) {
+/** 본문 폭을 확보하고 1024px 미만에서는 메뉴를 본문 위로 옮긴다. */
+export function MypageShell({ children }: { children: ReactNode }) {
   return (
-    <main className="flex flex-1 bg-[#f5f8fb]">
+    <main className="grid min-w-0 flex-1 grid-cols-1 bg-[#F5F8FB] lg:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[240px_minmax(0,1fr)]">
       <MypageSidebar />
-      <div className="mx-auto flex w-full max-w-6xl flex-1">
-        <div className="min-w-0 flex-1">{children}</div>
-      </div>
+      <div className="min-w-0 lg:hidden"><MypageNav /></div>
+      <div className="min-w-0 w-full">{children}</div>
     </main>
-  );
+  )
 }

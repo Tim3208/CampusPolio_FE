@@ -1,40 +1,23 @@
 import Link from "next/link"
-import {
-  ArrowLeft,
-  CalendarDays,
-  ExternalLink,
-  Eye,
-  FileText,
-  Heart,
-  UserRound,
-  UsersRound,
-} from "lucide-react"
+import { ArrowLeft, ExternalLink, Eye, FilePenLine, FileText, Heart } from "lucide-react"
 
-import type { ProjectDetail, ProjectDetailUser } from "@/entities/project"
+import type { ProjectDetail } from "@/entities/project"
 import { ProjectReviewPanel } from "@/features/project/project-review"
 import { appRoutes } from "@/shared/config"
+import { MarkdownViewer } from "@/shared/ui/markdown-viewer"
+import { ProjectDetailError } from "./project-detail-error"
+import { ProjectDetailImage } from "./project-detail-image"
 
 type ProjectDetailPageProps = {
   project?: ProjectDetail
   errorMessage?: string
 }
 
-/**
- * API에서 받은 날짜 문자열을 상세 페이지 표시용 날짜로 변환한다.
- * @param value API 날짜 문자열
- * @returns 한국어 날짜 문자열
- */
+/** API 날짜를 기존 한국어 등록일 형식으로 표시한다. */
 function formatProjectDate(value?: string) {
-  if (!value) {
-    return "날짜 정보 없음"
-  }
-
+  if (!value) return "날짜 정보 없음"
   const date = new Date(value)
-
-  if (Number.isNaN(date.getTime())) {
-    return "날짜 정보 없음"
-  }
-
+  if (Number.isNaN(date.getTime())) return "날짜 정보 없음"
   return date.toLocaleDateString("ko-KR", {
     day: "numeric",
     month: "long",
@@ -42,234 +25,74 @@ function formatProjectDate(value?: string) {
   })
 }
 
-/**
- * 프로젝트 사용자 목록에서 작성자를 찾는다.
- * @param users 프로젝트 상세 API의 사용자 목록
- * @returns 작성자 사용자 정보
- */
-function getProjectOwner(users: ProjectDetailUser[]) {
-  return users.find((user) => user.role === "OWNER")
-}
-
-/**
- * 프로젝트 사용자 목록에서 참여자 목록을 찾는다.
- * @param users 프로젝트 상세 API의 사용자 목록
- * @returns OWNER를 제외한 참여자 목록
- */
-function getProjectMembers(users: ProjectDetailUser[]) {
-  return users.filter((user) => user.role !== "OWNER")
-}
-
-/**
- * 프로젝트 상세 페이지 본문을 렌더링한다.
- * @param props 프로젝트 상세 데이터와 오류 메시지
- * @returns 프로젝트 상세 화면 UI
- */
-export function ProjectDetailPage({
-  errorMessage,
-  project,
-}: ProjectDetailPageProps) {
-  if (errorMessage || !project) {
-    return (
-      <main className="min-h-screen bg-[#F4F7FA]">
-        <section className="mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-4xl items-center justify-center px-6 py-16">
-          <div className="w-full rounded-lg bg-white px-8 py-12 text-center shadow-sm">
-            <h1 className="text-2xl font-extrabold text-slate-950">
-              프로젝트를 불러오지 못했습니다.
-            </h1>
-            <p className="mt-4 text-sm leading-6 text-slate-600">
-              {errorMessage ?? "잠시 후 다시 시도해주세요."}
-            </p>
-            <Link
-              href={appRoutes.home}
-              className="mt-8 inline-flex h-10 items-center rounded-md bg-main-10 px-4 text-sm font-bold text-white"
-            >
-              메인으로 돌아가기
-            </Link>
-          </div>
-        </section>
-      </main>
-    )
-  }
+/** 실제 상세 데이터의 메타·Markdown 본문·자료와 기존 AI 리뷰를 조합한다. */
+export function ProjectDetailPage({ errorMessage, project }: ProjectDetailPageProps) {
+  if (errorMessage || !project) return <ProjectDetailError message={errorMessage} />
 
   const tags = Array.isArray(project.tags) ? project.tags : []
   const users = Array.isArray(project.users) ? project.users : []
   const files = Array.isArray(project.files) ? project.files : []
-  const owner = getProjectOwner(users)
-  const members = getProjectMembers(users)
+  const viewCount = project.viewCount ?? 0
+  const likeCount = project.likeCount ?? 0
+  const owner = users.find((user) => user.role === "OWNER")
+  const members = users.filter((user) => user.role === "MEMBER")
 
   return (
-    <main className="min-h-screen bg-[#F4F7FA] text-slate-950">
-      <section className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-8 px-6 py-8 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <article className="min-w-0">
-          <Link
-            href={appRoutes.home}
-            className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-[#005E9C] hover:underline"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-            이전으로 돌아가기
+    <main className="min-h-screen bg-[#F5F8FB] text-gray-01">
+      <div className="mx-auto grid w-full max-w-[1440px] grid-cols-1 gap-4 px-4 pt-7 pb-10 md:gap-5 md:px-8 md:pt-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-10 lg:px-10 xl:grid-cols-[minmax(0,1fr)_320px] xl:gap-14 xl:px-12 xl:pt-9">
+        <article className="flex min-w-0 flex-col gap-4 md:gap-5">
+          <Link href={appRoutes.projects} className="inline-flex self-start items-center gap-1.5 text-sm font-semibold text-main-10 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-main-10">
+            <ArrowLeft className="size-[18px]" strokeWidth={1.75} aria-hidden="true" />
+            프로젝트 모음으로
           </Link>
-
-          <div className="mt-5 flex flex-wrap gap-2">
-            {tags.length > 0 ? (
-              tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-sm bg-[#DCEBFF] px-2 py-1 text-[10px] font-bold uppercase text-[#005E9C]"
-                >
-                  {tag}
-                </span>
-              ))
-            ) : (
-              <span className="rounded-sm bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-500">
-                태그 없음
-              </span>
-            )}
-          </div>
-
-          <h1 className="mt-4 max-w-4xl text-4xl font-black leading-[1.02] text-[#151B23] md:text-5xl">
-            {project.title}
-          </h1>
-
-          <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-600">
-            {project.description || "프로젝트 설명이 없습니다."}
-          </p>
-
-          <dl className="mt-8 grid max-w-3xl grid-cols-2 gap-5 border-b border-slate-200 pb-6 text-[11px] uppercase text-slate-500 md:grid-cols-4">
-            <div>
-              <dt className="font-bold text-slate-400">Author</dt>
-              <dd className="mt-1 normal-case text-slate-950">
-                {owner?.name ?? "작성자 정보 없음"}
-              </dd>
+          {tags.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {tags.map((tag) => (
+                <span key={tag} className="inline-flex h-7 items-center rounded-full bg-main-22 px-3 text-[13px] font-semibold text-main-10">{tag}</span>
+              ))}
             </div>
+          ) : null}
+          <h1 className="max-w-[900px] text-[26px] leading-[1.35] font-extrabold tracking-[-.03em] break-keep [overflow-wrap:anywhere] text-balance text-main-00 md:text-[32px] md:leading-[1.28] lg:text-[36px] xl:text-[42px]">{project.title}</h1>
+          {project.description?.trim() ? <p className="max-w-[62ch] text-[15.5px] leading-[1.75] break-words text-gray-03 md:text-[17px]">{project.description}</p> : null}
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-3.5 border-y border-[#E3E9F0] py-[18px] md:grid-cols-4 md:gap-5 [&_dt]:text-[12.5px] [&_dt]:font-bold [&_dt]:text-gray-05 [&_dd]:mt-1 [&_dd]:text-[15px] [&_dd]:font-semibold [&_dd]:[overflow-wrap:anywhere]">
+            <div><dt>작성자</dt><dd className={owner?.name?.trim() ? "" : "text-gray-05"}>{owner?.name?.trim() || "작성자 정보 없음"}</dd></div>
+            <div><dt>참여자</dt><dd className={members.length ? "" : "text-gray-05"}>{members.length ? members.map((member) => member.name).join(", ") : "없음"}</dd></div>
+            <div><dt>등록일</dt><dd>{formatProjectDate(project.createdAt)}</dd></div>
             <div>
-              <dt className="font-bold text-slate-400">Members</dt>
-              <dd className="mt-1 normal-case text-slate-950">
-                {members.length > 0
-                  ? members.map((member) => member.name).join(", ")
-                  : "참여자 정보 없음"}
-              </dd>
-            </div>
-            <div>
-              <dt className="font-bold text-slate-400">Published</dt>
-              <dd className="mt-1 normal-case text-slate-950">
-                {formatProjectDate(project.createdAt)}
-              </dd>
-            </div>
-            <div>
-              <dt className="font-bold text-slate-400">Stats</dt>
-              <dd className="mt-1 normal-case text-slate-950">
-                {project.viewCount ?? 0} views
+              <dt>조회와 좋아요</dt>
+              <dd className="flex flex-wrap gap-3">
+                <span className="inline-flex items-center gap-1" aria-label={"조회 " + viewCount}><Eye className="size-[15px]" strokeWidth={1.75} aria-hidden="true" />{viewCount.toLocaleString("ko-KR")}</span>
+                <span className="inline-flex items-center gap-1" aria-label={"좋아요 " + likeCount}><Heart className={"size-[15px] " + (project.isLiked ? "fill-current text-main-10" : "")} strokeWidth={1.75} aria-hidden="true" />{likeCount.toLocaleString("ko-KR")}</span>
               </dd>
             </div>
           </dl>
-
-          <div className="mt-8 overflow-hidden rounded-md bg-slate-200 shadow-sm">
-            {project.thumbnailUrl ? (
-              <div
-                className="aspect-[16/8.5] bg-cover bg-center"
-                style={{ backgroundImage: `url(${project.thumbnailUrl})` }}
-                aria-label={`${project.title} 썸네일`}
-                role="img"
-              />
-            ) : (
-              <div className="flex aspect-[16/8.5] items-center justify-center text-sm font-medium text-slate-500">
-                썸네일 없음
-              </div>
-            )}
-          </div>
-
-          <section className="mt-8 max-w-3xl">
-            <h2 className="text-base font-black text-[#151B23]">
-              프로젝트 소개
-            </h2>
-            <div className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-600">
-              {project.content || project.description || "본문이 없습니다."}
-            </div>
-          </section>
+          {project.thumbnailUrl ? <ProjectDetailImage url={project.thumbnailUrl} title={project.title} /> : null}
+          {project.content?.trim() ? (
+            <MarkdownViewer content={project.content} />
+          ) : (
+            <section className="flex flex-col items-center gap-2.5 rounded-[14px] border border-dashed border-[#CBD6E2] bg-[#FDFEFF] px-6 py-10 text-center">
+              <span className="mb-1 grid size-[52px] place-items-center rounded-[14px] bg-main-22 text-main-10"><FilePenLine className="size-6" strokeWidth={1.75} aria-hidden="true" /></span>
+              <h2 className="text-[17px] font-bold text-main-00">아직 본문이 작성되지 않았어요</h2>
+              <p className="text-sm leading-[1.6] text-gray-05">작성자가 내용을 추가하면 이곳에 표시돼요.</p>
+            </section>
+          )}
         </article>
-
-        <aside className="lg:pt-24">
-          <div className="sticky top-20 space-y-4">
+        <aside className="min-w-0">
+          <div className="grid items-start gap-4 md:grid-cols-2 lg:sticky lg:top-6 lg:grid-cols-1">
+            <section className="flex min-w-0 flex-col gap-3 rounded-[14px] border border-[#E3E9F0] bg-[#FDFEFF] p-5 shadow-[0_1px_2px_rgb(0_29_53/.05),0_8px_24px_-14px_rgb(0_29_53/.22)]">
+              <div className="flex items-center justify-between"><h2 className="text-base font-bold text-main-00">자료</h2><span className="inline-flex h-[22px] items-center rounded-full bg-main-22 px-2 text-xs font-bold text-main-10">{files.length}</span></div>
+              {files.length ? files.map((file) => (
+                <a key={file.fileId} href={file.fileUrl} target="_blank" rel="noreferrer" className="flex min-w-0 items-center gap-3 rounded-[10px] border border-[#E3E9F0] bg-[#FDFEFF] px-3 py-2.5 hover:border-main-20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-main-10">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-[9px] bg-main-22 text-main-10"><FileText className="size-[18px]" strokeWidth={1.75} aria-hidden="true" /></span>
+                  <span className="min-w-0 flex-1 text-sm leading-[1.45] font-semibold break-all">{file.originalName}</span>
+                  <ExternalLink className="size-4 shrink-0 text-gray-05" strokeWidth={1.75} aria-hidden="true" />
+                </a>
+              )) : <p className="text-sm text-gray-05">첨부된 자료가 없어요.</p>}
+            </section>
             <ProjectReviewPanel projectId={project.projectId} />
-
-            <section className="rounded-md bg-white p-4 shadow-sm ring-1 ring-slate-200">
-              <h2 className="text-[11px] font-black uppercase tracking-wide text-[#151B23]">
-                Resources & Links
-              </h2>
-
-              <div className="mt-4 space-y-2">
-                {files.length > 0 ? (
-                  files.map((file) => (
-                    <a
-                      key={file.fileId}
-                      href={file.fileUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center justify-between gap-3 rounded-sm border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-[#005E9C] hover:text-[#005E9C]"
-                    >
-                      <span className="inline-flex min-w-0 items-center gap-2">
-                        <FileText className="h-3.5 w-3.5 shrink-0" />
-                        <span className="truncate">{file.originalName}</span>
-                      </span>
-                      <ExternalLink className="h-3.5 w-3.5 shrink-0" />
-                    </a>
-                  ))
-                ) : (
-                  <p className="rounded-sm border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-xs text-slate-500">
-                    첨부 파일 없음
-                  </p>
-                )}
-              </div>
-            </section>
-
-            <section className="rounded-md bg-white p-4 shadow-sm ring-1 ring-slate-200">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#DCEBFF] text-[#005E9C]">
-                  <UserRound className="h-5 w-5" aria-hidden="true" />
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-black text-[#151B23]">
-                    {owner?.name ?? "작성자 정보 없음"}
-                  </p>
-                  <p className="text-xs text-slate-500">프로젝트 작성자</p>
-                </div>
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-slate-500">
-                <span className="inline-flex items-center gap-1">
-                  <Eye className="h-3.5 w-3.5" aria-hidden="true" />
-                  {project.viewCount ?? 0}
-                </span>
-                <span className="inline-flex items-center gap-1">
-                  <Heart
-                    className={`h-3.5 w-3.5 ${
-                      project.isLiked ? "fill-current text-main-10" : ""
-                    }`}
-                    aria-hidden="true"
-                  />
-                  {project.likeCount ?? 0}
-                </span>
-                <span className="col-span-2 inline-flex items-center gap-1">
-                  <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
-                  {formatProjectDate(project.createdAt)}
-                </span>
-                <span className="col-span-2 inline-flex items-start gap-1">
-                  <UsersRound
-                    className="mt-0.5 h-3.5 w-3.5 shrink-0"
-                    aria-hidden="true"
-                  />
-                  <span>
-                    {members.length > 0
-                      ? members.map((member) => member.name).join(", ")
-                      : "참여자 정보 없음"}
-                  </span>
-                </span>
-              </div>
-            </section>
           </div>
         </aside>
-      </section>
+      </div>
     </main>
   )
 }

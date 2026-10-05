@@ -90,7 +90,8 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  /* 포커스 표시 대비(3:1 이상)를 위해 Figma 팔레트 main-10을 사용한다 */
+  --ring: var(--main-10);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -231,3 +232,44 @@
     color: var(--color-gray-08);
   }
 }
+
+/* 승인된 대상 화면에서 명시적으로 사용하는 읽기 본문과 로딩 스타일. */
+.campus-markdown { font-size: 16.5px; line-height: 1.85; color: var(--gray-01); overflow-wrap: anywhere; }
+.campus-markdown :is(h1,h2,h3,h4,h5,h6) { font-weight: 800; color: var(--main-00); letter-spacing: -.02em; line-height: 1.4; word-break: keep-all; text-wrap: balance; }
+.campus-markdown h1 { font-size: 30px; margin: 40px 0 12px; }
+.campus-markdown h2 { font-size: 24px; margin: 40px 0 12px; }
+.campus-markdown :is(h3,h4,h5,h6) { font-size: 20px; margin: 28px 0 12px; }
+.campus-markdown p { margin: 0 0 16px; color: var(--gray-03); }
+.campus-markdown :is(ul,ol) { margin: 0 0 18px; padding-left: 20px; color: var(--gray-03); }
+.campus-markdown ul { list-style: disc; }
+.campus-markdown ol { list-style: decimal; }
+.campus-markdown li { margin-bottom: 4px; }
+.campus-markdown li::marker { color: var(--main-10); }
+.campus-markdown .contains-task-list { list-style: none; padding-left: 0; }
+.campus-markdown .task-list-item input { margin-right: 8px; accent-color: var(--main-10); }
+.campus-markdown blockquote { margin: 20px 0; padding: 12px 18px; border-left: 3px solid var(--main-20); background: #FDFEFF; color: var(--main-12); }
+.campus-markdown blockquote p { color: inherit; }
+.campus-markdown pre { max-width: 100%; margin: 20px 0; padding: 18px 20px; overflow-x: auto; border-radius: 12px; background: var(--main-00); color: #dbe7f3; font-family: var(--font-geist-mono); font-size: 13.5px; line-height: 1.75; overflow-wrap: normal; }
+.campus-markdown :not(pre) > code { border-radius: 4px; padding: 2px 5px; background: #E6EDF4; font-size: .88em; }
+.campus-markdown-table { max-width: 100%; margin: 20px 0; overflow-x: auto; border: 1px solid #E3E9F0; border-radius: 12px; background: #FDFEFF; }
+.campus-markdown-table table { width: max-content; min-width: 100%; border-collapse: collapse; font-size: 14px; }
+.campus-markdown-table :is(th,td) { padding: 10px 16px; border-bottom: 1px solid #E3E9F0; text-align: left; white-space: nowrap; }
+.campus-markdown-table th { background: #F5F8FB; font-weight: 700; color: var(--gray-03); font-size: 13px; }
+.campus-markdown-table tr:last-child td { border-bottom: 0; }
+.campus-markdown-image { display: block; width: 100%; max-width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 12px; margin: 24px 0; }
+.campus-markdown a { color: var(--main-10); text-decoration: underline; text-underline-offset: 3px; word-break: break-all; }
+.campus-markdown hr { margin: 24px 0; border-color: #E3E9F0; }
+@media (max-width: 767px) {
+  .campus-markdown { font-size: 15.5px; }
+  .campus-markdown h2 { font-size: 20px; margin-top: 28px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .campus-skeleton { animation: campus-skeleton-pulse 1.4s ease-in-out infinite; }
+  @keyframes campus-skeleton-pulse { 50% { opacity: .55; } }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="sheet-content"], [data-slot="sheet-overlay"], [data-slot="dropdown-menu-content"], .campus-skeleton { animation: none !important; transition: none !important; }
+  header [data-slot="button"] { transition: none; }
+}
+
+.campus-markdown-image[role='img'] { display: flex; }

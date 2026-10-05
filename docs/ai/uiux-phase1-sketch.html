@@ -1,0 +1,1023 @@
+<title>CampusPolio 1차 UI/UX 스케치</title>
+<style>
+/* 레이아웃: 화면별 섹션 안에 데스크톱(축소)·모바일 프레임을 나란히 두고, 아래에 번호 메모를 붙이는 와이어프레임 시트. 프레임 안에는 실제 UI 텍스트만 둔다 */
+:root {
+  --paper: #f4f4f4;   /* 시트 바탕 */
+  --white: #ffffff;   /* 프레임 화면 바탕 */
+  --ink: #111111;     /* 선·주요 글자·선택 상태 */
+  --ink-2: #555555;   /* 보조 글자 */
+  --ink-3: #8c8c8c;   /* 흐린 선·자리 표시 글자 */
+  --line: #cfcfcf;    /* 카드 테두리 */
+  --fill: #ececec;    /* 이미지 자리 바탕 */
+  --fill-2: #d9d9d9;  /* 본문 텍스트 자리 막대 */
+  --dz: 0.6;          /* 데스크톱 프레임 축소 배율 */
+  --sans: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", Consolas, "D2Coding", monospace;
+  color-scheme: light;
+}
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); }
+* { box-sizing: border-box; }
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+/* ── 시트(문서) 영역 ───────────────────────── */
+.doc { max-width: 1520px; margin: 0 auto; padding-inline: 16px; padding-block: 32px 96px; display: flex; flex-direction: column; gap: 56px; }
+.doc-head { display: flex; flex-direction: column; gap: 16px; max-width: 980px; }
+.doc-head h1 { margin: 0; font-size: 30px; line-height: 1.25; text-wrap: balance; }
+.doc-head p { margin: 0; line-height: 1.7; color: var(--ink-2); max-width: 70ch; }
+.meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.meta-grid div { background: var(--white); border: 1px solid var(--line); padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; line-height: 1.6; }
+.meta-grid b { font-size: 11px; letter-spacing: .06em; color: var(--ink-2); }
+.legend { display: flex; flex-wrap: wrap; gap: 10px 20px; font-size: 13px; align-items: center; }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.lg-ph { width: 34px; height: 22px; }
+.lg-on { width: 34px; height: 22px; background: var(--ink); }
+.lg-sk { width: 34px; height: 8px; background: var(--fill-2); }
+
+.toc { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper); border-block: 1px solid var(--ink); padding-block: 10px; display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; font-size: 14px; }
+.toc a { font-weight: 600; text-decoration: none; padding: 4px 0; }
+.toc a:hover { text-decoration: underline; }
+.toc .zoom { margin-left: auto; display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--ink-2); }
+.toc .zoom button { border: 1px solid var(--ink); background: var(--white); padding: 4px 10px; cursor: pointer; font-size: 12px; }
+.toc .zoom button[aria-pressed="true"] { background: var(--ink); color: var(--white); }
+
+.part { display: flex; flex-direction: column; gap: 22px; scroll-margin-top: 64px; }
+.part-head { display: flex; flex-direction: column; gap: 6px; border-top: 3px solid var(--ink); padding-top: 14px; }
+.part-head h2 { margin: 0; font-size: 24px; }
+.part-head .ux { font-family: var(--mono); font-size: 12px; color: var(--ink-2); letter-spacing: .04em; }
+.part-head p { margin: 0; color: var(--ink-2); line-height: 1.7; max-width: 80ch; }
+.sub { margin: 8px 0 0; font-size: 15px; font-weight: 700; }
+
+.frames { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
+.frame { margin: 0; display: flex; flex-direction: column; gap: 8px; max-width: 100%; min-width: 0; }
+.frame figcaption { font-family: var(--mono); font-size: 12px; color: var(--ink-2); display: flex; gap: 8px; flex-wrap: wrap; }
+.frame figcaption b { color: var(--ink); font-family: var(--sans); font-size: 13px; }
+.viewport { border: 1.5px solid var(--ink); background: var(--white); overflow: auto; max-width: 100%; }
+.d .scr { zoom: var(--dz); }
+.scr { background: var(--white); font-size: 14px; line-height: 1.5; position: relative; }
+.m .scr { width: 360px; }
+.d .scr { width: 1280px; }
+
+.notes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 10px 28px; }
+.notes li { display: grid; grid-template-columns: 24px 1fr; gap: 10px; font-size: 13.5px; line-height: 1.65; min-width: 0; }
+.notes li > div { min-width: 0; }
+.src { display: inline-block; font-size: 11px; font-weight: 700; border: 1px solid var(--ink); padding: 0 6px; margin-right: 6px; letter-spacing: .02em; white-space: nowrap; }
+
+/* 번호 마커 */
+.n { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); color: var(--white); font-size: 12px; font-weight: 800; font-style: normal; flex: none; vertical-align: middle; font-family: var(--sans); line-height: 1; }
+.d .n { width: 32px; height: 32px; font-size: 17px; }
+
+/* ── 와이어프레임 공통 부품 ───────────────────────── */
+.ph { position: relative; display: flex; align-items: center; justify-content: center; border: 1px solid var(--ink-3); background-color: var(--fill); background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'><path d='M0 0L100 100M100 0L0 100' stroke='%23a6a6a6' stroke-width='1' vector-effect='non-scaling-stroke' fill='none'/></svg>"); background-size: 100% 100%; background-repeat: no-repeat; max-width: 100%; flex: none; }
+.ph > span { background: var(--white); border: 1px solid var(--ink-3); font-size: 11px; padding: 1px 6px; color: var(--ink-2); white-space: nowrap; }
+.d .ph > span { font-size: 14px; }
+.nothumb { display: flex; align-items: center; justify-content: center; background: var(--fill); border: 1px solid var(--line); color: var(--ink-2); font-size: 13px; text-align: center; padding: 8px; }
+
+.w-hd { display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 24px; border-bottom: 1px solid var(--line); gap: 12px; background: var(--white); }
+.m .w-hd { padding: 0 16px; }
+.logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 21px; white-space: nowrap; }
+.logo .ph { width: 38px; height: 38px; }
+.m .logo { font-size: 17px; gap: 6px; }
+.m .logo .ph { width: 28px; height: 28px; }
+
+.row { display: flex; align-items: center; }
+.col { display: flex; flex-direction: column; }
+.between { justify-content: space-between; }
+.wrap { flex-wrap: wrap; }
+.g4 { gap: 4px; } .g6 { gap: 6px; } .g8 { gap: 8px; } .g12 { gap: 12px; } .g16 { gap: 16px; } .g20 { gap: 20px; } .g24 { gap: 24px; } .g32 { gap: 32px; }
+.end { align-items: flex-end; }
+.top { align-items: flex-start; }
+.f1 { flex: 1; min-width: 0; }
+
+.inp { display: flex; align-items: center; height: 38px; padding: 0 12px; border: 1px solid var(--ink-3); border-radius: 4px; color: var(--ink-3); font-size: 13px; background: var(--white); white-space: nowrap; overflow: hidden; }
+.inp.val { color: var(--ink); }
+.inp.lg { height: 44px; }
+.inp.area { height: 96px; align-items: flex-start; padding-top: 10px; }
+.lbl { font-size: 12px; font-weight: 700; }
+.btn { display: inline-flex; align-items: center; justify-content: center; height: 38px; padding: 0 14px; border: 1px solid var(--ink); border-radius: 4px; font-size: 13px; font-weight: 600; white-space: nowrap; background: var(--white); flex: none; }
+.btn.pri { background: var(--ink); color: var(--white); }
+.btn.ghost { border-color: transparent; }
+.btn.dis { border-style: dashed; color: var(--ink-3); border-color: var(--ink-3); }
+.btn.lg { height: 44px; }
+.btn.sm { height: 32px; padding: 0 10px; font-size: 12px; }
+.btn.full { width: 100%; }
+.btn.sq { width: 38px; padding: 0; }
+.lnk { text-decoration: underline; text-underline-offset: 3px; font-weight: 600; font-size: 13px; white-space: nowrap; }
+.chip { display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border: 1px solid var(--ink-3); border-radius: 999px; font-size: 12px; white-space: nowrap; background: var(--white); flex: none; }
+.chip.on { background: var(--ink); color: var(--white); border-color: var(--ink); }
+.chip.x { border-color: var(--ink); gap: 8px; }
+.chip.x i { font-style: normal; font-size: 11px; text-decoration: underline; }
+.tag { display: inline-block; padding: 1px 6px; border: 1px solid var(--ink); font-size: 11px; font-weight: 700; background: var(--white); white-space: nowrap; }
+.tag.lt { border-color: var(--ink-3); font-weight: 500; color: var(--ink-2); }
+.seg { display: inline-flex; border: 1px solid var(--ink); border-radius: 4px; overflow: hidden; flex: none; }
+.seg span { display: inline-flex; align-items: center; height: 36px; padding: 0 12px; font-size: 12px; font-weight: 600; }
+.seg span + span { border-left: 1px solid var(--ink); }
+.seg .on { background: var(--ink); color: var(--white); }
+.sel { display: inline-flex; align-items: center; justify-content: space-between; gap: 10px; height: 38px; padding: 0 12px; border: 1px solid var(--ink); border-radius: 4px; font-size: 13px; background: var(--white); white-space: nowrap; flex: none; }
+.sel::after { content: "선택"; font-size: 10px; color: var(--ink-3); }
+
+.h1 { font-size: 36px; font-weight: 800; line-height: 1.2; margin: 0; text-wrap: balance; }
+.h2 { font-size: 27px; font-weight: 800; line-height: 1.25; margin: 0; }
+.h3 { font-size: 17px; font-weight: 700; line-height: 1.4; margin: 0; }
+.m .h1 { font-size: 25px; }
+.m .h2 { font-size: 21px; }
+.muted { color: var(--ink-2); font-size: 13px; margin: 0; }
+.small { font-size: 12px; color: var(--ink-2); }
+.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .06em; color: var(--ink-2); }
+
+.sec { padding: 40px 48px; display: flex; flex-direction: column; gap: 20px; }
+.m .sec { padding: 24px 16px; gap: 16px; }
+.bt { border-top: 1px solid var(--line); }
+
+.sk { display: block; height: 9px; background: var(--fill-2); border-radius: 2px; }
+.sks { display: flex; flex-direction: column; gap: 8px; }
+
+.card { border: 1px solid var(--line); background: var(--white); display: flex; flex-direction: column; min-width: 0; }
+.card .body { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.ct { font-weight: 700; font-size: 16px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cmeta { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--ink-2); border-top: 1px solid var(--line); padding-top: 10px; }
+.tags1 { display: flex; gap: 6px; flex-wrap: wrap; max-height: 21px; overflow: hidden; min-width: 0; } /* 한 줄에 다 들어가는 태그만 보이고 넘치는 태그는 통째로 숨김 */
+.lrow { flex-direction: row; align-items: stretch; }
+.lthumb { width: 100px; min-height: 100px; align-self: stretch; border: 0; border-right: 1px solid var(--ink-3); }
+.lbody { padding: 10px 12px; gap: 6px; flex: 1; min-width: 0; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+
+.track { display: flex; gap: 16px; overflow: hidden; }
+.fcard { position: relative; flex: none; border: 1px solid var(--ink); }
+.fcard .ov { position: absolute; left: 14px; right: 14px; bottom: 14px; background: var(--white); border: 1px solid var(--ink); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.stat { font-size: 12px; color: var(--ink-2); }
+
+.box { border: 1px solid var(--ink-3); padding: 16px; background: var(--white); display: flex; flex-direction: column; gap: 10px; }
+.empty { border: 1px solid var(--ink-3); padding: 28px 18px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; background: var(--white); }
+.empty b { font-size: 15px; }
+.dim { background: var(--fill-2); }
+.cb { width: 18px; height: 18px; border: 1.5px solid var(--ink); flex: none; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; }
+.cb.on { background: var(--ink); color: var(--white); }
+.cb.on::after { content: "V"; }
+.chk { display: flex; align-items: center; gap: 10px; height: 40px; font-size: 14px; }
+.m .chk { height: 46px; border-bottom: 1px solid var(--line); }
+
+.foot { border-top: 1px solid var(--line); padding: 24px 48px; display: flex; justify-content: space-between; gap: 12px; font-size: 12px; color: var(--ink-2); flex-wrap: wrap; }
+.m .foot { padding: 20px 16px; flex-direction: column; }
+
+.pag { display: flex; align-items: center; gap: 6px; }
+.pg { display: inline-flex; align-items: center; justify-content: center; min-width: 38px; height: 38px; border: 1px solid var(--line); font-size: 13px; font-weight: 600; }
+.pg.on { background: var(--ink); color: var(--white); border-color: var(--ink); }
+.pg.gap { border: 0; min-width: 20px; }
+.m .pg { min-width: 34px; height: 40px; }
+
+.md { display: flex; flex-direction: column; gap: 14px; max-width: 720px; font-size: 15px; line-height: 1.8; }
+.md .mh2 { font-size: 22px; font-weight: 800; margin-top: 8px; }
+.md ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.md blockquote { margin: 0; border-left: 3px solid var(--ink); padding: 4px 0 4px 14px; color: var(--ink-2); }
+.code { border: 1px solid var(--ink); background: var(--fill); font-family: var(--mono); font-size: 13px; line-height: 1.7; padding: 12px 14px; overflow: hidden; white-space: nowrap; position: relative; }
+.code .cut { color: var(--ink-3); }
+.tbl { border: 1px solid var(--ink); overflow: hidden; }
+.tbl table { border-collapse: collapse; width: max-content; font-size: 13px; }
+.tbl td, .tbl th { border: 1px solid var(--line); padding: 6px 12px; text-align: left; white-space: nowrap; }
+.tbl th { background: var(--fill); }
+.url { text-decoration: underline; word-break: break-all; }
+.dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; border-bottom: 1px solid var(--line); padding-bottom: 18px; }
+.m .dl { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.dl div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.dl dt { font-size: 11px; font-weight: 700; color: var(--ink-2); }
+.dl dd { margin: 0; font-size: 14px; }
+.file { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; border: 1px solid var(--line); padding: 10px 12px; font-size: 13px; }
+.file b { font-weight: 600; word-break: break-all; }
+
+.side { width: 224px; flex: none; display: flex; flex-direction: column; gap: 18px; }
+.navl { display: flex; align-items: center; height: 40px; padding: 0 12px; font-size: 14px; font-weight: 600; border: 1px solid transparent; }
+.navl.on { background: var(--ink); color: var(--white); }
+.navgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.navgrid .navl { height: 44px; border-color: var(--ink-3); justify-content: center; }
+.navgrid .navl.on { border-color: var(--ink); }
+
+.flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; }
+.flow .step { background: var(--white); border: 1.5px solid var(--ink); padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; width: 220px; max-width: 100%; }
+.flow .step b { font-size: 14px; }
+.flow .step span { font-size: 12.5px; color: var(--ink-2); line-height: 1.6; }
+.flow .step code { font-family: var(--mono); font-size: 11.5px; }
+.flow .arr { display: flex; align-items: center; font-weight: 800; font-size: 18px; padding: 0 2px; }
+.flow.alt .step { border-style: dashed; }
+
+.inv { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.inv > div { background: var(--white); border: 1px solid var(--line); padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.inv h3 { margin: 0; font-size: 14px; }
+.inv p { margin: 0; font-size: 12.5px; color: var(--ink-2); line-height: 1.6; }
+.focus-demo { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+.tablewrap { overflow-x: auto; border: 1px solid var(--ink); background: var(--white); }
+.dtable { border-collapse: collapse; width: 100%; min-width: 860px; font-size: 13px; line-height: 1.6; }
+.dtable th, .dtable td { border: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
+.dtable th { background: var(--fill); font-size: 12px; }
+.asks { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 10px; line-height: 1.7; max-width: 90ch; }
+
+@media (max-width: 640px) {
+  .doc-head h1 { font-size: 24px; }
+  .toc .zoom { margin-left: 0; }
+}
+</style>
+
+<div class="doc">
+
+<header class="doc-head">
+  <span class="eyebrow">CAMPUSPOLIO · UI/UX 1차 · 스케치 단계</span>
+  <h1>홈 → 탐색 → 상세 열람 흐름 스케치</h1>
+  <p>스케치(기획) → 도색 → 마감 중 첫 단계입니다. 화면의 정보 순서와 배치, 상태별 화면만 흑백으로 그렸습니다. 색·아이콘·애니메이션은 넣지 않았고, 이미지·영상 자리는 X 표시 상자로 대신했습니다. 카드 제목·이름 등은 길이 확인용 예시 문구입니다. 프레임 안의 글자는 모두 실제 화면에 들어가는 텍스트이고, 설명은 프레임 아래 번호 메모에만 적었습니다.</p>
+  <div class="meta-grid">
+    <div><b>기준</b>Figma 홈 75:349, 탐색 75:976, 상세 75:802, 마이페이지 75:1219 + 현재 코드 + 1차 작업 계획</div>
+    <div><b>범위</b>UX-01 공통 요소, UX-02 헤더, UX-03 홈, UX-04 탐색, UX-05 상세, UX-06 마이페이지 틀</div>
+    <div><b>화면 폭</b>데스크톱 1280px(축소 표시), 모바일 360px</div>
+    <div><b>판단 방식</b>Figma와 현재 화면 중 나은 쪽을 채택하고, 둘을 섞은 곳은 메모에 이유를 남김</div>
+  </div>
+  <div class="legend">
+    <span><i class="ph lg-ph"></i>이미지·영상 자리</span>
+    <span><i class="lg-on"></i>선택됨·주요 행동</span>
+    <span><i class="lg-sk"></i>본문 텍스트 자리</span>
+    <span><b class="n">1</b>아래 메모 번호</span>
+    <span><span class="btn dis sm">비활성</span>비활성 버튼</span>
+  </div>
+  <div class="legend">
+    <span><span class="src">Figma 채택</span></span>
+    <span><span class="src">현재 유지</span></span>
+    <span><span class="src">계획 반영</span></span>
+    <span><span class="src">새 해석</span></span>
+  </div>
+</header>
+
+<nav class="toc" aria-label="스케치 목차">
+  <a href="#flow">0 흐름</a>
+  <a href="#parts">1 공통 요소</a>
+  <a href="#header">2 헤더</a>
+  <a href="#home">3 홈</a>
+  <a href="#explore">4 탐색</a>
+  <a href="#detail">5 상세</a>
+  <a href="#mypage">6 마이페이지</a>
+  <a href="#decisions">7 판단 요약</a>
+  <div class="zoom" role="group" aria-label="데스크톱 프레임 배율">
+    데스크톱 프레임
+    <button type="button" id="z50" data-z="0.5" aria-pressed="false">50%</button>
+    <button type="button" id="z60" data-z="0.6" aria-pressed="true">60%</button>
+    <button type="button" id="z80" data-z="0.8" aria-pressed="false">80%</button>
+    <button type="button" id="z100" data-z="1" aria-pressed="false">100%</button>
+  </div>
+</nav>
+
+<!-- ───────────────── 0. 흐름 ───────────────── -->
+<section class="part" id="flow">
+  <div class="part-head">
+    <span class="ux">STORYLINE</span>
+    <h2>0. 전체 흐름과 스토리라인</h2>
+    <p>처음 온 방문자가 홈에서 관심 작품을 발견하고, 탐색에서 조건을 좁힌 뒤, 상세에서 본문과 자료를 읽는 흐름이 이번 스케치의 중심입니다. 어느 화면에서든 헤더 검색으로 탐색에 들어갈 수 있습니다.</p>
+  </div>
+  <p class="sub">주 흐름: 방문자</p>
+  <div class="flow">
+    <div class="step"><b>1. 홈 진입</b><span>‘주요 프로젝트’에서 인기 작품을 가로로 넘겨 봄</span><code>/</code></div>
+    <div class="arr">→</div>
+    <div class="step"><b>2. 관심 분야 고르기</b><span>‘분야별 프로젝트’ 태그 칩으로 좁히거나 ‘전체 프로젝트 보기’</span><code>/ → /projects?tags=…</code></div>
+    <div class="arr">→</div>
+    <div class="step"><b>3. 탐색에서 조건 조정</b><span>검색어·태그·정렬·보기 방식을 바꾸고 페이지를 넘김. 조건은 URL에 남음</span><code>/projects?keyword=&amp;tags=&amp;filterType=&amp;page=</code></div>
+    <div class="arr">→</div>
+    <div class="step"><b>4. 상세 열람</b><span>제목·메타 → 본문(Markdown) → 자료 순서로 읽음</span><code>/projects/[projectId]</code></div>
+    <div class="arr">→</div>
+    <div class="step"><b>5. 목록으로 복귀</b><span>‘프로젝트 모음으로’ 또는 브라우저 뒤로가기로 다른 결과를 봄</span><code>/projects</code></div>
+  </div>
+  <p class="sub">보조 흐름</p>
+  <div class="flow alt">
+    <div class="step"><b>헤더 검색</b><span>데스크톱: 검색어 입력 후 Enter. 모바일: ‘검색’ 버튼으로 탐색 화면 이동</span><code>→ /projects?keyword=…</code></div>
+    <div class="arr">→</div>
+    <div class="step"><b>탐색 결과</b><span>검색창에 같은 검색어가 채워져 있음</span></div>
+  </div>
+  <div class="flow alt">
+    <div class="step"><b>작성자</b><span>헤더 ‘마이페이지’(모바일은 ‘계정’ 메뉴)</span></div>
+    <div class="arr">→</div>
+    <div class="step"><b>마이페이지</b><span>프로젝트·포트폴리오 목록, 설정</span><code>/mypage/*</code></div>
+    <div class="arr">→</div>
+    <div class="step"><b>프로젝트 등록</b><span>작성 화면 자체는 이번 범위 밖(후속 작업)</span><code>/projects/new</code></div>
+  </div>
+</section>
+
+<!-- ───────────────── 1. 공통 요소 ───────────────── -->
+<section class="part" id="parts">
+  <div class="part-head">
+    <span class="ux">UX-01</span>
+    <h2>1. 공통 요소 목록</h2>
+    <p>대상 화면에서 같은 역할을 하는 요소를 한 가지 모양으로 묶었습니다. 스케치 단계에서는 종류와 상태만 정하고, 색·글꼴·모서리 값은 도색 단계에서 정합니다.</p>
+  </div>
+  <div class="inv">
+    <div><h3>버튼 3종</h3><div class="row g8 wrap"><span class="btn pri">주요 행동</span><span class="btn">보조 행동</span><span class="lnk">텍스트 링크</span></div><p>한 영역에 주요 행동은 하나만 둡니다. 모바일 터치 영역은 44px 안팎.</p></div>
+    <div><h3>비활성·포커스</h3><div class="row g12 wrap"><span class="btn dis">다음</span><span class="btn focus-demo">포커스</span></div><p>비활성은 점선과 흐린 글자로, 포커스는 두꺼운 외곽선으로 구분합니다. 색만으로 구분하지 않습니다.</p></div>
+    <div><h3>입력·선택</h3><div class="col g8"><span class="inp">프로젝트 검색</span><div class="row g8"><span class="sel">최신순</span><span class="seg"><span class="on">그리드</span><span>리스트</span></span></div></div><p>검색 입력에는 화면에 보이거나 읽히는 이름을 붙입니다.</p></div>
+    <div><h3>칩과 태그</h3><div class="row g8 wrap"><span class="chip on">전체</span><span class="chip">공학</span><span class="chip x">공학 <i>해제</i></span><span class="tag">공학</span></div><p>칩 = 누를 수 있는 필터, 태그 배지 = 카드의 분류 표시. 둘의 모양을 구분합니다.</p></div>
+    <div><h3>카드 2종</h3><div class="row g8 top"><div class="fcard" style="width:110px"><div class="ph" style="height:80px"></div></div><div class="card" style="width:110px"><div class="ph" style="height:50px;border:0;border-bottom:1px solid var(--ink-3)"></div><div class="body" style="padding:6px"><span class="sk"></span><span class="sk" style="width:60%"></span></div></div></div><p>강조 카드(홈 주요 프로젝트, 글이 이미지 위)와 일반 카드(목록, 글이 이미지 아래)를 용도에 따라 나눕니다.</p></div>
+    <div><h3>상태 상자</h3><div class="empty" style="padding:12px"><b style="font-size:13px">결과가 없어요</b><span class="btn sm">조건 초기화</span></div><p>빈 데이터·결과 없음·오류는 같은 상자 구조(제목 → 이유 → 다음 행동)를 씁니다.</p></div>
+  </div>
+</section>
+
+<!-- ───────────────── 2. 헤더 ───────────────── -->
+<section class="part" id="header">
+  <div class="part-head">
+    <span class="ux">UX-02</span>
+    <h2>2. 공통 헤더</h2>
+    <p>현재 모바일에서는 검색창이 숨겨지고 대체 진입이 없습니다. 360px에서도 로고·검색·계정 행동이 한 줄에 들어오게 정리했습니다.</p>
+  </div>
+  <div class="frames">
+    <figure class="frame d">
+      <figcaption><b>데스크톱 · 로그아웃</b>1280</figcaption>
+      <div class="viewport"><div class="scr">
+        <div class="w-hd">
+          <div class="logo"><span class="ph"></span>Campus Polio <b class="n">1</b></div>
+          <div class="row g12">
+            <span class="inp" style="width:280px">프로젝트 검색</span><b class="n">2</b>
+            <span class="btn ghost">로그인</span><span class="btn pri">회원가입</span><b class="n">3</b>
+          </div>
+        </div>
+      </div></div>
+    </figure>
+    <figure class="frame d">
+      <figcaption><b>데스크톱 · 로그인</b>1280</figcaption>
+      <div class="viewport"><div class="scr">
+        <div class="w-hd">
+          <div class="logo"><span class="ph"></span>Campus Polio</div>
+          <div class="row g12">
+            <span class="inp" style="width:280px">프로젝트 검색</span>
+            <span class="btn">마이페이지</span><b class="n">4</b>
+          </div>
+        </div>
+      </div></div>
+    </figure>
+  </div>
+  <div class="frames">
+    <figure class="frame m">
+      <figcaption><b>모바일 · 로그아웃</b>360</figcaption>
+      <div class="viewport"><div class="scr">
+        <div class="w-hd">
+          <div class="logo"><span class="ph"></span>Campus Polio</div>
+          <div class="row g6"><span class="btn sm">검색</span><b class="n">5</b><span class="btn sm pri">로그인</span><b class="n">6</b></div>
+        </div>
+        <div style="height:60px"></div>
+      </div></div>
+    </figure>
+    <figure class="frame m">
+      <figcaption><b>모바일 · 로그인</b>360</figcaption>
+      <div class="viewport"><div class="scr">
+        <div class="w-hd">
+          <div class="logo"><span class="ph"></span>Campus Polio</div>
+          <div class="row g6"><span class="btn sm">검색</span><span class="btn sm">계정</span><b class="n">7</b></div>
+        </div>
+        <div style="height:60px"></div>
+      </div></div>
+    </figure>
+    <figure class="frame m">
+      <figcaption><b>모바일 · 계정 메뉴 열림</b>360</figcaption>
+      <div class="viewport"><div class="scr">
+        <div class="w-hd">
+          <div class="logo"><span class="ph"></span>Campus Polio</div>
+          <div class="row g6"><span class="btn sm">검색</span><span class="btn sm pri">계정</span><b class="n">8</b></div>
+        </div>
+        <div class="col" style="border-bottom:1.5px solid var(--ink)">
+          <div class="col g4" style="padding:14px 16px 6px"><span class="eyebrow">내 계정</span></div>
+          <span class="navl" style="height:46px;padding:0 16px">내 프로젝트</span>
+          <span class="navl" style="height:46px;padding:0 16px">내 포트폴리오</span>
+          <span class="navl" style="height:46px;padding:0 16px">프로필 설정</span>
+          <div style="padding:10px 16px 14px" class="col g8">
+            <span class="btn pri lg full">프로젝트 등록</span>
+          </div>
+        </div>
+        <div class="dim" style="height:120px"></div>
+      </div></div>
+    </figure>
+  </div>
+  <ol class="notes">
+    <li><b class="n">1</b><div><span class="src">Figma 채택</span>왼쪽 로고, 오른쪽 검색·계정 순서. 로고 이미지와 ‘Campus Polio’ 글자를 함께 유지합니다.</div></li>
+    <li><b class="n">2</b><div><span class="src">계획 반영</span>검색 입력에 ‘프로젝트 검색’이라는 이름을 붙이고, Enter로 <code>/projects?keyword=…</code>에 이동합니다.</div></li>
+    <li><b class="n">3</b><div><span class="src">현재 유지</span>로그인·회원가입 버튼. 현재 두 버튼 모두 같은 <code>/login</code>으로 이동합니다.</div></li>
+    <li><b class="n">4</b><div><span class="src">새 해석</span>로그인 상태의 계정 버튼은 아이콘만 두지 않고 ‘마이페이지’ 글자를 붙입니다. 아이콘을 쓸지는 도색 단계에서 정합니다.</div></li>
+    <li><b class="n">5</b><div><span class="src">계획 반영</span>모바일 ‘검색’ 버튼은 <code>/projects</code>로 이동하고, 탐색 화면 상단 검색창에서 바로 입력합니다. 별도 검색 모달은 만들지 않습니다.</div></li>
+    <li><b class="n">6</b><div><span class="src">새 해석 · 확정</span>모바일에서는 로그인과 회원가입이 같은 경로이므로 ‘로그인’ 버튼 하나로 합쳤습니다. 360px에서 로고가 잘리지 않게 하기 위함입니다.</div></li>
+    <li><b class="n">7</b><div><span class="src">계획 반영</span>로그인 상태의 모바일은 계정 영역을 ‘계정’ 메뉴로 접습니다. 메뉴에는 기존 마이페이지 경로와 프로젝트 등록만 둡니다. 로그아웃은 아직 기능이 없어(T03 후속 작업) 이번 메뉴에는 넣지 않습니다.</div></li>
+    <li><b class="n">8</b><div><span class="src">계획 반영</span>키보드 순서는 로고 → 검색 → 계정입니다. 메뉴는 Escape나 바깥을 누르면 닫히고, 닫으면 포커스가 ‘계정’ 버튼으로 돌아갑니다.</div></li>
+  </ol>
+</section>
+
+<!-- ───────────────── 3. 홈 ───────────────── -->
+<section class="part" id="home">
+  <div class="part-head">
+    <span class="ux">UX-03</span>
+    <h2>3. 홈</h2>
+    <p>현재는 모바일 슬라이더가 마지막 작품까지 가지 못하고, ‘자세히 보기’가 마우스 hover에서만 보입니다. 같은 프로젝트가 두 섹션에 겹쳐 나오기도 합니다. 홈에서는 인기 작품을 둘러보고 분야를 골라 탐색으로 넘어가게 합니다.</p>
+  </div>
+  <div class="frames">
+    <figure class="frame d">
+      <figcaption><b>데스크톱 · 기본</b>1280 · 로그아웃</figcaption>
+      <div class="viewport"><div class="scr">
+        <div class="w-hd">
+          <div class="logo"><span class="ph"></span>Campus Polio</div>
+          <div class="row g12"><span class="inp" style="width:280px">프로젝트 검색</span><span class="btn ghost">로그인</span><span class="btn pri">회원가입</span></div>
+        </div>
+
+        <div class="sec">
+          <div class="row between end">
+            <div class="col g6"><div class="row g12"><h2 class="h2">주요 프로젝트</h2><b class="n">1</b></div></div>
+            <div class="row g12"><span class="lnk">전체 프로젝트 보기</span><span class="btn dis">이전</span><span class="btn">다음</span><b class="n">2</b></div>
+          </div>
+          <div class="track">
+            <div class="fcard" style="width:470px"><div class="ph" style="height:330px;border:0"><span>대표 이미지</span></div>
+              <div class="ov"><span class="tag" style="align-self:flex-start">공학</span><b class="h3">스마트 캠퍼스 출결 시스템: 블루투스 비콘 기반 실시간 출석 관리</b><span class="stat">김민지 · 조회 1.2k · 좋아요 34</span><span class="lnk">자세히 보기</span></div></div>
+            <div class="fcard" style="width:470px"><div class="ph" style="height:330px;border:0"><span>대표 이미지</span></div>
+              <div class="ov"><span class="tag" style="align-self:flex-start">인문학</span><b class="h3">삼육 기록관 디지털 아카이브 구축</b><span class="stat">이서준 · 조회 980 · 좋아요 21</span><span class="lnk">자세히 보기</span></div></div>
+            <div class="fcard" style="width:470px"><div class="ph" style="height:330px;border:0"><span>대표 이미지</span></div>
+              <div class="ov"><span class="tag" style="align-self:flex-start">시각 디자인</span><b class="h3">한글 타이포그래피로 본 미래 인터페이스</b><span class="stat">박지호 · 조회 870 · 좋아요 19</span><span class="lnk">자세히 보기</span></div></div>
+          </div>
+          <div class="row g8"><b class="n">3</b></div>
+        </div>
+
+        <div class="sec bt">
+          <div class="col g6"><div class="row g12"><h2 class="h2">분야별 프로젝트</h2><b class="n">4</b></div></div>
+          <div class="row g8 wrap"><span class="chip on">전체</span><span class="chip">시각 디자인</span><span class="chip">공학</span><span class="chip">인문학</span><span class="chip">건축학</span><span class="chip">신학</span></div>
+          <div class="grid3">
+            <div class="card"><div class="ph" style="height:200px;border:0;border-bottom:1px solid var(--ink-3)"><span>썸네일</span></div><div class="body"><span class="tag" style="align-self:flex-start">공학</span><span class="ct">지역 하천 수질 데이터 시각화 대시보드</span><div class="cmeta"><span>최유나</span><span>조회 640 · 좋아요 12</span></div></div></div>
+            <div class="card"><div class="ph" style="height:200px;border:0;border-bottom:1px solid var(--ink-3)"><span>썸네일</span></div><div class="body"><span class="tag" style="align-self:flex-start">공학</span><span class="ct">시니어를 위한 음성 기반 복약 알림 앱</span><div class="cmeta"><span>정하린</span><span>조회 512 · 좋아요 9</span></div></div></div>
+            <div class="card"><div class="ph" style="height:200px;border:0;border-bottom:1px solid var(--ink-3)"><span>썸네일</span></div><div class="body"><span class="tag" style="align-self:flex-start">시각 디자인</span><span class="ct">공감각 인터랙티브 설치 작품: 소리에 반응하는 액체 모션</span><div class="cmeta"><span>오태윤</span><span>조회 430 · 좋아요 15</span></div></div></div>
+            <div class="card"><div class="ph" style="height:200px;border:0;border-bottom:1px solid var(--ink-3)"><span>썸네일</span></div><div class="body"><span class="tag" style="align-self:flex-start">신학</span><span class="ct">현대 명상 프로그램과 전통 묵상의 비교 연구</span><div class="cmeta"><span>한도윤</span><span>조회 301 · 좋아요 4</span></div></div></div>
+            <div class="card"><div class="ph" style="height:200px;border:0;border-bottom:1px solid var(--ink-3)"><span>썸네일</span></div><div class="body"><span class="tag" style="align-self:flex-start">건축학</span><span class="ct">캠퍼스 유휴 공간 재생 계획</span><div class="cmeta"><span>윤서아</span><span>조회 288 · 좋아요 7</span></div></div></div>
+            <div class="card"><div class="ph" style="height:200px;border:0;border-bottom:1px solid var(--ink-3)"><span>썸네일</span></div><div class="body"><span class="tag" style="align-self:flex-start">인문학</span><span class="ct">구술 기록으로 본 학교 70년사</span><div class="cmeta"><span>장민서</span><span>조회 210 · 좋아요 3</span></div></div></div>
+          </div>
+          <div class="row g12" style="justify-content:center"><span class="btn lg">전체 프로젝트 보기</span><b class="n">5</b></div>
+        </div>
+
+        <div class="sec">
+          <div class="box row between" style="padding:36px 40px;border:1.5px solid var(--ink)">
+            <div class="col g12">
+              <span class="eyebrow">프로젝트 아카이브</span>
+              <div class="row g12"><h2 class="h2">새 프로젝트를 공유해보세요</h2><b class="n">6</b></div>
+              <div class="row g8"><span class="btn pri lg">작품 등록하기</span><span class="btn lg">내 프로젝트 보기</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="foot"><span>Copyright 2026. CampusPolio. All rights reserved.</span><span class="row g20">이용약관 · 개인정보 처리방침 · 문의하기 <b class="n">7</b></span></div>
+      </div></div>
+    </figure>
+
+    <figure class="frame m">
+      <figcaption><b>모바일 · 기본</b>360 · 로그아웃</figcaption>
+      <div class="viewport"><div class="scr">
+        <div class="w-hd"><div class="logo"><span class="ph"></span>Campus Polio</div><div class="row g6"><span class="btn sm">검색</span><span class="btn sm pri">로그인</span></div></div>
+        <div class="sec">
+          <div class="col g4"><h2 class="h2">주요 프로젝트</h2></div>
+          <div class="track">
+            <div class="fcard" style="width:286px"><div class="ph" style="height:240px;border:0"><span>대표 이미지</span></div>
+              <div class="ov" style="left:10px;right:10px;bottom:10px;padding:10px"><span class="tag" style="align-self:flex-start">공학</span><b style="font-size:15px;line-height:1.4">스마트 캠퍼스 출결 시스템: 블루투스 비콘 기반 실시간 출석 관리</b><span class="stat">김민지 · 조회 1.2k</span><span class="lnk">자세히 보기</span></div></div>
+            <div class="fcard" style="width:286px"><div class="ph" style="height:240px;border:0"></div></div>
+          </div>
+          <div class="row between"><div class="row g8"><span class="btn dis lg">이전</span><span class="btn lg">다음</span><b class="n">8</b></div><span class="lnk">전체 보기</span></div>
+        </div>
+        <div class="sec bt">
+          <div class="col g4"><h2 class="h2">분야별 프로젝트</h2></div>
+          <div class="row g8" style="overflow:hidden"><span class="chip on">전체</span><span class="chip">시각 디자인</span><span class="chip">공학</span><span class="chip">인문학</span><span class="chip">건축학</span></div>
+          <div class="row g8"><b class="n">9</b></div>
+          <div class="card"><div class="ph" style="height:180px;border:0;border-bottom:1px solid var(--ink-3)"><span>썸네일</span></div><div class="body"><span class="tag" style="align-self:flex-start">공학</span><span class="ct">지역 하천 수질 데이터 시각화 대시보드</span><div class="cmeta"><span>최유나</span><span>조회 640 · 좋아요 12</span></div></div></div>
+          <div class="card"><div class="ph" style="height:180px;border:0;border-bottom:1px solid var(--ink-3)"><span>썸네일</span></div><div class="body"><span class="tag" style="align-self:flex-start">공학</span><span class="ct">시니어를 위한 음성 기반 복약 알림 앱</span><div class="cmeta"><span>정하린</span><span>조회 512 · 좋아요 9</span></div></div></div>
+          <span class="btn lg full">전체 프로젝트 보기</span>
+        </div>
+        <div class="sec">
+          <div class="box" style="border:1.5px solid var(--ink)">
+            <span class="eyebrow">프로젝트 아카이브</span>
+            <h2 class="h2">새 프로젝트를 공유해보세요</h2>
+            <span class="btn pri lg full">작품 등록하기</span><span class="btn lg full">내 프로젝트 보기</span>
+            <div class="row g8"><b class="n">10</b></div>
+          </div>
+        </div>
+        <div class="foot"><span>Copyright 2026. CampusPolio.</span><span>이용약관 · 개인정보 처리방침 · 문의하기</span></div>
+      </div></div>
+    </figure>
+  </div>
+
+  <p class="sub">홈 상태</p>
+  <div class="frames">
+    <figure class="frame m">
+      <figcaption><b>주요 프로젝트 0개</b>360</figcaption>
+      <div class="viewport"><div class="scr"><div class="sec">
+        <div class="row g12"><h2 class="h2">주요 프로젝트</h2><b class="n">11</b></div>
+        <div class="empty"><b>아직 소개할 프로젝트가 없어요</b><span class="muted">첫 프로젝트를 등록하면 이곳에 소개돼요.</span><span class="btn pri lg">작품 등록하기</span></div>
+      </div></div></div>
+    </figure>
+    <figure class="frame m">
+      <figcaption><b>선택한 분야에 프로젝트 없음</b>360</figcaption>
+      <div class="viewport"><div class="scr"><div class="sec">
+        <div class="col g4"><h2 class="h2">분야별 프로젝트</h2></div>
+        <div class="row g8" style="overflow:hidden"><span class="chip">전체</span><span class="chip">시각 디자인</span><span class="chip on">인문학</span><span class="chip">공학</span></div>
+        <div class="empty"><b>인문학 프로젝트가 아직 없어요</b><span class="muted">다른 분야를 고르거나 전체 목록을 확인해 보세요.</span><span class="btn lg">전체 분야 보기</span></div>
+      </div></div></div>
+    </figure>
+    <figure class="frame m">
+      <figcaption><b>불러오기 실패</b>360</figcaption>
+      <div class="viewport"><div class="scr"><div class="sec">
+        <div class="empty"><b>프로젝트를 불러오지 못했어요</b><span class="muted">네트워크 상태를 확인하고 다시 시도해 주세요.</span><span class="btn pri lg">다시 시도</span></div>
+        <div class="row g8"><b class="n">12</b></div>
+        <div class="box" style="border:1.5px solid var(--ink)"><h2 class="h3">새 프로젝트를 공유해보세요</h2><span class="btn pri full">작품 등록하기</span></div>
+      </div></div></div>
+    </figure>
+    <figure class="frame m">
+      <figcaption><b>긴 제목 · 썸네일 없음/실패</b>360</figcaption>
+      <div class="viewport"><div class="scr"><div class="sec">
+        <div class="fcard" style="width:100%"><div class="nothumb" style="height:220px;border:0">썸네일 없음</div>
+          <div class="ov" style="left:10px;right:10px;bottom:10px;padding:10px"><span class="tag" style="align-self:flex-start">공학</span><b style="font-size:15px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">지역 소상공인을 위한 인공지능 기반 재고 예측 및 자동 발주 추천 시스템 설계와 구현 사례 연구</b><span class="stat">작성자 정보 없음 · 조회 12</span><span class="lnk">자세히 보기</span></div></div>
+        <div class="row g8"><b class="n">13</b></div>
+      </div></div></div>
+    </figure>
+  </div>
+
+  <ol class="notes">
+    <li><b class="n">1</b><div><span class="src">계획 반영</span>‘주요 전시’를 ‘주요 프로젝트’로 바꿉니다. 이 영역의 데이터는 인기 프로젝트이고 Event·전시 기능이 아니므로, 행사처럼 보이는 문구를 쓰지 않습니다.</div></li>
+    <li><b class="n">2</b><div><span class="src">Figma 채택</span>제목 오른쪽에 ‘전체 프로젝트 보기’와 이전/다음 버튼을 둡니다. 처음과 끝에서는 버튼이 비활성(점선)이 되고, 수동 스크롤 뒤에도 상태를 다시 계산합니다.</div></li>
+    <li><b class="n">3</b><div><span class="src">Figma 채택</span>큰 카드와 다음 카드 일부 노출. <span class="src">계획 반영</span>가로 스크롤·스냅·스와이프로 바꾸고 ‘항상 3개’ 계산은 없앱니다. Figma의 2행 비대칭 배치는 카드 수(0~10개)가 바뀌면 깨지므로 채택하지 않았습니다. 카드 전체가 링크 하나이고 ‘자세히 보기’는 항상 보입니다.</div></li>
+    <li><b class="n">4</b><div><span class="src">새 해석 · 확정</span>태그 칩을 1섹션에서 2섹션으로 옮겼습니다. 1섹션은 인기 프로젝트, 2섹션은 분야별(categories) 프로젝트로 역할을 나눠 같은 작품이 두 번 나오는 일을 줄입니다. 섹션 이름도 탐색 페이지의 ‘프로젝트 모음’과 겹치지 않게 ‘분야별 프로젝트’로 했습니다.</div></li>
+    <li><b class="n">5</b><div><span class="src">새 해석</span>Figma 2섹션의 하단 화살표(두 번째 슬라이더) 대신 그리드와 ‘전체 프로젝트 보기’ 버튼을 둡니다. 특정 태그를 고른 상태라면 버튼이 ‘공학 프로젝트 더 보기’로 바뀌고 기존 URL 파라미터(<code>/projects?tags=공학</code>)로 이동합니다.</div></li>
+    <li><b class="n">6</b><div><span class="src">계획 반영</span>Figma의 행사 배너(남은 일수·등록 인원)와 현재의 POPULAR·TOTAL 수치를 넣지 않습니다. 홈 응답으로 계산한 숫자를 전체 프로젝트 수로 오해할 수 있기 때문입니다. 등록 유도 문구와 버튼은 현재 화면을 유지합니다.</div></li>
+    <li><b class="n">7</b><div><span class="src">현재 유지</span>푸터. 이용약관 등은 연결할 페이지가 없어 지금처럼 글자로만 둡니다.</div></li>
+    <li><b class="n">8</b><div><span class="src">새 해석</span>모바일 카드는 화면의 약 80% 폭으로, 다음 카드가 보이게 합니다. 이전/다음 버튼은 트랙 아래에 44px로 둡니다.</div></li>
+    <li><b class="n">9</b><div><span class="src">새 해석</span>모바일 칩은 줄바꿈하면 화면을 많이 차지하므로 한 줄 가로 스크롤로 둡니다.</div></li>
+    <li><b class="n">10</b><div><span class="src">새 해석</span>CTA 버튼은 모바일에서 세로로 쌓고 전체 폭으로 둡니다.</div></li>
+    <li><b class="n">11</b><div><span class="src">계획 반영</span>주요 프로젝트가 0개면 이전/다음 버튼을 숨기고, 빈 상태 상자에서 작품 등록으로 안내합니다.</div></li>
+    <li><b class="n">12</b><div><span class="src">새 해석</span>불러오기 오류는 두 섹션에 반복하지 않고 페이지 위쪽에 한 번만 보여줍니다. 아래 등록 유도 영역은 그대로 둡니다.</div></li>
+    <li><b class="n">13</b><div><span class="src">계획 반영</span>카드 제목은 2줄까지 보여주고 말줄임합니다(전체 제목은 상세에서 확인). 썸네일이 없을 때와 이미지 로드가 실패했을 때는 같은 대체 모양을 씁니다. 작성자가 없으면 ‘작성자 정보 없음’으로 표시합니다.</div></li>
+  </ol>
+</section>
+
+<!-- ───────────────── 4. 탐색 ───────────────── -->
+<section class="part" id="explore">
+  <div class="part-head">
+    <span class="ux">UX-04</span>
+    <h2>4. 프로젝트 탐색 <code style="font-size:15px">/projects</code></h2>
+    <p>현재는 작은 화면에서 사이드바가 사라져 태그 필터를 쓸 수 없습니다. 연도·학기는 눌러도 결과가 바뀌지 않습니다. 모바일에서도 같은 조건을 쓸 수 있게 하고, 실제로 적용된 조건만 보이게 했습니다.</p>
+  </div>
+  <div class="frames">
+    <figure class="frame d">
+      <figcaption><b>데스크톱 · 그리드, 조건 적용됨</b>1280 · 로그인</figcaption>
+      <div class="viewport"><div class="scr">
+        <div class="w-hd"><div class="logo"><span class="ph"></span>Campus Polio</div><div class="row g12"><span class="inp" style="width:280px">프로젝트 검색</span><span class="btn">마이페이지</span></div></div>
+        <div class="row top g32" style="padding:40px 48px">
+          <aside class="side">
+            <div class="col g4"><b style="font-size:19px">삼육 아카이브</b><span class="small">프로젝트 저장소</span></div>
+            <div class="row g8"><span class="btn pri lg" style="flex:1">프로젝트 제출</span><b class="n">1</b></div>
+            <div class="col g4" style="margin-top:12px">
+              <div class="row between"><span class="lbl">태그</span><span class="small">2개 적용</span></div>
+              <div class="row g8"><b class="n">2</b></div>
+              <span class="chk"><i class="cb"></i>시각 디자인</span>
+              <span class="chk"><i class="cb"></i>건축학</span>
+              <span class="chk"><i class="cb"></i>신학</span>
+              <span class="chk"><i class="cb on"></i><b>공학</b></span>
+              <span class="chk"><i class="cb"></i>인문학</span>
+              <span class="chk"><i class="cb"></i>졸업작품</span>
+              <span class="chk"><i class="cb"></i>논문</span>
+              <span class="chk"><i class="cb on"></i><b>디자인</b></span>
+              <span class="chk"><i class="cb"></i>역사</span>
+            </div>
+            <div class="row g8"><b class="n">3</b><b class="n">4</b></div>
+          </aside>
+          <div class="f1 col g20">
+            <div class="col g6"><div class="row g12"><h1 class="h1">프로젝트 모음</h1><b class="n">5</b></div></div>
+            <div class="row between g12">
+              <div class="row g8"><span class="inp val" style="width:340px">캡스톤</span><span class="btn">검색</span></div>
+              <div class="row g8"><span class="sel">최신순</span><span class="seg"><span class="on">그리드</span><span>리스트</span></span><b class="n">6</b></div>
+            </div>
+            <div class="row g8 wrap" style="border-block:1px solid var(--line);padding-block:12px">
+              <span class="lbl">적용된 조건</span>
+              <span class="chip x">검색어: 캡스톤 <i>해제</i></span><span class="chip x">공학 <i>해제</i></span><span class="chip x">디자인 <i>해제</i></span>
+              <span class="lnk" style="margin-left:8px">전체 조건 초기화</span><b class="n">7</b>
+            </div>
+            <div class="grid3">
+              <div class="card"><div class="ph" style="height:170px;border:0;border-bottom:1px solid var(--ink-3)"><span>썸네일</span></div><div class="body"><span class="tag" style="align-self:flex-start">공학</span><span class="ct">스마트 캠퍼스 출결 시스템: 블루투스 비콘 기반 실시간 출석 관리</span><div class="sks"><span class="sk"></span><span class="sk" style="width:70%"></span></div><div class="tags1"><span class="tag lt">캡스톤</span><span class="tag lt">IoT</span><span class="tag lt">블루투스</span><span class="tag lt">모바일 앱</span><span class="tag lt">출결 관리</span><span class="tag lt">React Native</span></div><div class="cmeta"><span>김민지</span><span>조회 1.2k · 좋아요 34</span></div></div></div>
+              <div class="card"><div class="ph" style="height:170px;border:0;border-bottom:1px solid var(--ink-3)"><span>썸네일</span></div><div class="body"><span class="tag" style="align-self:flex-start">디자인</span><span class="ct">캡스톤 전시 공간 안내 사인 시스템</span><div class="sks"><span class="sk"></span><span class="sk" style="width:55%"></span></div><div class="tags1"><span class="tag lt">캡스톤</span></div><div class="cmeta"><span>윤서아</span><span>조회 320 · 좋아요 8</span></div></div></div>
+              <div class="card"><div class="ph" style="height:170px;border:0;border-bottom:1px solid var(--ink-3)"><span>썸네일</span></div><div class="body"><span class="tag" style="align-self:flex-start">공학</span><span class="ct">시니어를 위한 음성 기반 복약 알림 앱</span><div class="sks"><span class="sk"></span><span class="sk" style="width:80%"></span></div><div class="tags1"><span class="tag lt">캡스톤</span><span class="tag lt">모바일</span></div><div class="cmeta"><span>정하린</span><span>조회 512 · 좋아요 9</span></div></div></div>
+              <div class="card"><div class="ph" style="height:170px;border:0;border-bottom:1px solid var(--ink-3)"><span>썸네일</span></div><div class="body"><span class="tag" style="align-self:flex-start">디자인</span><span class="ct">로컬 브랜드 리디자인 캡스톤</span><div class="sks"><span class="sk"></span><span class="sk" style="width:60%"></span></div><div class="tags1"><span class="tag lt">브랜딩</span></div><div class="cmeta"><span>오태윤</span><span>조회 280 · 좋아요 6</span></div></div></div>
+              <div class="card"><div class="nothumb" style="height:170px;border:0;border-bottom:1px solid var(--line)">썸네일 없음</div><div class="body"><span class="tag" style="align-self:flex-start">공학</span><span class="ct">캡스톤 협업 일정 관리 도구</span><div class="sks"><span class="sk"></span><span class="sk" style="width:40%"></span></div><div class="tags1"><span class="tag lt">웹</span></div><div class="cmeta"><span>한도윤</span><span>조회 190 · 좋아요 2</span></div></div></div>
+              <div class="card"><div class="ph" style="height:170px;border:0;border-bottom:1px solid var(--ink-3)"><span>썸네일</span></div><div class="body"><span class="tag" style="align-self:flex-start">공학</span><span class="ct">드론 영상 기반 캠퍼스 시설 점검</span><div class="sks"><span class="sk"></span><span class="sk" style="width:75%"></span></div><div class="tags1"><span class="tag lt">캡스톤</span><span class="tag lt">영상</span></div><div class="cmeta"><span>장민서</span><span>조회 150 · 좋아요 4</span></div></div></div>
+            </div>
+            <div class="row g8"><b class="n">8</b></div>
+            <div class="col g8" style="align-items:center;margin-top:20px">
+              <div class="pag"><span class="btn dis">이전</span><span class="pg on">1</span><span class="pg">2</span><span class="pg">3</span><span class="btn">다음</span><b class="n">9</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="foot"><span>Copyright 2026. CampusPolio. All rights reserved.</span><span>이용약관 · 개인정보 처리방침 · 문의하기</span></div>
+      </div></div>
+    </figure>
+
+    <figure class="frame m">
+      <figcaption><b>모바일 · 그리드, 조건 적용됨</b>360 · 로그인</figcaption>
+      <div class="viewport"><div class="scr">
+        <div class="w-hd"><div class="logo"><span class="ph"></span>Campus Polio</div><div class="row g6"><span class="btn sm">검색</span><span class="btn sm">계정</span></div></div>
+        <div class="sec">
+          <div class="col g4"><h1 class="h1">프로젝트 모음</h1></div>
+          <div class="row g8"><span class="inp val lg f1">캡스톤</span><span class="btn lg">검색</span></div>
+          <div class="row between g6"><span class="btn lg">필터 · 2</span><b class="n">10</b><span class="sel" style="height:44px">최신순</span><span class="seg"><span class="on" style="height:42px">그리드</span><span style="height:42px">리스트</span></span></div>
+          <div class="row g6 wrap"><span class="chip x">검색어: 캡스톤 <i>해제</i></span><span class="chip x">공학 <i>해제</i></span><span class="chip x">디자인 <i>해제</i></span><span class="lnk" style="line-height:32px">전체 조건 초기화</span></div>
+          <div class="card"><div class="ph" style="height:170px;border:0;border-bottom:1px solid var(--ink-3)"><span>썸네일</span></div><div class="body"><span class="tag" style="align-self:flex-start">공학</span><span class="ct">스마트 캠퍼스 출결 시스템: 블루투스 비콘 기반 실시간 출석 관리</span><div class="sks"><span class="sk"></span><span class="sk" style="width:70%"></span></div><div class="cmeta"><span>김민지</span><span>조회 1.2k · 좋아요 34</span></div></div></div>
+          <div class="card"><div class="ph" style="height:170px;border:0;border-bottom:1px solid var(--ink-3)"><span>썸네일</span></div><div class="body"><span class="tag" style="align-self:flex-start">디자인</span><span class="ct">캡스톤 전시 공간 안내 사인 시스템</span><div class="cmeta"><span>윤서아</span><span>조회 320 · 좋아요 8</span></div></div></div>
+          <div class="col g8" style="align-items:center">
+            <div class="pag"><span class="btn dis lg">이전</span><span class="pg on">1</span><span class="pg">2</span><span class="pg">3</span><span class="btn lg">다음</span></div>
+          </div>
+          <div class="row g8"><b class="n">11</b></div>
+        </div>
+      </div></div>
+    </figure>
+
+    <figure class="frame m">
+      <figcaption><b>모바일 · 태그 필터 패널 열림</b>360</figcaption>
+      <div class="viewport"><div class="scr" style="background:var(--fill-2)">
+        <div class="w-hd" style="opacity:.5"><div class="logo"><span class="ph"></span>Campus Polio</div><div class="row g6"><span class="btn sm">검색</span><span class="btn sm">계정</span></div></div>
+        <div style="height:70px"></div>
+        <div style="background:var(--white);border-top:2px solid var(--ink);border-radius:12px 12px 0 0" class="col">
+          <div class="row between" style="padding:16px 16px 8px"><b class="h3">태그 필터 <b class="n">12</b></b><span class="btn sm">닫기</span></div>
+          <div class="col" style="padding:0 16px">
+            <span class="chk"><i class="cb"></i>시각 디자인</span>
+            <span class="chk"><i class="cb"></i>건축학</span>
+            <span class="chk"><i class="cb"></i>신학</span>
+            <span class="chk"><i class="cb on"></i><b>공학</b></span>
+            <span class="chk"><i class="cb"></i>인문학</span>
+            <span class="chk"><i class="cb"></i>졸업작품</span>
+            <span class="chk"><i class="cb on"></i><b>논문</b></span>
+            <span class="chk"><i class="cb"></i>디자인</span>
+            <span class="chk"><i class="cb"></i>역사</span>
+          </div>
+          <div class="row g8" style="padding:14px 16px;border-top:1px solid var(--ink);margin-top:8px"><span class="btn lg">선택 초기화</span><span class="btn pri lg f1">적용하기 · 2</span></div>
+          <div class="row g8" style="padding:0 16px 14px"><b class="n">13</b></div>
+        </div>
+      </div></div>
+    </figure>
+  </div>
+
+  <p class="sub">탐색 상태</p>
+  <div class="frames">
+    <figure class="frame m">
+      <figcaption><b>리스트 보기</b>360</figcaption>
+      <div class="viewport"><div class="scr"><div class="sec">
+        <div class="row between g6"><span class="btn lg">필터</span><span class="sel" style="height:44px">조회순</span><span class="seg"><span style="height:42px">그리드</span><span class="on" style="height:42px">리스트</span></span></div>
+        <div class="row g8"><b class="n">16</b></div>
+        <div class="card lrow"><div class="ph lthumb"></div><div class="body lbody"><span class="tag" style="align-self:flex-start">공학</span><span class="ct" style="font-size:14px">스마트 캠퍼스 출결 시스템: 블루투스 비콘 기반 실시간 출석 관리</span><div class="tags1"><span class="tag lt">캡스톤</span><span class="tag lt">IoT</span><span class="tag lt">블루투스</span><span class="tag lt">모바일 앱</span><span class="tag lt">출결 관리</span></div><span class="small">김민지 · 조회 1.2k</span></div></div>
+        <div class="card lrow"><div class="ph lthumb"></div><div class="body lbody"><span class="tag" style="align-self:flex-start">인문학</span><span class="ct" style="font-size:14px">삼육 기록관 디지털 아카이브 구축</span><div class="tags1"><span class="tag lt">아카이브</span></div><span class="small">이서준 · 조회 980</span></div></div>
+        <div class="card lrow"><div class="ph lthumb"></div><div class="body lbody"><span class="tag" style="align-self:flex-start">시각 디자인</span><span class="ct" style="font-size:14px">한글 타이포그래피로 본 미래 인터페이스와 차세대 디지털 서체 시스템 설계 연구</span><div class="tags1"><span class="tag lt">타이포그래피</span><span class="tag lt">UI</span><span class="tag lt">서체 디자인</span><span class="tag lt">인터랙션</span></div><span class="small">박지호 · 조회 870</span></div></div>
+        <div class="pag" style="justify-content:center"><span class="btn lg">이전</span><span class="pg">1</span><span class="pg on">2</span><span class="pg">3</span><span class="pg gap">…</span><span class="pg">16</span><span class="btn lg">다음</span></div>
+      </div></div></div>
+    </figure>
+    <figure class="frame m">
+      <figcaption><b>검색 결과 0건</b>360</figcaption>
+      <div class="viewport"><div class="scr"><div class="sec">
+        <div class="row g8"><span class="inp val lg f1">캡스톤 드론</span><span class="btn lg">검색</span></div>
+        <div class="row between g6"><span class="btn lg">필터 · 1</span><span class="sel" style="height:44px">최신순</span><span class="seg"><span class="on" style="height:42px">그리드</span><span style="height:42px">리스트</span></span></div>
+        <div class="row g6 wrap"><span class="chip x">검색어: 캡스톤 드론 <i>해제</i></span><span class="chip x">신학 <i>해제</i></span></div>
+        <div class="empty"><b>조건에 맞는 프로젝트가 없어요</b><span class="muted">검색어를 바꾸거나 조건을 줄여 보세요.</span><span class="btn pri lg">전체 조건 초기화</span></div>
+        <div class="row g8"><b class="n">14</b></div>
+      </div></div></div>
+    </figure>
+    <figure class="frame m">
+      <figcaption><b>목록 불러오기 실패</b>360</figcaption>
+      <div class="viewport"><div class="scr"><div class="sec">
+        <div class="row g8"><span class="inp val lg f1">캡스톤</span><span class="btn lg">검색</span></div>
+        <div class="row between g6"><span class="btn lg">필터 · 2</span><span class="sel" style="height:44px">최신순</span><span class="seg"><span class="on" style="height:42px">그리드</span><span style="height:42px">리스트</span></span></div>
+        <div class="empty"><b>프로젝트 목록을 불러오지 못했어요</b><span class="muted">네트워크 상태를 확인하고 다시 시도해 주세요.</span><span class="btn pri lg">다시 시도</span></div>
+        <div class="row g8"><b class="n">15</b></div>
+      </div></div></div>
+    </figure>
+  </div>
+
+  <ol class="notes">
+    <li><b class="n">1</b><div><span class="src">Figma 채택</span>사이드바 상단의 저장소 이름과 ‘프로젝트 제출’ 버튼(현재 화면에도 있음).</div></li>
+    <li><b class="n">2</b><div><span class="src">계획 반영</span>현재의 대표 태그 메뉴 5개와 빠른 태그 4개를 ‘태그’ 목록 하나로 합칩니다. 선택 상태는 체크 표시와 굵은 글자로 구분하고, 누르면 바로 URL(<code>tags=</code>)에 반영합니다. ‘전공’ 필터라는 이름은 쓰지 않습니다.</div></li>
+    <li><b class="n">3</b><div><span class="src">계획 반영</span>연도·학기는 눌러도 결과가 바뀌지 않으므로 운영 화면에서 숨깁니다. API 연동(T09·T10) 후 태그 목록 아래에 다시 넣습니다.</div></li>
+    <li><b class="n">4</b><div><span class="src">새 해석</span>Figma와 현재 사이드바 하단의 ‘설정·고객지원’은 누를 수 없는 글자라서 뺐습니다.</div></li>
+    <li><b class="n">5</b><div><span class="src">계획 반영</span>Figma의 설명 문구 ‘내 프로젝트 모음 아니고…’는 기획 메모이므로 서비스 문구로 바꿨습니다.</div></li>
+    <li><b class="n">6</b><div><span class="src">현재 유지</span>검색·정렬·보기 전환을 한 줄에 둡니다. Enter 말고도 제출할 수 있게 ‘검색’ 버튼을 보이게 했습니다. 보기 전환은 Figma처럼 ‘그리드/리스트’ 글자로 표시합니다.</div></li>
+    <li><b class="n">7</b><div><span class="src">계획 반영</span>실제로 적용된 조건만 칩으로 보여주고, 칩마다 해제할 수 있습니다. ‘전체 조건 초기화’는 검색어·태그·정렬·페이지를 기본값으로 되돌립니다.</div></li>
+    <li><b class="n">8</b><div><span class="src">현재 유지</span>같은 크기의 3열 카드입니다. Figma처럼 첫 카드를 2배로 키우면 정렬·검색에 따라 첫 결과가 바뀌어 의미가 없으므로 채택하지 않았습니다.</div></li>
+    <li><b class="n">9</b><div><span class="src">현재 유지</span>번호형 페이지 이동. 결과 개수와 표시 범위 문구는 넣지 않습니다. 검색어·태그·정렬이 바뀌면 1페이지로 돌아갑니다.</div></li>
+    <li><b class="n">10</b><div><span class="src">계획 반영</span>모바일은 사이드바 대신 ‘필터’ 버튼(적용된 태그 수 표시)으로 태그 패널을 엽니다. 검색·정렬·보기 전환·페이지 이동은 화면에 그대로 둡니다. 같은 조건이면 데스크톱과 같은 URL이 만들어집니다.</div></li>
+    <li><b class="n">11</b><div><span class="src">새 해석 · 확정</span>360px에서 도구 줄이 넘치지 않도록 모바일 탐색에서는 ‘프로젝트 제출’ 버튼을 빼고 헤더 계정 메뉴의 ‘프로젝트 등록’으로 대신했습니다.</div></li>
+    <li><b class="n">12</b><div><span class="src">계획 반영</span>패널을 열 때 현재 적용된 태그를 복사해 편집합니다. ‘닫기’·Escape·바깥 누름은 변경을 버리고, ‘선택 초기화’는 편집 중인 태그만 비웁니다. ‘적용하기’를 눌러야 URL이 바뀝니다. 그림은 ‘디자인’을 해제하고 ‘논문’을 고른 편집 중 상태입니다.</div></li>
+    <li><b class="n">13</b><div><span class="src">계획 반영</span>제목이 있는 대화상자이고, 열면 첫 태그에 포커스가 갑니다. Tab은 패널 안에서만 돌고, 닫으면 ‘필터’ 버튼으로 포커스가 돌아갑니다.</div></li>
+    <li><b class="n">14</b><div><span class="src">계획 반영</span>결과가 0건이면 페이지 이동을 숨기고 ‘전체 조건 초기화’를 주요 행동으로 둡니다. 적용된 조건 칩은 그대로 보여 결과가 없는 이유를 알 수 있게 합니다.</div></li>
+    <li><b class="n">15</b><div><span class="src">계획 반영</span>오류일 때는 이미 받은 항목으로 만든 가짜 결과 대신 오류 안내와 ‘다시 시도’를 보여줍니다. 검색창과 필터 수 등 입력한 조건은 그대로 유지합니다.</div></li>
+    <li><b class="n">16</b><div><span class="src">확정</span>리스트 카드의 썸네일은 카드 높이를 끝까지 채워 아래에 빈 여백이 남지 않게 합니다. 모든 카드에서 제목은 2줄까지 보여주고 넘치면 ‘…’으로 줄이며, 태그는 한 줄에 들어가는 만큼만 보여줍니다. 결과 개수 문구는 표시하지 않습니다.</div></li>
+  </ol>
+</section>
+
+<!-- ───────────────── 5. 상세 ───────────────── -->
+<section class="part" id="detail">
+  <div class="part-head">
+    <span class="ux">UX-05</span>
+    <h2>5. 프로젝트 상세 <code style="font-size:15px">/projects/[projectId]</code></h2>
+    <p>현재 본문은 Markdown 기호(#, -)가 그대로 보이고, ‘이전으로 돌아가기’는 실제로 홈으로 이동합니다. Figma의 읽기 중심 배치를 따르되, 실제로 받는 데이터만 표시합니다.</p>
+  </div>
+  <div class="frames">
+    <figure class="frame d">
+      <figcaption><b>데스크톱 · 기본</b>1280 · 로그아웃</figcaption>
+      <div class="viewport"><div class="scr">
+        <div class="w-hd"><div class="logo"><span class="ph"></span>Campus Polio</div><div class="row g12"><span class="inp" style="width:280px">프로젝트 검색</span><span class="btn ghost">로그인</span><span class="btn pri">회원가입</span></div></div>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:48px;padding:32px 48px 56px">
+          <article class="col g20" style="min-width:0">
+            <div class="row g8"><span class="lnk">프로젝트 모음으로</span><b class="n">1</b></div>
+            <div class="row g6"><span class="tag">공학</span><span class="tag">캡스톤</span><span class="tag">IoT</span></div>
+            <div class="row top g12"><h1 class="h1" style="font-size:42px;max-width:900px">스마트 캠퍼스 출결 시스템: 블루투스 비콘과 모바일 앱을 활용한 실시간 출석 관리 플랫폼 개발</h1><b class="n">2</b></div>
+            <p class="muted" style="font-size:15px;max-width:720px">강의실에 설치한 비콘과 학생용 앱으로 출석을 자동으로 기록하고, 교수자가 실시간으로 확인하는 시스템입니다.</p>
+            <dl class="dl" style="margin:0;max-width:820px">
+              <div><dt>작성자</dt><dd>김민지</dd></div>
+              <div><dt>참여자</dt><dd>이서준, 박지호</dd></div>
+              <div><dt>등록일</dt><dd>2026년 5월 12일</dd></div>
+              <div><dt>조회 · 좋아요</dt><dd>1,204 · 34</dd></div>
+            </dl>
+            <div class="row g8"><b class="n">3</b></div>
+            <div class="ph" style="width:100%;height:440px"><span>대표 이미지 <b class="n">4</b></span></div>
+            <div class="md">
+              <div class="row g8"><b class="n">5</b></div>
+              <div class="mh2">프로젝트 배경</div>
+              <div class="sks"><span class="sk"></span><span class="sk"></span><span class="sk" style="width:65%"></span></div>
+              <ul><li>출석 호명에 수업 시간 5분 이상 소요</li><li>대리 출석 확인이 어려움</li><li>출석 데이터가 학기 말에야 정리됨</li></ul>
+              <blockquote>“출석 확인 시간을 줄이고 수업에 더 집중하고 싶다” — 사용자 인터뷰 중</blockquote>
+              <div class="mh2">구현</div>
+              <div class="sks"><span class="sk"></span><span class="sk" style="width:80%"></span></div>
+              <div class="code">const beacon = await scanNearbyBeacons({ timeout: 3000, minRssi: -70, classroomId: currentClass.id, retry: 2 })<br>if (!beacon) return reportAttendance({ status: "ABSENT_CANDIDATE", reason: "NO_BEACON" <span class="cut">…</span></div>
+              <div class="row g8"><b class="n">6</b></div>
+              <div class="tbl"><table><tr><th>항목</th><th>기존 방식</th><th>도입 후</th><th>측정 기간</th><th>비고</th></tr><tr><td>출석 확인 시간</td><td>평균 6분</td><td>평균 40초</td><td>2026년 4월</td><td>3개 강의 기준</td></tr></table></div>
+              <div class="ph" style="width:100%;height:300px"><span>본문 이미지</span></div>
+              <p style="margin:0">시연 코드: <span class="url">https://github.com/campuspolio-example/smart-attendance-beacon-platform/tree/main/mobile</span> <b class="n">7</b></p>
+            </div>
+            <div class="row g8"><b class="n">11</b></div>
+          </article>
+          <aside class="col g16">
+            <div class="box" style="border-color:var(--ink)">
+              <div class="row between"><b class="h3">자료 · 3</b><b class="n">8</b></div>
+              <div class="file"><b>최종발표_스마트출결.pdf</b><span class="lnk">새 창</span></div>
+              <div class="file"><b>시연영상_v2.mp4</b><span class="lnk">새 창</span></div>
+              <div class="file"><b>smart-attendance-beacon-platform-source-code-final-submission.zip</b><span class="lnk">새 창</span></div>
+            </div>
+            <div class="box">
+              <div class="row between"><b class="h3">AI 코드 리뷰</b><b class="n">9</b></div>
+              <span class="btn full">리뷰 요청</span>
+              <div class="sks"><span class="sk"></span><span class="sk" style="width:60%"></span></div>
+            </div>
+            <div class="row g8"><b class="n">10</b></div>
+          </aside>
+        </div>
+        <div class="foot"><span>Copyright 2026. CampusPolio. All rights reserved.</span><span>이용약관 · 개인정보 처리방침 · 문의하기</span></div>
+      </div></div>
+    </figure>
+
+    <figure class="frame m">
+      <figcaption><b>모바일 · 기본</b>360</figcaption>
+      <div class="viewport"><div class="scr">
+        <div class="w-hd"><div class="logo"><span class="ph"></span>Campus Polio</div><div class="row g6"><span class="btn sm">검색</span><span class="btn sm pri">로그인</span></div></div>
+        <div class="sec">
+          <span class="lnk" style="line-height:44px">프로젝트 모음으로</span>
+          <div class="row g6 wrap"><span class="tag">공학</span><span class="tag">캡스톤</span><span class="tag">IoT</span></div>
+          <h1 class="h1">스마트 캠퍼스 출결 시스템: 블루투스 비콘과 모바일 앱을 활용한 실시간 출석 관리 플랫폼 개발</h1>
+          <p class="muted">강의실에 설치한 비콘과 학생용 앱으로 출석을 자동으로 기록하는 시스템입니다.</p>
+          <dl class="dl" style="margin:0">
+            <div><dt>작성자</dt><dd>김민지</dd></div>
+            <div><dt>참여자</dt><dd>이서준, 박지호</dd></div>
+            <div><dt>등록일</dt><dd>2026년 5월 12일</dd></div>
+            <div><dt>조회 · 좋아요</dt><dd>1,204 · 34</dd></div>
+          </dl>
+          <div class="ph" style="width:100%;height:190px"><span>대표 이미지</span></div>
+          <div class="md" style="font-size:15px">
+            <div class="mh2" style="font-size:19px">프로젝트 배경</div>
+            <div class="sks"><span class="sk"></span><span class="sk"></span><span class="sk" style="width:60%"></span></div>
+            <ul><li>출석 호명에 5분 이상 소요</li><li>대리 출석 확인이 어려움</li></ul>
+            <div class="code" style="font-size:12px">const beacon = await scanNearbyBeacons({ <span class="cut">…</span></div>
+            <div class="tbl"><table><tr><th>항목</th><th>기존</th><th>도입 후</th><th>기간</th></tr><tr><td>확인 시간</td><td>6분</td><td>40초</td><td>4월</td></tr></table></div>
+          </div>
+          <div class="box" style="border-color:var(--ink)">
+            <b class="h3">자료 · 3</b>
+            <div class="file"><b>최종발표_스마트출결.pdf</b><span class="lnk">새 창</span></div>
+            <div class="file"><b>시연영상_v2.mp4</b><span class="lnk">새 창</span></div>
+            <div class="file"><b>smart-attendance-beacon-platform-source-code-final-submission.zip</b><span class="lnk">새 창</span></div>
+          </div>
+          <div class="box"><b class="h3">AI 코드 리뷰</b><span class="btn lg full">리뷰 요청</span></div>
+          <div class="row g8"><b class="n">12</b></div>
+        </div>
+      </div></div>
+    </figure>
+  </div>
+
+  <p class="sub">상세 상태</p>
+  <div class="frames">
+    <figure class="frame m">
+      <figcaption><b>데이터 누락</b>360 · 태그·이미지·본문·첨부·작성자 없음</figcaption>
+      <div class="viewport"><div class="scr"><div class="sec">
+        <span class="lnk" style="line-height:44px">프로젝트 모음으로</span>
+        <div class="row top g8"><h1 class="h1">캡스톤 협업 일정 관리 도구</h1><b class="n">13</b></div>
+        <dl class="dl" style="margin:0">
+          <div><dt>작성자</dt><dd>작성자 정보 없음</dd></div>
+          <div><dt>참여자</dt><dd>없음</dd></div>
+          <div><dt>등록일</dt><dd>2026년 6월 2일</dd></div>
+          <div><dt>조회 · 좋아요</dt><dd>0 · 0</dd></div>
+        </dl>
+        <div class="empty" style="padding:20px"><b>아직 본문이 작성되지 않았어요</b></div>
+        <div class="box"><b class="h3">자료</b><span class="muted">첨부된 자료가 없어요.</span></div>
+      </div></div></div>
+    </figure>
+    <figure class="frame m">
+      <figcaption><b>대표 이미지 불러오기 실패</b>360</figcaption>
+      <div class="viewport"><div class="scr"><div class="sec">
+        <h1 class="h1">삼육 기록관 디지털 아카이브 구축</h1>
+        <div class="nothumb" style="height:190px">이미지를 불러오지 못했어요</div>
+        <div class="sks"><span class="sk"></span><span class="sk"></span><span class="sk" style="width:50%"></span></div>
+        <div class="row g8"><b class="n">14</b></div>
+      </div></div></div>
+    </figure>
+    <figure class="frame m">
+      <figcaption><b>불러오기 실패</b>360</figcaption>
+      <div class="viewport"><div class="scr"><div class="sec" style="padding-block:60px">
+        <div class="empty"><b>프로젝트를 불러오지 못했어요</b><span class="muted">삭제되었거나 주소가 바뀌었을 수 있어요. 잠시 후 다시 시도해 주세요.</span><span class="btn pri lg full">다시 시도</span><span class="btn lg full">프로젝트 모음으로</span></div>
+        <div class="row g8"><b class="n">15</b></div>
+      </div></div></div>
+    </figure>
+  </div>
+
+  <ol class="notes">
+    <li><b class="n">1</b><div><span class="src">계획 반영</span>‘이전으로 돌아가기’(실제로는 홈으로 이동)를 ‘프로젝트 모음으로’로 바꾸고 <code>/projects</code>로 보냅니다. 이전 검색 조건 복원은 이번 범위가 아닙니다.</div></li>
+    <li><b class="n">2</b><div><span class="src">Figma 채택</span>태그 → 큰 제목 → 요약 순서. 긴 한국어 제목은 자르지 않고 줄바꿈합니다.</div></li>
+    <li><b class="n">3</b><div><span class="src">Figma 채택</span>제목 아래 메타 줄. 데이터가 없는 ‘지도 교수’는 넣지 않고, 영어 대문자 라벨 대신 한국어를 씁니다. 날짜는 <code>createdAt</code>이므로 ‘등록일’로 표시합니다.</div></li>
+    <li><b class="n">4</b><div><span class="src">Figma 채택</span>본문 폭 전체를 쓰는 큰 대표 이미지. 이미지가 없으면 영역을 생략합니다.</div></li>
+    <li><b class="n">5</b><div><span class="src">계획 반영</span>본문은 Markdown을 읽기 전용으로 렌더링합니다(제목·목록·인용·코드·표·이미지·링크). 원문과 저장 형식은 바꾸지 않습니다.</div></li>
+    <li><b class="n">6</b><div><span class="src">계획 반영</span>코드와 표는 블록 안에서만 가로 스크롤되고, 페이지 전체는 옆으로 넘치지 않습니다.</div></li>
+    <li><b class="n">7</b><div><span class="src">계획 반영</span>긴 URL은 줄바꿈합니다. 허용하지 않는 주소(javascript: 등)는 링크로 만들지 않습니다.</div></li>
+    <li><b class="n">8</b><div><span class="src">Figma 채택</span>오른쪽 위 ‘Resources &amp; Links’ 자리를 ‘자료’로 씁니다. 기존 첨부 파일의 이름과 새 창 열기만 보여주고, 긴 파일명은 자르지 않고 줄바꿈합니다. GitHub·PDF 전용 자료 구조는 후속 작업입니다.</div></li>
+    <li><b class="n">9</b><div><span class="src">현재 유지</span>AI 코드 리뷰는 자료 아래 부가 영역으로 둡니다. 요청·판정 로직은 그대로입니다.</div></li>
+    <li><b class="n">10</b><div><span class="src">새 해석 · 확정</span>현재 오른쪽 작성자 카드는 메타 줄과 내용이 같아 뺐습니다.</div></li>
+    <li><b class="n">11</b><div><span class="src">계획 반영</span>Figma의 ‘관련 작품’은 제공 데이터가 없어 표시하지 않습니다.</div></li>
+    <li><b class="n">12</b><div><span class="src">계획 반영</span>모바일 순서는 제목·메타 → 대표 이미지 → 본문 → 자료 → AI 리뷰입니다. 사이드바 내용은 본문 아래로 내려갑니다.</div></li>
+    <li><b class="n">13</b><div><span class="src">계획 반영</span>데이터가 없으면 태그 줄·요약 문장·대표 이미지 영역은 통째로 생략합니다. 작성자가 없으면 ‘작성자 정보 없음’, 본문과 자료는 빈 상태 문구로 표시합니다.</div></li>
+    <li><b class="n">14</b><div><span class="src">계획 반영</span>대표 이미지 로드가 실패하면 같은 크기의 대체 영역에 실패 문구를 보여주고, 대체 텍스트는 프로젝트 제목으로 둡니다. 본문 안 이미지도 같은 방식입니다.</div></li>
+    <li><b class="n">15</b><div><span class="src">계획 반영</span>오류 화면의 ‘메인으로 돌아가기’를 ‘프로젝트 모음으로’로 바꾸고 ‘다시 시도’를 함께 둡니다.</div></li>
+  </ol>
+</section>
+
+<!-- ───────────────── 6. 마이페이지 ───────────────── -->
+<section class="part" id="mypage">
+  <div class="part-head">
+    <span class="ux">UX-06</span>
+    <h2>6. 마이페이지 공통 틀</h2>
+    <p>현재는 224px 사이드바가 모든 화면 폭에 남아 모바일 본문이 세로로 눌립니다. 넓은 화면은 Figma 사이드바를 유지하고, 좁은 화면은 메뉴를 본문 위로 올립니다. 목록 내용과 저장 동작은 바꾸지 않습니다.</p>
+  </div>
+  <div class="frames">
+    <figure class="frame d">
+      <figcaption><b>데스크톱 · 프로젝트 모음 탭</b>1280 · 로그인</figcaption>
+      <div class="viewport"><div class="scr">
+        <div class="w-hd"><div class="logo"><span class="ph"></span>Campus Polio</div><div class="row g12"><span class="inp" style="width:280px">프로젝트 검색</span><span class="btn pri">마이페이지</span></div></div>
+        <div class="row top" style="min-height:900px">
+          <aside class="side" style="border-right:1px solid var(--line);padding:32px 20px;align-self:stretch">
+            <div class="col g4"><b style="font-size:16px">삼육 아카이브</b><span class="small">프로젝트 저장소</span></div>
+            <nav class="col g4" aria-label="마이페이지 메뉴 예시">
+              <span class="navl on">프로젝트 모음</span>
+              <span class="navl">포트폴리오 모음</span>
+              <span class="navl">설정</span>
+              <span class="navl">지원</span>
+            </nav>
+            <div class="row g8"><b class="n">1</b><b class="n">3</b></div>
+            <div class="row g8"><span class="btn pri lg" style="flex:1">프로젝트 등록</span><b class="n">2</b></div>
+          </aside>
+          <div class="f1 col g24" style="padding:40px 48px">
+            <h1 class="h1">프로젝트 모음</h1>
+            <div class="grid3">
+              <div class="card" style="border:1.5px dashed var(--ink-3);align-items:center;justify-content:center;gap:8px;min-height:300px"><span class="btn sq">+</span><b>프로젝트 생성</b></div>
+              <div class="card"><div class="ph" style="height:160px;border:0;border-bottom:1px solid var(--ink-3);justify-content:flex-start;align-items:flex-start;padding:10px"><span class="tag">공개</span></div><div class="body"><span class="ct">스마트 캠퍼스 출결 시스템</span><div class="tags1"><span class="tag lt">IoT</span><span class="tag lt">캡스톤</span></div><div class="cmeta"><span>업데이트: 2시간 전</span><span class="lnk">메뉴</span></div></div></div>
+              <div class="card"><div class="ph" style="height:160px;border:0;border-bottom:1px solid var(--ink-3);justify-content:flex-start;align-items:flex-start;padding:10px"><span class="tag">비공개</span></div><div class="body"><span class="ct">언어 모델 최적화 실험 기록</span><div class="tags1"><span class="tag lt">NLP</span></div><div class="cmeta"><span>업데이트: 어제</span><span class="lnk">메뉴</span></div></div></div>
+              <div class="card"><div class="ph" style="height:160px;border:0;border-bottom:1px solid var(--ink-3);justify-content:flex-start;align-items:flex-start;padding:10px"><span class="tag">공개</span></div><div class="body"><span class="ct">바이오 데이터 가공 파이프라인</span><div class="tags1"><span class="tag lt">BIO</span><span class="tag lt">DATA</span></div><div class="cmeta"><span>업데이트: 3일 전</span><span class="lnk">메뉴</span></div></div></div>
+              <div class="card"><div class="ph" style="height:160px;border:0;border-bottom:1px solid var(--ink-3);justify-content:flex-start;align-items:flex-start;padding:10px"><span class="tag">공개</span></div><div class="body"><span class="ct">스마트 시티 설계 제안</span><div class="tags1"><span class="tag lt">URBAN</span></div><div class="cmeta"><span>업데이트: 일주일 전</span><span class="lnk">메뉴</span></div></div></div>
+            </div>
+            <div class="row g8"><b class="n">4</b></div>
+          </div>
+        </div>
+      </div></div>
+    </figure>
+
+    <figure class="frame m">
+      <figcaption><b>현재 화면(문제)</b>360 · 사이드바 때문에 본문이 136px로 눌림</figcaption>
+      <div class="viewport"><div class="scr">
+        <div class="w-hd"><div class="logo"><span class="ph"></span>Campus Polio</div><div class="btn sm">계정</div></div>
+        <div class="row top" style="min-height:420px">
+          <div style="width:224px;flex:none;border-right:1px solid var(--line);padding:20px 14px;align-self:stretch" class="col g6"><b>삼육 아카이브</b><span class="navl on">프로젝트 모음</span><span class="navl">포트폴리오 모음</span><span class="navl">설정</span><span class="navl">Support</span></div>
+          <div style="padding:16px 10px;min-width:0" class="col g8"><b style="font-size:22px;line-height:1.15;word-break:break-all">프로젝트 모음</b><div class="ph" style="width:100%;height:120px"></div></div>
+        </div>
+      </div></div>
+    </figure>
+
+    <figure class="frame m">
+      <figcaption><b>모바일 · 프로젝트 모음 탭</b>360</figcaption>
+      <div class="viewport"><div class="scr">
+        <div class="w-hd"><div class="logo"><span class="ph"></span>Campus Polio</div><div class="row g6"><span class="btn sm">검색</span><span class="btn sm">계정</span></div></div>
+        <div class="col g12" style="padding:16px;border-bottom:1px solid var(--ink)">
+          <div class="row between"><span class="eyebrow">마이페이지</span><b class="n">5</b></div>
+          <nav class="navgrid" aria-label="마이페이지 메뉴 예시(모바일)">
+            <span class="navl on">프로젝트 모음</span>
+            <span class="navl">포트폴리오 모음</span>
+            <span class="navl">설정</span>
+            <span class="navl">지원</span>
+          </nav>
+          <span class="btn pri lg full">프로젝트 등록</span>
+        </div>
+        <div class="sec">
+          <h1 class="h1">프로젝트 모음</h1>
+          <div class="card row" style="flex-direction:row;border:1.5px dashed var(--ink-3);padding:14px;gap:12px"><span class="btn sq">+</span><b>프로젝트 생성</b><b class="n">6</b></div>
+          <div class="card"><div class="ph" style="height:160px;border:0;border-bottom:1px solid var(--ink-3);justify-content:flex-start;align-items:flex-start;padding:10px"><span class="tag">공개</span></div><div class="body"><span class="ct">스마트 캠퍼스 출결 시스템</span><div class="tags1"><span class="tag lt">IoT</span><span class="tag lt">캡스톤</span></div><div class="cmeta"><span>업데이트: 2시간 전</span><span class="lnk">메뉴</span></div></div></div>
+          <div class="card"><div class="ph" style="height:160px;border:0;border-bottom:1px solid var(--ink-3);justify-content:flex-start;align-items:flex-start;padding:10px"><span class="tag">비공개</span></div><div class="body"><span class="ct">언어 모델 최적화 실험 기록</span><div class="cmeta"><span>업데이트: 어제</span><span class="lnk">메뉴</span></div></div></div>
+        </div>
+      </div></div>
+    </figure>
+
+    <figure class="frame m">
+      <figcaption><b>모바일 · 설정 탭</b>360</figcaption>
+      <div class="viewport"><div class="scr">
+        <div class="w-hd"><div class="logo"><span class="ph"></span>Campus Polio</div><div class="row g6"><span class="btn sm">검색</span><span class="btn sm">계정</span></div></div>
+        <div class="col g12" style="padding:16px;border-bottom:1px solid var(--ink)">
+          <span class="eyebrow">마이페이지</span>
+          <nav class="navgrid" aria-label="마이페이지 메뉴 예시(설정)">
+            <span class="navl">프로젝트 모음</span>
+            <span class="navl">포트폴리오 모음</span>
+            <span class="navl on">설정</span>
+            <span class="navl">지원</span>
+          </nav>
+          <span class="btn pri lg full">프로젝트 등록</span>
+        </div>
+        <div class="sec">
+          <h1 class="h1">프로필 설정</h1>
+          <div class="row g12"><div class="ph" style="width:72px;height:72px"></div><div class="col g6 f1"><span class="lbl">프로필 이미지 URL</span><span class="inp lg">https://example.com/profile.png</span></div></div>
+          <div class="col g6"><span class="lbl">이름</span><span class="inp lg">홍길동</span></div>
+          <div class="col g6"><span class="lbl">닉네임</span><span class="inp lg">길동이</span></div>
+          <div class="col g6"><span class="lbl">전공</span><span class="inp lg">컴퓨터공학과</span></div>
+          <div class="col g6"><span class="lbl">학년</span><span class="sel" style="height:44px">선택하세요</span></div>
+          <div class="col g6"><span class="lbl">소개</span><span class="inp area">진행 중인 프로젝트, 관심 분야를 적어주세요.</span></div>
+          <span class="btn pri lg full">저장하기</span>
+          <div class="row g8"><b class="n">7</b></div>
+        </div>
+      </div></div>
+    </figure>
+  </div>
+
+  <ol class="notes">
+    <li><b class="n">1</b><div><span class="src">Figma 채택</span>넓은 화면은 왼쪽 224px 사이드바와 현재 메뉴 표시를 유지합니다(현재 화면과 같음).</div></li>
+    <li><b class="n">2</b><div><span class="src">새 해석 · 확정</span>메뉴 이름을 한국어로 맞췄습니다. ‘Support’ → ‘지원’, ‘Upload Project’(Figma ‘Upload Archive’) → ‘프로젝트 등록’. 경로는 그대로입니다.</div></li>
+    <li><b class="n">3</b><div><span class="src">계획 반영</span>현재 메뉴는 채운 바탕(모양 변화)과 <code>aria-current</code>로 구분합니다. 페이지 이동 링크이므로 탭 역할을 쓰지 않습니다.</div></li>
+    <li><b class="n">4</b><div><span class="src">현재 유지</span>첫 칸의 ‘프로젝트 생성’ 카드(보조 문구 ‘새로운 프로젝트를 시작하세요’는 뺌), 공개/비공개 표시, 업데이트 시각. 목록 정보 구조·저장·권한은 이번에 바꾸지 않습니다.</div></li>
+    <li><b class="n">5</b><div><span class="src">계획 반영</span>좁은 화면에서는 사이드바를 본문 위 메뉴로 바꿉니다. 2열 링크 묶음(44px 높이)으로 네 메뉴를 한 번에 보여주고, 본문은 화면 전체 폭을 씁니다.</div></li>
+    <li><b class="n">6</b><div><span class="src">새 해석</span>모바일의 ‘프로젝트 생성’ 카드는 낮은 가로형으로 줄여, 첫 화면에서 실제 프로젝트가 보이게 합니다.</div></li>
+    <li><b class="n">7</b><div><span class="src">계획 반영</span>설정 폼은 한 열로, 입력창을 전체 폭으로 둡니다. 저장·검증 로직은 그대로입니다. 지원(Support) 본문 제작은 후속 범위입니다.</div></li>
+  </ol>
+</section>
+
+<!-- ───────────────── 7. 판단 요약 ───────────────── -->
+<section class="part" id="decisions">
+  <div class="part-head">
+    <span class="ux">SUMMARY</span>
+    <h2>7. 판단 요약과 검토 요청</h2>
+    <p>화면별로 Figma에서 가져온 것, 현재 화면에서 유지한 것, 계획에 따라 바꾸거나 뺀 것을 정리했습니다.</p>
+  </div>
+  <div class="tablewrap">
+    <table class="dtable">
+      <tr><th style="width:110px">화면</th><th>Figma에서 채택</th><th>현재 화면에서 유지</th><th>바꾸거나 뺀 것</th></tr>
+      <tr><td><b>헤더</b></td><td>로고 · 검색 · 계정 배치</td><td>로그인/회원가입 이동, 로그인 상태별 마이페이지 이동</td><td>모바일 검색 버튼 추가, 모바일 로그인 버튼 통합, 계정 메뉴로 접기</td></tr>
+      <tr><td><b>홈</b></td><td>큰 강조 카드, 다음 카드 일부 노출, 제목 옆 ‘전체 보기’</td><td>태그 칩, 등록 유도 CTA, 푸터</td><td>‘주요 전시’ → ‘주요 프로젝트’, 2행 비대칭 배치·행사 배너·수치 영역 제외, 칩을 2섹션으로 이동, hover 전용 링크 제거</td></tr>
+      <tr><td><b>탐색</b></td><td>사이드바 구성(저장소 이름·제출 버튼·태그), 그리드/리스트 글자 전환</td><td>균일 3열 카드, 번호형 페이지 이동, URL 기반 조건</td><td>연도·학기 숨김, 태그 목록 통합, 적용 조건 칩 + 전체 초기화, 모바일 필터 패널, ‘설정·고객지원’ 글자 제거</td></tr>
+      <tr><td><b>상세</b></td><td>태그 → 제목 → 메타 → 대표 이미지 → 본문 순서, 오른쪽 위 자료 영역</td><td>첨부 파일 목록, AI 코드 리뷰</td><td>Markdown 렌더링, 돌아가기 링크 → ‘프로젝트 모음으로’, 지도 교수·관련 작품 제외, 작성자 카드 제거</td></tr>
+      <tr><td><b>마이페이지</b></td><td>왼쪽 사이드바와 현재 메뉴 표시</td><td>프로젝트 생성 카드, 공개 상태·업데이트 표시</td><td>모바일 메뉴를 본문 위 2열 링크로 이동, 메뉴 이름 한국어 통일</td></tr>
+    </table>
+  </div>
+  <p class="sub">검토 후 확정한 판단</p>
+  <ol class="asks">
+    <li><b>헤더</b>: 모바일에서는 로그인과 회원가입을 ‘로그인’ 버튼 하나로 합칩니다.</li>
+    <li><b>홈</b>: 태그 칩은 ‘분야별 프로젝트’ 섹션에 두고, ‘주요 프로젝트’ 섹션은 인기 프로젝트만 보여줍니다.</li>
+    <li><b>탐색</b>: 모바일 탐색에서는 ‘프로젝트 제출’ 버튼을 빼고 헤더 계정 메뉴의 ‘프로젝트 등록’으로 대신합니다.</li>
+    <li><b>상세</b>: 오른쪽 작성자 카드를 없애고 제목 아래 메타 줄에만 작성자 정보를 둡니다.</li>
+    <li><b>마이페이지</b>: 메뉴 이름을 ‘지원’, ‘프로젝트 등록’처럼 한국어로 통일합니다.</li>
+  </ol>
+</section>
+
+</div>
+
+<script>
+/**
+ * 데스크톱 프레임 축소 배율을 바꾸고 선택한 버튼 상태를 갱신한다.
+ * @param button 누른 배율 버튼
+ */
+function setDesktopZoom(button) {
+  document.documentElement.style.setProperty("--dz", button.dataset.z);
+  document.querySelectorAll(".zoom button").forEach((item) => {
+    item.setAttribute("aria-pressed", String(item === button));
+  });
+  try { localStorage.setItem("sketch-dz", button.id); } catch (error) { /* 저장 불가 환경은 무시 */ }
+}
+
+document.querySelectorAll(".zoom button").forEach((button) => {
+  button.addEventListener("click", () => setDesktopZoom(button));
+});
+
+try {
+  const savedId = localStorage.getItem("sketch-dz");
+  const saved = savedId && document.getElementById(savedId);
+  if (saved) setDesktopZoom(saved);
+} catch (error) { /* 저장 불가 환경은 무시 */ }
+</script>
