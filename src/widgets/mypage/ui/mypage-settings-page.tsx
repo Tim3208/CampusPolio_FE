@@ -16,7 +16,7 @@ export function MypageSettingsPage({
   profile,
 }: MypageSettingsPageProps) {
   return (
-    <section className="flex flex-col gap-8 px-8 py-10">
+    <section className="flex min-w-0 flex-col gap-8 px-4 py-7 md:px-8 md:py-8 lg:px-10 lg:py-10 xl:px-12 xl:pt-11 xl:pb-16">
       <div>
         <h1 className="text-[32px] font-extrabold leading-tight text-[#171f24]">
           설정
@@ -38,7 +38,7 @@ export function MypageSettingsPage({
           </div>
         </div>
       ) : (
-        <ProfileSettingsForm profile={profile} />
+        <div className="min-w-0 w-full [&_form]:min-w-0 [&_form]:w-full [&_form_div]:min-w-0 [&_form_aside]:min-w-0"><ProfileSettingsForm profile={profile} /></div>
       )}
     </section>
   )

@@ -2,8 +2,8 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { type KeyboardEvent, type MouseEvent } from "react"
-import { Globe2, Lock, MoreVertical, Plus } from "lucide-react"
+import { useCallback, useState, type KeyboardEvent, type MouseEvent } from "react"
+import { Globe2, ImageOff, Lock, MoreVertical, Plus } from "lucide-react"
 
 import type { MyProject } from "@/entities/project"
 import {
@@ -88,16 +88,30 @@ function ProjectCreateCard() {
   return (
     <Link
       href={appRoutes.projectCreate}
-      className="flex min-h-[360px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 bg-white/40 px-6 text-center transition-colors hover:border-main-02 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-main-02"
+      className="flex min-w-0 items-center justify-start gap-3 rounded-[14px] border-[1.5px] border-dashed border-main-20 bg-main-22/35 px-4 py-3.5 text-[15px] font-bold text-main-10 hover:border-main-10 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-main-10 md:min-h-[320px] md:flex-col md:justify-center"
     >
-      <span className="mb-5 inline-flex size-14 items-center justify-center rounded-xl bg-slate-200 text-main-02">
-        <Plus className="size-6" aria-hidden="true" />
+      <span className="grid size-11 shrink-0 place-items-center rounded-[14px] border border-main-20 bg-[#FDFEFF] md:size-[52px]">
+        <Plus className="size-[18px]" strokeWidth={1.75} aria-hidden="true" />
       </span>
-      <span className="text-lg font-bold text-[#171f24]">프로젝트 생성</span>
-      <span className="mt-3 max-w-40 text-sm leading-6 text-slate-600">
-        새로운 학술 아카이브 프로젝트를 시작하세요
-      </span>
+      <span>프로젝트 생성</span>
     </Link>
+  )
+}
+
+/** 내 프로젝트 API 이미지의 누락과 실패를 동일한 썸네일 대체 모양으로 표시한다. */
+function ProjectThumbnail({ url, title }: { url: string | null; title: string }) {
+  const [failedUrl, setFailedUrl] = useState<string | null>(null)
+  /** 하이드레이션 전에 발생한 이미지 실패도 처리한다. */
+  const attachImage = useCallback((image: HTMLImageElement | null) => {
+    if (image?.complete && image.naturalWidth === 0) setFailedUrl(url)
+  }, [url])
+  return url && failedUrl !== url ? (
+    // eslint-disable-next-line @next/next/no-img-element -- API 동적 외부 이미지를 원격 최적화 없이 표시하고 로드 실패를 처리한다.
+    <img ref={attachImage} src={url} alt={title + " 썸네일"} onError={() => setFailedUrl(url)} className="block aspect-[16/10] w-full bg-main-22 object-cover" />
+  ) : (
+    <div className="flex aspect-[16/10] w-full flex-col items-center justify-center gap-1.5 bg-main-22 text-[13px] font-semibold text-main-12">
+      <ImageOff className="size-[26px]" strokeWidth={1.75} aria-hidden="true" /><span>썸네일 없음</span>
+    </div>
   )
 }
 
@@ -152,53 +166,28 @@ function ProjectCard({ project, onEdit, onOpen }: ProjectCardProps) {
   return (
     <article
       aria-label={`${project.title} 상세 보기`}
-      className="group flex min-h-[360px] cursor-pointer flex-col overflow-hidden rounded-lg bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-main-02"
+      className="group flex min-w-0 cursor-pointer flex-col overflow-hidden rounded-[14px] border border-[#E3E9F0] bg-[#FDFEFF] shadow-[0_1px_2px_rgb(0_29_53/.05),0_8px_24px_-14px_rgb(0_29_53/.22)] hover:border-main-20 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-main-10"
       onClick={handleOpen}
       onKeyDown={handleKeyDown}
       role="link"
       tabIndex={0}
     >
-      <div className="relative h-44 overflow-hidden bg-slate-200">
-        {project.thumbnailUrl ? (
-          <div
-            aria-hidden="true"
-            className="size-full bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
-            style={{ backgroundImage: `url(${project.thumbnailUrl})` }}
-          />
-        ) : (
-          <div className="flex size-full items-center justify-center text-sm font-medium text-slate-500">
-            썸네일 없음
-          </div>
-        )}
-
-        <span
-          className={cn(
-            "absolute left-4 top-4 inline-flex h-7 items-center gap-1.5 rounded-sm px-2.5 text-xs font-semibold shadow-sm",
-            project.status === "PUBLISHED"
-              ? "bg-white text-main-02"
-              : "bg-slate-950 text-white"
-          )}
-        >
-          {project.status === "PUBLISHED" ? (
-            <Globe2 className="size-3.5" aria-hidden="true" />
-          ) : (
-            <Lock className="size-3.5" aria-hidden="true" />
-          )}
+      <ProjectThumbnail url={project.thumbnailUrl} title={project.title} />
+      <div className="flex min-w-0 flex-1 flex-col gap-2 px-[18px] pt-4 pb-[18px]">
+        <span className={cn("inline-flex h-[26px] items-center gap-[5px] self-start rounded-full px-2.5 text-xs font-bold", project.status === "PUBLISHED" ? "bg-main-22 text-main-10" : "border border-[#E3E9F0] bg-[#F5F8FB] text-gray-03")}>
+          {project.status === "PUBLISHED" ? <Globe2 className="size-[13px]" strokeWidth={1.75} aria-hidden="true" /> : <Lock className="size-[13px]" strokeWidth={1.75} aria-hidden="true" />}
           {visibilityLabel}
         </span>
-      </div>
-
-      <div className="flex flex-1 flex-col px-6 py-6">
-        <h2 className="line-clamp-2 min-h-14 text-xl font-extrabold leading-7 text-[#171f24]">
+        <h2 className="line-clamp-2 text-[17px] font-bold leading-[1.45] tracking-[-.01em] break-keep [overflow-wrap:anywhere] text-main-00">
           {project.title}
         </h2>
 
-        <div className="mt-4 flex min-h-7 flex-wrap gap-2">
+        <div className="flex h-6 flex-wrap gap-1.5 overflow-hidden">
           {tags.length > 0 ? (
             tags.map((tag) => (
               <span
                 key={`${project.projectId}-${tag}`}
-                className="inline-flex h-6 items-center rounded bg-main-22 px-2.5 text-xs font-bold text-main-02"
+                className="inline-flex h-6 shrink-0 items-center whitespace-nowrap rounded-full border border-[#E3E9F0] bg-[#F5F8FB] px-[9px] text-xs text-gray-03"
               >
                 {tag}
               </span>
@@ -210,13 +199,13 @@ function ProjectCard({ project, onEdit, onOpen }: ProjectCardProps) {
           )}
         </div>
 
-        <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-5">
-          <span className="text-sm text-slate-600">
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-[#E3E9F0] pt-3">
+          <span className="min-w-0 text-[13px] text-gray-05">
             {formatUpdatedAt(project.updatedAt)}
           </span>
           <button
             type="button"
-            className="inline-flex size-8 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-main-02"
+            className="inline-flex size-8 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-main-10"
             onClick={handleSettingsClick}
             onKeyDown={handleSettingsKeyDown}
             aria-label={`${project.title} 설정`}
@@ -293,12 +282,12 @@ export function MypageProjectsPage({
   }
 
   return (
-    <section className="flex flex-col gap-8 px-8 py-10">
-      <h1 className="text-[32px] font-extrabold leading-tight text-[#171f24]">
+    <section className="flex min-w-0 flex-col gap-4 px-4 pt-7 pb-8 md:gap-6 md:px-8 md:pt-8 md:pb-12 lg:px-10 lg:pt-10 lg:pb-14 xl:px-12 xl:pt-11 xl:pb-16">
+      <h1 className="text-[26px] font-extrabold leading-[1.25] tracking-[-.03em] text-main-00 md:text-4xl">
         프로젝트 모음
       </h1>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid min-w-0 grid-cols-1 gap-4 md:gap-6 md:grid-cols-2 xl:grid-cols-3">
         <ProjectCreateCard />
 
         {errorMessage ? (

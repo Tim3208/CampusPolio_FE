@@ -4,12 +4,11 @@ import { useState } from "react"
 import type { ReactNode } from "react"
 import {
   AlertTriangle,
-  Bot,
   CheckCircle2,
   Code2,
   Loader2,
   RefreshCw,
-  Sparkles,
+  ScanSearch,
 } from "lucide-react"
 
 import { reviewProject, type ProjectReview } from "@/entities/project"
@@ -82,6 +81,7 @@ export function ProjectReviewPanel({ projectId }: ProjectReviewPanelProps) {
   const [errorMessage, setErrorMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
+  /** 기존 프로젝트 ID로 리뷰를 요청하거나 다시 생성한다. */
   const handleReviewClick = async () => {
     setIsLoading(true)
     setErrorMessage("")
@@ -103,24 +103,14 @@ export function ProjectReviewPanel({ projectId }: ProjectReviewPanelProps) {
   const score = review ? clampScore(review.totalScore) : 0
 
   return (
-    <section className="rounded-md bg-white p-4 shadow-sm ring-1 ring-slate-200">
-      <div className="flex items-center gap-2">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#DCEBFF] text-[#005E9C]">
-          <Bot className="h-4 w-4" aria-hidden="true" />
-        </span>
-        <div>
-          <h2 className="text-[11px] font-black uppercase tracking-wide text-[#151B23]">
-            AI 코드 리뷰
-          </h2>
-          <p className="text-xs text-slate-500">프로젝트 품질 분석</p>
-        </div>
-      </div>
+    <section className="min-w-0 rounded-[14px] border border-[#E3E9F0] bg-[#FDFEFF] p-5 shadow-[0_1px_2px_rgb(0_29_53/.05),0_8px_24px_-14px_rgb(0_29_53/.22)]">
+      <h2 className="text-base font-bold text-main-00">AI 코드 리뷰</h2>
 
       <button
         type="button"
         onClick={handleReviewClick}
         disabled={isLoading}
-        className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-main-10 px-3 text-sm font-bold text-white transition hover:bg-[#005E9C] disabled:cursor-not-allowed disabled:bg-slate-300"
+        className="mt-3 inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-[10px] border border-[#CBD6E2] bg-[#FDFEFF] px-4 text-sm font-semibold text-gray-01 hover:border-main-20 hover:text-main-10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-main-10 disabled:cursor-not-allowed disabled:border-[#E3E9F0] disabled:bg-[#F5F8FB] disabled:text-gray-08"
       >
         {isLoading ? (
           <>
@@ -134,8 +124,8 @@ export function ProjectReviewPanel({ projectId }: ProjectReviewPanelProps) {
           </>
         ) : (
           <>
-            <Sparkles className="h-4 w-4" aria-hidden="true" />
-            AI 코드 리뷰
+            <ScanSearch className="size-[18px]" strokeWidth={1.75} aria-hidden="true" />
+            리뷰 요청
           </>
         )}
       </button>
