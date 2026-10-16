@@ -54,6 +54,12 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=YOUR_GOOGLE_WEB_CLIENT_ID
 
 `NEXT_PUBLIC_*`는 브라우저에 노출되는 설정이다. Google client secret 등 비밀값을 넣지 않는다. Mock 예시는 조회 화면 개발용이며, Google 로그인 UI는 Mock 사용 시에도 웹 클라이언트 ID와 외부 Google SDK를 요구한다. 실제 로그인·메일·서버 권한은 실제 백엔드에서 확인해야 하며, Mock 인증 상태만으로 해당 검증을 완료할 수 없다. 현재 Mock은 서버와 브라우저 사이 상태 및 세션 동작에 제약이 있다.
 
+## Sentry 클라이언트 오류 수집
+
+`.env.local`에 `NEXT_PUBLIC_SENTRY_DSN`을 설정하고 개발 서버를 재시작하면 브라우저 오류 수집을 활성화한다. DSN은 Sentry 프로젝트의 Settings → Client Keys (DSN)에서 확인한다. 미설정 시 수집을 초기화하지 않는다. 배포 시에는 빌드 환경에 설정한다.
+
+성능 추적·세션 리플레이·서버 수집·소스맵 업로드는 이번 범위에 포함하지 않는다. 설정과 검증 상태는 [Sentry 작업 기록](docs/ai/sentry-client-monitoring.md)을 참고한다.
+
 ## 검증
 
 ```sh
