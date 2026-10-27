@@ -1,0 +1,13 @@
+/* Pretendard v1.3.9: visual 프로젝트에서만 로드. 출처/해시는 tests/visual/fonts.json 참조. */
+@font-face { font-family: "Pretendard"; font-style: normal; font-weight: 100; font-display: block; src: url("/fonts/Pretendard-Thin.woff2") format("woff2"); }
+@font-face { font-family: "Pretendard"; font-style: normal; font-weight: 200; font-display: block; src: url("/fonts/Pretendard-ExtraLight.woff2") format("woff2"); }
+@font-face { font-family: "Pretendard"; font-style: normal; font-weight: 300; font-display: block; src: url("/fonts/Pretendard-Light.woff2") format("woff2"); }
+@font-face { font-family: "Pretendard"; font-style: normal; font-weight: 400; font-display: block; src: url("/fonts/Pretendard-Regular.woff2") format("woff2"); }
+@font-face { font-family: "Pretendard"; font-style: normal; font-weight: 500; font-display: block; src: url("/fonts/Pretendard-Medium.woff2") format("woff2"); }
+@font-face { font-family: "Pretendard"; font-style: normal; font-weight: 600; font-display: block; src: url("/fonts/Pretendard-SemiBold.woff2") format("woff2"); }
+@font-face { font-family: "Pretendard"; font-style: normal; font-weight: 700; font-display: block; src: url("/fonts/Pretendard-Bold.woff2") format("woff2"); }
+@font-face { font-family: "Pretendard"; font-style: normal; font-weight: 800; font-display: block; src: url("/fonts/Pretendard-ExtraBold.woff2") format("woff2"); }
+@font-face { font-family: "Pretendard"; font-style: normal; font-weight: 900; font-display: block; src: url("/fonts/Pretendard-Black.woff2") format("woff2"); }
+/* 모션·캐럿만 고정하며 배치·넘침·focus 표시는 제품 그대로 유지한다. */
+*, *::before, *::after { animation: none !important; transition: none !important; caret-color: transparent !important; scroll-behavior: auto !important; }
+

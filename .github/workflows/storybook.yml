@@ -1,0 +1,107 @@
+name: Storybook PR checks
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: storybook-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  storybook:
+    # 기존 win32 기준을 비교한다. Windows 이미지의 세부 빌드 차이는 원격 실행에서 확인한다.
+    runs-on: windows-2025
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      CI: 'true'
+      STORYBOOK_TEST_PORT: '6222'
+      NEXT_PUBLIC_API_BASE_URL: ''
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: ''
+      NEXT_PUBLIC_USE_MOCK_API: 'false'
+      NEXT_PUBLIC_MOCK_AUTH_STATE: unverified
+      NEXT_TELEMETRY_DISABLED: '1'
+      STORYBOOK_DISABLE_TELEMETRY: '1'
+      PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/campuspolio-chromium
+
+    steps:
+      - name: Check out the PR
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Use Node from .nvmrc
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          architecture: x64
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Prepare isolated npm 10.9.9
+        run: |
+          New-Item -ItemType Directory -Force build/ci | Out-Null
+          $prefix = Join-Path $env:RUNNER_TEMP 'campuspolio-npm-10.9.9'
+          npm install --prefix "$prefix" --no-save --package-lock=false --ignore-scripts npm@10.9.9 2>&1 | Tee-Object -FilePath build/ci/npm-bootstrap.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $npmCli = Join-Path $prefix 'node_modules/npm/bin/npm-cli.js'
+          "NPM_CLI=$npmCli" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          $nodeVersion = node --version
+          $npmVersion = node "$npmCli" --version
+          "Node=$nodeVersion npm=$npmVersion OS=$([Environment]::OSVersion.VersionString)" | Tee-Object -FilePath build/ci/versions.log
+          if ($nodeVersion -ne 'v24.22.1' -or $npmVersion -ne '10.9.9') { throw 'Unexpected Node/npm version' }
+          if ((Get-Content package.json -Raw | ConvertFrom-Json).packageManager -ne 'npm@10.9.9') { throw 'Unexpected packageManager' }
+
+      - name: Clean install from the lockfile
+        run: |
+          node "$env:NPM_CLI" ci 2>&1 | Tee-Object -FilePath build/ci/npm-ci.log
+          exit $LASTEXITCODE
+
+      - name: Install the locked Chromium version
+        run: |
+          node "$env:NPM_CLI" exec -- playwright install chromium 2>&1 | Tee-Object -FilePath build/ci/chromium.log
+          exit $LASTEXITCODE
+
+      - name: Check types
+        run: |
+          node "$env:NPM_CLI" exec -- tsc --noEmit --incremental false 2>&1 | Tee-Object -FilePath build/ci/types.log
+          exit $LASTEXITCODE
+
+      - name: Lint
+        run: |
+          node "$env:NPM_CLI" run lint 2>&1 | Tee-Object -FilePath build/ci/lint.log
+          exit $LASTEXITCODE
+
+      - name: Test all Storybook stories
+        run: |
+          node "$env:NPM_CLI" run test:storybook 2>&1 | Tee-Object -FilePath build/ci/storybook-tests.log
+          exit $LASTEXITCODE
+
+      - name: Compare all visual baselines
+        # 일반 runner가 --update=none을 강제한다. 기준 생성/갱신은 CI에 넣지 않는다.
+        run: |
+          node "$env:NPM_CLI" run test:visual 2>&1 | Tee-Object -FilePath build/ci/visual-tests.log
+          exit $LASTEXITCODE
+
+      - name: Build static Storybook
+        run: |
+          node "$env:NPM_CLI" run build-storybook 2>&1 | Tee-Object -FilePath build/ci/storybook-build.log
+          exit $LASTEXITCODE
+
+      - name: Build the application with the default bundler
+        run: |
+          node "$env:NPM_CLI" run build 2>&1 | Tee-Object -FilePath build/ci/next-build.log
+          exit $LASTEXITCODE
+
+      - name: Preserve logs, failure screenshots, visual diffs and static Storybook
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: storybook-${{ github.run_id }}-${{ github.run_attempt }}
+          path: build/
+          if-no-files-found: warn

@@ -300,12 +300,24 @@ export const RichMarkdownEditor = forwardRef<
    * @param fileUrl 이미지 URL
    */
   function insertImage(fileName: string, fileUrl: string) {
-    editorRef.current?.focus();
-    restoreSelection(lastSelectionRef.current);
+    const editor = editorRef.current;
+    if (disabled || !editor?.isContentEditable) return;
+    editor.focus();
+    const savedRange = lastSelectionRef.current;
+    const range = savedRange && editor.contains(savedRange.commonAncestorContainer)
+      ? savedRange : document.createRange();
+    if (range !== savedRange) {
+      range.selectNodeContents(editor);
+      range.collapse(false);
+    }
+    restoreSelection(range);
+    const existingImages = new Set(editor.querySelectorAll("img"));
     document.execCommand("insertImage", false, fileUrl);
 
-    const images = editorRef.current?.querySelectorAll(`img[src="${fileUrl}"]`);
-    const image = images?.[images.length - 1];
+    // 같은 URL을 본문 중간에 다시 넣어도 기존 이미지의 이름·스타일을 바꾸지 않는다.
+    const image = Array.from(editor.querySelectorAll("img")).find(
+      (candidate) => !existingImages.has(candidate),
+    );
 
     image?.setAttribute("alt", fileName);
     image?.classList.add(
@@ -390,6 +402,10 @@ export const RichMarkdownEditor = forwardRef<
       <div
         id={id}
         ref={editorRef}
+        role="textbox"
+        aria-label="프로젝트 본문"
+        aria-multiline="true"
+        aria-disabled={disabled}
         contentEditable={!disabled}
         suppressContentEditableWarning
         onInput={commitEditorChange}

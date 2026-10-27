@@ -27,7 +27,7 @@
 - [프로젝트 상세 75:802](https://www.figma.com/design/hWgpBU1pri3aJg9JkVoE6L/Campus-Polio?node-id=75-802)
 - [마이페이지 75:1219](https://www.figma.com/design/hWgpBU1pri3aJg9JkVoE6L/Campus-Polio?node-id=75-1219)
 
-[구현·개발 검증 기록](uiux-phase1-implementation.md)에 파일 대응, 실제 검증 결과, 의도적인 차이와 미해결 항목을 기록했다. 독립 QA와 실제 backend/OAuth 검증은 완료로 표시하지 않는다. 작성·수정·포트폴리오 제작 화면의 시각 재설계와 지원 본문 제작은 이번 범위에 포함하지 않는다.
+[구현·개발 검증 기록](uiux-phase1-implementation.md)에 파일 대응, 실제 검증 결과, 의도적인 차이와 미해결 항목을 기록했다. 이 UI/UX 개발 기록의 작성 시점에는 독립 QA와 실제 backend/OAuth 검증을 완료로 표시하지 않았다. 이후 상태는 해당 run의 QA·검수 증거를 확인한다. 작성·수정·포트폴리오 제작 화면의 시각 재설계와 지원 본문 제작은 이번 범위에 포함하지 않는다.
 
 ### 자료 해석
 
@@ -45,3 +45,13 @@
 - 새 자료를 추가하면 이 목차에 링크와 상태를 기록한다.
 - 계획·시안·구현 결과를 구분하고, 실제 완료 여부는 코드와 검증 결과로 확인한다.
 - 공통 작업 규칙은 이 폴더에 복제하지 않고 [AGENTS.md](../../AGENTS.md)로 연결한다.
+
+## Storybook
+
+[Storybook 사용 안내](storybook-guide.md)는 2026-10-27 현재 28개 파일·273개 기능 상태, 별도12개 시각 기준, Node24.22.1/npm10.9.9 설치·실행·Controls/reset·Docs·기준 갱신과 환경 격리를 제공한다. 과거57개·DEV-06 도입 원문은 별도 이력으로 보존했다. 최종 독립 QA·검수·전달 상태는 해당 run 증거와 Wiki에서 확인한다. Storybook 추가는 위의 확정 시안·과거 승인 및 구현 이력을 변경하지 않는다.
+
+[Storybook UI 조작과 검증 확장 계획](storybook-adoption-plan.md)은 2026-10-26 현재 기반 분석과 Playground·대상 컴포넌트·접근성·반응형·CI·시각 회귀의 적용 순서 및 완료 조건을 정리한다. 당시 확장 제안 원문이며 후속 구현과 개발 확인을 별도 추가했다. 같은 날의 기존 Chromium 테스트 9개 파일·57개 통과 기록은 그대로 보존한다.
+
+[Storybook 확장 개발 확인](storybook-extension-verification.md)은 DEV-13의 실제 명령·시각·화면·effective 접근성180/93·계약 차이·기본 빌드 실패 및 대체 결과를 기록한다. PR workflow 작성과 로컬 검증, 원격 CI 실제 실행을 구분한다. 이 개발 확인 시점의 후속 독립 QA·DEV13 Claude·Wiki·finish·문서 동기화·원본 전달은 미리 완료로 표시하지 않으며 이후 상태는 실제 run 증거를 따른다. 과거 UIUX/Storybook QA, SKIPPED_QUOTA/WAITING_QUOTA/BLOCKED를 이번 결과로 소급 변경하지 않는다.
+
+[Storybook QA 수리 1차 개발 확인](storybook-qa-recovery-01-verification.md)은 QA attempt-01의 14 PASS/4 FAIL(입력 echo·폼 이미지·좁은 선택 제목의 3주제), DEV-14 수리와 추가 동일 URL 이미지 alt 회귀, 최종 273 기능/12 시각 비교 및 실패·재시도 근거를 연결한다. DEV-14 실제 Claude 개발 PASS와 DEV-15 문서 작성, 이후 개발자들과 다른 새 담당자의 QA-01~21 전체 재실행·Wiki 검수·finish·동기화·원본 전달은 별도 상태다. DEV-13 및 과거 도입·quota 이력은 보존한다.

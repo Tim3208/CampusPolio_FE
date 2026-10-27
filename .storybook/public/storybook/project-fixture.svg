@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-labelledby="title">
+  <title id="title">CampusPolio Storybook 고정 프로젝트 이미지</title>
+  <rect width="960" height="540" fill="#dbeafe"/>
+  <rect x="100" y="90" width="760" height="360" rx="28" fill="#ffffff"/>
+  <path d="M180 340 320 190 450 320 570 220 780 390H180Z" fill="#005e9c"/>
+  <circle cx="690" cy="170" r="42" fill="#a8caee"/>
+  <text x="180" y="415" fill="#001d35" font-family="sans-serif" font-size="28">CampusPolio · Storybook fixture</text>
+</svg>

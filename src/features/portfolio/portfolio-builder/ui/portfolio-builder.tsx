@@ -494,7 +494,7 @@ export function PortfolioBuilder({
             </span>
           </div>
 
-          <div className="space-y-2">
+          <div className="@container space-y-2">
             {selectedProjects.length > 0 ? (
               selectedProjects.map((project, index) => (
                 <SelectedProjectCard
@@ -864,7 +864,7 @@ function SelectedProjectCard({
   totalCount: number;
 }) {
   return (
-    <article className="grid grid-cols-[28px_72px_1fr_auto] items-center gap-4 rounded-md border border-slate-200 bg-white p-3">
+    <article className="grid grid-cols-[28px_72px_minmax(0,1fr)] items-center gap-4 rounded-md border border-slate-200 bg-white p-3 @min-[400px]:grid-cols-[28px_72px_minmax(0,1fr)_auto]">
       <span className="text-center text-sm font-bold text-slate-400">
         {String(index + 1).padStart(2, "0")}
       </span>
@@ -877,7 +877,7 @@ function SelectedProjectCard({
           {formatProjectMonth(project.updatedAt)}
         </p>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="col-span-2 col-start-2 flex items-center justify-end gap-1 @min-[400px]:col-span-1 @min-[400px]:col-start-auto">
         <button
           type="button"
           onClick={() => onMove(project.projectId, "up")}
