@@ -39,6 +39,10 @@
 
 [설정·검증 기록](sentry-client-monitoring.md): 이슈 #20의 클라이언트 오류 수집 설정과 검증 상태를 기록한다. 실제 브라우저 오류 2건의 전송과 Sentry 대시보드 표시를 확인했다.
 
+## 배포 의존성 보안 업데이트
+
+[의존성 업데이트 검증 기록](security-dependency-update.md)은 이슈 #22의 Next.js 및 이미지 처리 의존성 변경, 보안 경고 비교, 화면·Sentry 회귀 검증 범위와 남은 제약을 기록한다.
+
 ## 보조 디자인 스킬
 
 [design-taste-frontend](../../.claude/skills/design-taste-frontend/SKILL.md)는 로컬에 추가된 보조 스킬이다. 관련 작업에 한해 적용 범위를 읽고 사용한다. 스킬은 사용자에게 확인할 디자인 기준안을 선택하는 근거를 대신하지 않는다. 원문과 [라이선스](../../.claude/skills/design-taste-frontend/LICENSE)를 함께 유지한다.

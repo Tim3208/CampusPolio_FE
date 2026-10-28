@@ -2,7 +2,7 @@
 
 ## 목적과 범위
 
-[이슈 #20](https://github.com/Tim3208/CampusPolio_FE/issues/20)의 멘토링 시연을 위해 브라우저 오류를 수집한다. Next.js 16.2.6, React 19.2.4에 `@sentry/nextjs` 11.8.0을 사용한다. 디자인·기존 UI·Storybook은 수정하지 않는다.
+[이슈 #20](https://github.com/Tim3208/CampusPolio_FE/issues/20)의 멘토링 시연을 위해 브라우저 오류를 수집한다. 도입 당시 Next.js 16.2.6, React 19.2.4에 `@sentry/nextjs` 11.8.0을 사용했다. 현재 설치 버전은 `package.json`과 잠금 파일을 기준으로 한다. 디자인·기존 UI·Storybook은 당시 수정하지 않았다.
 
 ## 현재 구현
 
