@@ -35,6 +35,10 @@
 - 시안의 상태 표현과 동작은 실제 화면에서 구현하고 검증해야 한다. 저장·공개·권한 등 API 계약은 시안만으로 결정하지 않는다.
 - 기존 FSD 안에서 화면을 구현하고, 자료의 차이를 발견하면 선택한 기준과 이유를 남긴다.
 
+## Sentry 클라이언트 오류 수집
+
+[설정·검증 기록](sentry-client-monitoring.md): 이슈 #20의 클라이언트 오류 수집 설정과 검증 상태를 기록한다. 실제 브라우저 오류 2건의 전송과 Sentry 대시보드 표시를 확인했다.
+
 ## 보조 디자인 스킬
 
 [design-taste-frontend](../../.claude/skills/design-taste-frontend/SKILL.md)는 로컬에 추가된 보조 스킬이다. 관련 작업에 한해 적용 범위를 읽고 사용한다. 스킬은 사용자에게 확인할 디자인 기준안을 선택하는 근거를 대신하지 않는다. 원문과 [라이선스](../../.claude/skills/design-taste-frontend/LICENSE)를 함께 유지한다.
