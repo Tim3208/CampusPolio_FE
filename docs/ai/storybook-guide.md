@@ -49,7 +49,7 @@
 
 ## 현재 설치와 실행
 
-[.nvmrc](../../.nvmrc)의 **Node 24.22.1**, [package.json](../../package.json)의 **npm 10.9.9**를 사용한다. 기존 Next 16.2.6, React 19.2.4, Storybook/Next Vite/Vitest·Docs·a11y addon 10.6.3, Vite 8.3.5, Vitest 4.1.12, Playwright 1.64.1, MSW 2.15.0과 addon 3.0.3은 lockfile 기준이다. 실행별 런타임을 사용할 수 있으며 사용자 전역 설치를 바꿀 필요는 없다.
+[.nvmrc](../../.nvmrc)의 **Node 24.22.1**, [package.json](../../package.json)의 **npm 10.9.9**를 사용한다. Next 16.4.3, React 19.2.4, Storybook/Next Vite/Vitest·Docs·a11y addon 10.6.3, Vite 8.3.5, Vitest 4.1.12, Playwright 1.64.1, MSW 2.15.0과 addon 3.0.3은 lockfile 기준이다. 실행별 런타임을 사용할 수 있으며 사용자 전역 설치를 바꿀 필요는 없다.
 
 ```sh
 node --version
