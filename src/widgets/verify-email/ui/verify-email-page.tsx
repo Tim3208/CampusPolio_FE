@@ -28,6 +28,8 @@ type VerifyEmailPageProps = {
 }
 
 type VerificationStep = "email" | "code"
+type PendingAction = "send" | "resend" | "verify"
+type VerificationError = { target: "user" | "email" | "code"; text: string }
 
 const CODE_LENGTH = 6
 const VERIFY_TIMEOUT_SECONDS = 180
@@ -109,15 +111,22 @@ function getLoginRedirectPath(nextPath: string) {
 export function VerifyEmailPage({ nextPath }: VerifyEmailPageProps) {
   const router = useRouter()
   const codeInputRefs = useRef<Array<HTMLInputElement | null>>([])
+  const shouldFocusCode = useRef(false)
   const [userId, setUserId] = useState<number | null>(null)
   const [email, setEmail] = useState("")
   const [codeDigits, setCodeDigits] = useState(createEmptyCodeDigits)
   const [step, setStep] = useState<VerificationStep>("email")
   const [remainingSeconds, setRemainingSeconds] = useState(0)
   const [isLoadingUser, setIsLoadingUser] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null)
+  const actionLock = useRef(false)
+  const userLoadLock = useRef(true)
+  const userRequest = useRef<ReturnType<typeof getCurrentUser> | null>(null)
+  const isMounted = useRef(false)
+  const [userLoadAttempt, setUserLoadAttempt] = useState(0)
+  const isSubmitting = pendingAction !== null
   const [message, setMessage] = useState("")
-  const [errorMessage, setErrorMessage] = useState("")
+  const [error, setError] = useState<VerificationError | null>(null)
   const code = useMemo(() => codeDigits.join(""), [codeDigits])
   const isCodeStep = step === "code"
   const canSendCode =
@@ -129,51 +138,55 @@ export function VerifyEmailPage({ nextPath }: VerifyEmailPageProps) {
     !isSubmitting &&
     !!userId
   const canResend =
-    isCodeStep && remainingSeconds === 0 && isAcademicEmail(email) && !!userId
+    isCodeStep && remainingSeconds === 0 && isAcademicEmail(email) && !!userId && !isSubmitting
 
   useEffect(() => {
     let ignore = false
+    isMounted.current = true
+    // Strict Mode의 effect 재연결에서도 진행 중인 최초 요청은 함께 기다린다.
+    const request = userRequest.current ?? getCurrentUser({ cache: "no-store" })
+    userRequest.current = request
 
-    /**
-     * 현재 로그인 사용자를 확인해 인증 화면 초기 상태를 준비한다.
-     */
+    /** 조회 결과를 현재 화면에만 반영하고 실패한 조회를 다시 시도할 수 있게 한다. */
     async function loadCurrentUser() {
       try {
-        const user = await getCurrentUser({ cache: "no-store" })
-
-        if (ignore) {
-          return
-        }
-
+        const user = await request
+        if (ignore) return
         if (user.isVerified) {
           router.replace(nextPath)
           return
         }
-
         setUserId(user.id)
         setEmail(isAcademicEmail(user.email) ? user.email : "")
-      } catch (error) {
-        if (ignore) {
-          return
-        }
-
-        setErrorMessage(getVerificationErrorMessage(error))
-        if (error instanceof ApiError && error.status === 401) {
+      } catch (cause) {
+        if (ignore) return
+        setError({ target: "user", text: getVerificationErrorMessage(cause) })
+        if (cause instanceof ApiError && cause.status === 401) {
           router.replace(getLoginRedirectPath(nextPath))
         }
       } finally {
         if (!ignore) {
+          userRequest.current = null
+          userLoadLock.current = false
           setIsLoadingUser(false)
         }
       }
     }
-
     void loadCurrentUser()
-
     return () => {
       ignore = true
+      isMounted.current = false
     }
-  }, [nextPath, router])
+  }, [nextPath, router, userLoadAttempt])
+
+  /** 실패한 사용자 조회를 중복 실행 없이 다시 요청한다. */
+  function handleReloadUser() {
+    if (userLoadLock.current || actionLock.current || userId) return
+    userLoadLock.current = true
+    setIsLoadingUser(true)
+    setError(null)
+    setUserLoadAttempt((attempt) => attempt + 1)
+  }
 
   useEffect(() => {
     if (!isCodeStep || remainingSeconds <= 0) {
@@ -189,6 +202,13 @@ export function VerifyEmailPage({ nextPath }: VerifyEmailPageProps) {
     }
   }, [isCodeStep, remainingSeconds])
 
+  useEffect(() => {
+    if (isCodeStep && !isSubmitting && shouldFocusCode.current) {
+      shouldFocusCode.current = false
+      codeInputRefs.current[0]?.focus()
+    }
+  }, [isCodeStep, isSubmitting])
+
   /**
    * 인증번호 입력칸으로 포커스를 이동한다.
    * @param index 이동할 코드 입력 인덱스
@@ -201,21 +221,18 @@ export function VerifyEmailPage({ nextPath }: VerifyEmailPageProps) {
    * 코드 입력 상태와 타이머를 인증 대기 상태로 초기화한다.
    */
   function startCodeVerification() {
+    shouldFocusCode.current = true
     setStep("code")
     setCodeDigits(createEmptyCodeDigits())
     setRemainingSeconds(VERIFY_TIMEOUT_SECONDS)
-
-    window.requestAnimationFrame(() => {
-      focusCodeInput(0)
-    })
   }
 
   /**
    * 현재 오류가 401이면 로그인 페이지로 이동한다.
    * @param error API 또는 일반 오류
    */
-  function handleVerificationError(error: unknown) {
-    setErrorMessage(getVerificationErrorMessage(error))
+  function handleVerificationError(error: unknown, target: "email" | "code") {
+    setError({ target, text: getVerificationErrorMessage(error) })
 
     if (error instanceof ApiError && error.status === 401) {
       router.replace(getLoginRedirectPath(nextPath))
@@ -229,22 +246,24 @@ export function VerifyEmailPage({ nextPath }: VerifyEmailPageProps) {
   async function handleSendCode(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
+    if (actionLock.current || userLoadLock.current || step !== "email") return
     const trimmedEmail = email.trim()
 
     if (!isAcademicEmail(trimmedEmail)) {
-      setErrorMessage(".ac.kr로 끝나는 학교 이메일을 입력해주세요.")
+      setError({ target: "email", text: ".ac.kr로 끝나는 학교 이메일을 입력해주세요." })
       setMessage("")
       return
     }
 
     if (!userId) {
-      setErrorMessage("사용자 정보를 확인하는 중입니다.")
+      setError({ target: "user", text: "사용자 정보를 확인하는 중입니다." })
       setMessage("")
       return
     }
 
-    setIsSubmitting(true)
-    setErrorMessage("")
+    actionLock.current = true
+    setPendingAction("send")
+    setError(null)
     setMessage("")
 
     try {
@@ -253,13 +272,15 @@ export function VerifyEmailPage({ nextPath }: VerifyEmailPageProps) {
         userId,
       })
 
+      if (!isMounted.current) return
       setEmail(trimmedEmail)
       setMessage(responseMessage || "인증번호가 발송되었습니다.")
       startCodeVerification()
     } catch (error) {
-      handleVerificationError(error)
+      if (isMounted.current) handleVerificationError(error, "email")
     } finally {
-      setIsSubmitting(false)
+      actionLock.current = false
+      if (isMounted.current) setPendingAction(null)
     }
   }
 
@@ -269,12 +290,13 @@ export function VerifyEmailPage({ nextPath }: VerifyEmailPageProps) {
   async function handleResendCode() {
     const trimmedEmail = email.trim()
 
-    if (!canResend || !userId) {
+    if (actionLock.current || userLoadLock.current || !canResend || !userId) {
       return
     }
 
-    setIsSubmitting(true)
-    setErrorMessage("")
+    actionLock.current = true
+    setPendingAction("resend")
+    setError(null)
     setMessage("")
 
     try {
@@ -283,12 +305,14 @@ export function VerifyEmailPage({ nextPath }: VerifyEmailPageProps) {
         userId,
       })
 
+      if (!isMounted.current) return
       setMessage(responseMessage || "인증번호를 다시 발송했습니다.")
       startCodeVerification()
     } catch (error) {
-      handleVerificationError(error)
+      if (isMounted.current) handleVerificationError(error, "code")
     } finally {
-      setIsSubmitting(false)
+      actionLock.current = false
+      if (isMounted.current) setPendingAction(null)
     }
   }
 
@@ -298,12 +322,13 @@ export function VerifyEmailPage({ nextPath }: VerifyEmailPageProps) {
   async function handleVerifyCode() {
     const trimmedEmail = email.trim()
 
-    if (!canVerifyCode || !userId) {
+    if (actionLock.current || userLoadLock.current || !canVerifyCode || !userId || !isAcademicEmail(trimmedEmail)) {
       return
     }
 
-    setIsSubmitting(true)
-    setErrorMessage("")
+    actionLock.current = true
+    setPendingAction("verify")
+    setError(null)
     setMessage("")
 
     try {
@@ -313,12 +338,14 @@ export function VerifyEmailPage({ nextPath }: VerifyEmailPageProps) {
         userId,
       })
 
+      if (!isMounted.current) return
       setMessage(responseMessage || "학교 이메일 인증이 완료되었습니다.")
       router.replace(nextPath)
     } catch (error) {
-      handleVerificationError(error)
+      if (isMounted.current) handleVerificationError(error, "code")
     } finally {
-      setIsSubmitting(false)
+      actionLock.current = false
+      if (isMounted.current) setPendingAction(null)
     }
   }
 
@@ -403,6 +430,21 @@ export function VerifyEmailPage({ nextPath }: VerifyEmailPageProps) {
     focusCodeInput(Math.min(index + pastedDigits.length, CODE_LENGTH - 1))
   }
 
+  const isExpired = isCodeStep && remainingSeconds === 0
+  const statusMessage = isLoadingUser
+    ? "사용자 정보를 불러오는 중입니다."
+    : pendingAction === "send"
+      ? "인증번호를 전송하는 중입니다."
+      : pendingAction === "resend"
+        ? "인증번호를 다시 전송하는 중입니다."
+        : pendingAction === "verify"
+          ? "인증번호를 확인하는 중입니다."
+          : isExpired
+            ? "인증번호가 만료되었습니다. 이메일이 오지 않았나요? 버튼으로 다시 발송해주세요."
+            : message
+  const emailDescription = "school-email-hint" + (error?.target === "email" ? " verification-error" : "")
+  const codeDescription = "verification-code-hint verification-status" + (error?.target === "code" ? " verification-error" : "")
+
   return (
     <main className="flex min-h-[calc(100vh-3.5rem)] flex-col items-center justify-between bg-slate-50 px-5 py-10">
       <section className="flex w-full flex-1 items-center justify-center">
@@ -430,7 +472,7 @@ export function VerifyEmailPage({ nextPath }: VerifyEmailPageProps) {
           <form onSubmit={handleSendCode} className="mt-10">
             <label
               htmlFor="school-email"
-              className="text-[11px] font-extrabold tracking-[0.18em] text-blue-300"
+              className="text-[11px] font-extrabold tracking-[0.18em] text-[#005E9C]"
             >
               UNIVERSITY EMAIL
             </label>
@@ -438,29 +480,34 @@ export function VerifyEmailPage({ nextPath }: VerifyEmailPageProps) {
               <input
                 id="school-email"
                 type="email"
+                aria-describedby={emailDescription}
+                aria-invalid={error?.target === "email" || undefined}
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 disabled={isLoadingUser || isSubmitting || isCodeStep}
                 placeholder="username@syu.ac.kr"
-                className="h-12 min-w-0 border-0 border-b border-slate-400 bg-transparent px-0 text-base font-semibold text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-[#005E9C]"
+                className="h-12 min-w-0 border-0 border-b border-slate-400 bg-transparent px-0 text-base font-semibold text-slate-900 outline-none focus-visible:ring-2 focus-visible:ring-[#005E9C] transition placeholder:text-slate-500 focus:border-[#005E9C]"
               />
               <button
+                aria-busy={pendingAction === "send"}
                 type="submit"
                 disabled={!canSendCode || isLoadingUser}
-                className="inline-flex h-12 min-w-24 items-center justify-center rounded-lg bg-[#005E9C] px-5 text-sm font-bold text-white transition hover:bg-[#004E82] disabled:bg-slate-200 disabled:text-slate-400"
+                className="inline-flex h-12 min-w-24 items-center justify-center rounded-lg bg-[#005E9C] px-5 text-sm font-bold text-white transition-shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#005E9C] hover:bg-[#004E82] disabled:bg-slate-200 disabled:text-slate-600"
               >
-                {isSubmitting && !isCodeStep ? (
-                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-                ) : (
-                  "코드 전송"
+                {pendingAction === "send" && (
+                  <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
                 )}
+                코드 전송
               </button>
             </div>
+            <p id="school-email-hint" className="mt-2 text-xs leading-5 text-slate-600">
+              .ac.kr로 끝나는 학교 이메일을 입력해주세요.
+            </p>
           </form>
 
           <div className="mt-10">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-extrabold tracking-[0.18em] text-slate-300">
+              <span id="verification-code-label" className="text-[11px] font-extrabold tracking-[0.18em] text-slate-600">
                 6-DIGIT CODE
               </span>
               <span className="text-xs font-bold text-[#005E9C]">
@@ -468,7 +515,10 @@ export function VerifyEmailPage({ nextPath }: VerifyEmailPageProps) {
               </span>
             </div>
 
-            <div className="mt-3 grid grid-cols-6 gap-3">
+            <p id="verification-code-hint" className="mt-2 text-xs leading-5 text-slate-600">
+              이메일로 받은 6자리 인증번호를 입력해주세요.
+            </p>
+            <div role="group" aria-labelledby="verification-code-label" aria-describedby={codeDescription} className="mt-3 grid grid-cols-6 gap-3">
               {codeDigits.map((digit, index) => (
                 <input
                   key={index}
@@ -482,8 +532,10 @@ export function VerifyEmailPage({ nextPath }: VerifyEmailPageProps) {
                   inputMode="numeric"
                   maxLength={1}
                   disabled={!isCodeStep || isSubmitting}
+                  aria-describedby={codeDescription}
+                  aria-invalid={(error?.target === "code" || isExpired) || undefined}
                   aria-label={`${index + 1}번째 인증번호`}
-                  className="aspect-square w-full rounded border border-slate-300 bg-slate-50 text-center text-xl font-bold text-slate-950 outline-none transition focus:border-[#005E9C] focus:bg-white focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 disabled:text-slate-300"
+                  className="aspect-square w-full rounded border border-slate-300 bg-slate-50 text-center text-xl font-bold text-slate-950 outline-none transition focus:border-[#005E9C] focus:bg-white focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 disabled:text-slate-600"
                 />
               ))}
             </div>
@@ -491,36 +543,43 @@ export function VerifyEmailPage({ nextPath }: VerifyEmailPageProps) {
             <button
               type="button"
               onClick={handleVerifyCode}
+              aria-busy={pendingAction === "verify"}
               disabled={!canVerifyCode}
-              className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-lg bg-slate-100 text-sm font-bold text-slate-500 transition hover:bg-slate-200 disabled:text-slate-400 enabled:bg-[#005E9C] enabled:text-white enabled:hover:bg-[#004E82]"
+              className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-lg bg-slate-100 text-sm font-bold text-slate-500 transition-shadow hover:bg-slate-200 disabled:text-slate-600 enabled:bg-[#005E9C] enabled:text-white enabled:hover:bg-[#004E82]"
             >
-              {isSubmitting && isCodeStep ? (
-                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-              ) : (
-                "인증 확인"
+              {pendingAction === "verify" && (
+                <Loader2 className="mr-2 size-4 animate-spin" aria-hidden="true" />
               )}
+              인증 확인
             </button>
           </div>
 
-          {(message || errorMessage) && (
-            <p
-              className={`mt-5 rounded px-3 py-2 text-center text-sm leading-5 ${
-                errorMessage
-                  ? "bg-red-50 text-red-600"
-                  : "bg-blue-50 text-[#005E9C]"
-              }`}
-            >
-              {errorMessage || message}
-            </p>
+          <p id="verification-status" role="status" aria-atomic="true"
+            className={statusMessage ? "mt-5 rounded bg-blue-50 px-3 py-2 text-center text-sm leading-5 text-[#005E9C]" : ""}>
+            {statusMessage}
+          </p>
+          <p id="verification-error" role="alert" aria-atomic="true"
+            className={error ? "mt-5 rounded bg-red-50 px-3 py-2 text-center text-sm leading-5 text-red-700" : ""}>
+            {error?.text}
+          </p>
+          {!userId && (error?.target === "user" || isLoadingUser) && (
+            <button type="button" onClick={handleReloadUser} disabled={isLoadingUser}
+              aria-busy={isLoadingUser} aria-describedby="verification-error verification-status"
+              className="mt-3 inline-flex min-h-10 items-center justify-center gap-2 rounded border border-slate-400 px-4 text-sm font-bold text-[#005E9C] disabled:text-slate-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#005E9C]">
+              {isLoadingUser && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
+              다시 불러오기
+            </button>
           )}
 
           <div className="mt-10 text-center">
             <button
               type="button"
               onClick={handleResendCode}
+              aria-busy={pendingAction === "resend"}
               disabled={!canResend || isSubmitting}
-              className="text-xs font-semibold text-slate-500 underline-offset-4 hover:text-[#005E9C] hover:underline disabled:text-slate-300 disabled:no-underline"
+              className="text-xs font-semibold text-slate-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#005E9C] underline-offset-4 hover:text-[#005E9C] hover:underline disabled:text-slate-600 disabled:no-underline"
             >
+              {pendingAction === "resend" && <Loader2 className="mr-2 inline size-4 animate-spin" aria-hidden="true" />}
               이메일이 오지 않았나요?
             </button>
           </div>
@@ -528,7 +587,7 @@ export function VerifyEmailPage({ nextPath }: VerifyEmailPageProps) {
       </section>
 
       <footer className="mt-8 text-center">
-        <p className="text-[11px] font-bold tracking-[0.28em] text-slate-300">
+        <p className="text-[11px] font-bold tracking-[0.28em] text-slate-600">
           © 2026 SAHMYOOK UNIVERSITY.
         </p>
         <div className="mt-6 flex items-center justify-center gap-8 text-[11px] font-bold text-slate-700">

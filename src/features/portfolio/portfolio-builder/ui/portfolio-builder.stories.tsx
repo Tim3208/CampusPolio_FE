@@ -45,7 +45,7 @@ const meta = {
     nextjs: { appDirectory: true, navigation: { pathname: "/portfolios/new" } },
     docs: {
       story: { inline: false, height: "900px" },
-      description: { component: "기존 PortfolioBuilder의 projectsPage/errorMessage만 사용한다. Playground는 자동 클릭 없이 자유 조작하고 고정 사례의 play는 표시된 흐름을 자동 검증한다. 초기 목록·저장 시나리오 변경과 시나리오 초기화만 새 인스턴스를 만든다. Docs 사례는 iframe별로 분리하고 자동 play를 실행하지 않는다. Docs에서는 초기 fixture와 수동 조작을 제공하고, 고정 흐름 자동 검증은 Canvas/Vitest에서 수행한다. Storybook 10.6.3의 iframe은 docs.story.autoplay 설정을 전달하지 않아 중첩 Docs 문서에서만 play를 생략한다.\n\n저장은 POST 생성 → 필요한 정보 PATCH → 선택 add/remove → 2개 이상 order → visibility false → slug 이동이다. OpenAPI의 필수 userId query를 현재 client가 생략하는 차이를 유지하며 MSW 성공은 실제 서버 수용·권한·영속 저장의 증거가 아니다. 오류는 명세 envelope success:false와 HTTP 400으로 재현한다. 파일 선택은 실제 object URL 로컬 미리보기이며 저장 썸네일은 첫 유효 프로젝트 썸네일이다. rollback·전용 업로드·공개 저장 기능을 추가하지 않는다.\n\n기존 미리보기는 요약 UI이며 dialog 역할, focus trap/복귀, Escape/외부 클릭 닫기를 구현하지 않는다. 실제 제공되는 닫기 버튼을 검증하며 별도 한계로 기록한다. 최신순과 페이지 버튼은 현재 UI의 표시/disabled 상태이며 서버 조회를 수행하지 않는다." },
+      description: { component: "기존 PortfolioBuilder의 projectsPage/errorMessage만 사용한다. Playground는 자동 클릭 없이 자유 조작하고 고정 사례의 play는 표시된 흐름을 자동 검증한다. 초기 목록·저장 시나리오 변경과 시나리오 초기화만 새 인스턴스를 만든다. Docs 사례는 iframe별로 분리하고 자동 play를 실행하지 않는다. Docs에서는 초기 fixture와 수동 조작을 제공하고, 고정 흐름 자동 검증은 Canvas/Vitest에서 수행한다. Storybook 10.6.3의 iframe은 docs.story.autoplay 설정을 전달하지 않아 중첩 Docs 문서에서만 play를 생략한다.\n\n저장은 POST 생성 → 필요한 정보 PATCH → 선택 add/remove → 2개 이상 order → visibility false → slug 이동이다. OpenAPI의 필수 userId query를 현재 client가 생략하는 차이를 유지하며 MSW 성공은 실제 서버 수용·권한·영속 저장의 증거가 아니다. 오류는 명세 envelope success:false와 HTTP 400으로 재현한다. 파일 선택은 실제 object URL 로컬 미리보기이며 저장 썸네일은 첫 유효 프로젝트 썸네일이다. rollback·전용 업로드·공개 저장 기능을 추가하지 않는다.\n\n미리보기는 선택한 프로젝트 요약 UI이며 대화상자 열기·키보드 이동·닫기와 포커스 복귀를 검증한다. 최신순과 페이지 버튼은 현재 UI의 표시/disabled 상태이며 서버 조회를 수행하지 않는다." },
     },
   },
   /** story 진입마다 실제 URL 추적·요청·라우터 상태를 새로 준비한다. */
@@ -169,10 +169,11 @@ export const SelectionAndPreview: Story = {
     await userEvent.keyboard(" ");
     await expect(selected.getAllByRole("heading", { level: 3 }).map(/** 표시 제목을 순서대로 읽는다. */ (heading) => heading.textContent)).toEqual(["도서관 지도", "캠퍼스 기록"]);
     await userEvent.click(canvas.getByRole("button", { name: "미리보기" }));
-    await expect(canvas.getByRole("heading", { name: "포트폴리오 미리보기" })).toBeVisible();
-    await expect(canvas.getAllByRole("heading", { level: 4 }).map(/** 미리보기 순서를 읽는다. */ (heading) => heading.textContent)).toEqual(["도서관 지도", "캠퍼스 기록"]);
-    await userEvent.click(canvas.getByRole("button", { name: "미리보기 닫기" }));
-    await expect(canvas.queryByRole("heading", { name: "포트폴리오 미리보기" })).not.toBeInTheDocument();
+    const dialog = within(canvasElement.ownerDocument.body).getByRole("dialog", { name: "포트폴리오 미리보기" });
+    await expect(dialog).toBeVisible();
+    await expect(within(dialog).getAllByRole("heading", { level: 4 }).map(/** 미리보기 순서를 읽는다. */ (heading) => heading.textContent)).toEqual(["도서관 지도", "캠퍼스 기록"]);
+    await userEvent.click(within(dialog).getByRole("button", { name: "미리보기 닫기" }));
+    await waitFor(() => expect(within(canvasElement.ownerDocument.body).queryByRole("dialog", { name: "포트폴리오 미리보기" })).not.toBeInTheDocument());
     await userEvent.click(selected.getAllByRole("button", { name: "선택 해제" })[0]);
     await expect(selected.getAllByRole("article")).toHaveLength(1);
     await selectProject(canvas, 0);
@@ -193,7 +194,53 @@ export const PreviewOpen: Story = {
     await selectProject(canvas, 0);
     await selectProject(canvas, 2);
     await userEvent.click(canvas.getByRole("button", { name: "미리보기" }));
-    await expect(canvas.getByText("프로젝트 상세 설명은 다음 단계에서 연결됩니다.")).toBeVisible();
+    await expect(within(canvasElement.ownerDocument.body).getByText("프로젝트 상세 설명은 다음 단계에서 연결됩니다.")).toBeVisible();
+  },
+};
+
+
+export const PreviewKeyboardAndEmpty: Story = {
+  parameters: { a11y: { test: "todo" as const }, docs: { description: { story: "기존 빌더의 색상 대비와 목록 구조 접근성 개선은 별도 과제다." } } },
+  args: { list: "empty" },
+  /** 선택이 없을 때 키보드로 열고 닫아 입력과 포커스가 유지되는지 확인한다. */
+  async play({ canvasElement }) {
+    if (isBuilderDocsFrame()) return;
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    await enterTitle(canvas, "키보드 확인");
+    const trigger = canvas.getByRole("button", { name: "미리보기" });
+    trigger.focus();
+    await userEvent.keyboard("{Enter}");
+    const dialog = await body.findByRole("dialog", { name: "포트폴리오 미리보기" });
+    await expect(within(dialog).getByText("미리볼 프로젝트를 먼저 선택해주세요.")).toBeVisible();
+    await expect(within(dialog).getByRole("heading", { name: "포트폴리오 미리보기" })).toHaveFocus();
+    await userEvent.tab();
+    await expect(dialog.contains(canvasElement.ownerDocument.activeElement)).toBe(true);
+    await userEvent.tab({ shift: true });
+    await expect(dialog.contains(canvasElement.ownerDocument.activeElement)).toBe(true);
+    await userEvent.keyboard("{Escape}");
+    await waitFor(() => expect(body.queryByRole("dialog", { name: "포트폴리오 미리보기" })).not.toBeInTheDocument());
+    await waitFor(() => expect(trigger).toHaveFocus());
+    await expect(canvas.getByPlaceholderText("예: 공모전 포트폴리오")).toHaveValue("키보드 확인");
+    await expectRequests([]);
+  },
+};
+
+export const PreviewLongContent: Story = {
+  parameters: { a11y: { test: "todo" as const }, docs: { description: { story: "기존 빌더의 색상 대비와 목록 구조 접근성 개선은 별도 과제다." } } },
+  args: { list: "long" },
+  /** 긴 프로젝트를 선택한 미리보기에서 제목과 닫기를 확인한다. */
+  async play({ canvasElement }) {
+    if (isBuilderDocsFrame()) return;
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    await userEvent.click(canvas.getByRole("button", { name: /긴 프로젝트 제목과 한 학기/ }));
+    await userEvent.click(canvas.getByRole("button", { name: "미리보기" }));
+    const dialog = await body.findByRole("dialog", { name: "포트폴리오 미리보기" });
+    await expect(within(dialog).getByRole("heading", { level: 4 })).toHaveTextContent("긴 프로젝트 제목과 한 학기");
+    await userEvent.click(within(dialog).getByRole("button", { name: "미리보기 닫기" }));
+    await waitFor(() => expect(body.queryByRole("dialog", { name: "포트폴리오 미리보기" })).not.toBeInTheDocument());
+    await expectRequests([]);
   },
 };
 
@@ -363,6 +410,7 @@ export const FilePreviewAndReset: Story = {
     await expect(getBuilderEvidence().requests[1].body).toEqual({ title: "캠퍼스 포트폴리오", description: "", thumbnailUrl: fixtureImage });
     await userEvent.click(canvas.getByRole("button", { name: "미리보기" }));
     const secondUrl = getBuilderEvidence().activeUrls[0];
+    await userEvent.click(within(canvasElement.ownerDocument.body).getByRole("button", { name: "미리보기 닫기" }));
     await userEvent.click(canvas.getByRole("button", { name: "시나리오 초기화" }));
     await waitFor(/** unmount cleanup이 실제 URL을 해제했는지 확인한다. */ () => expect(getBuilderEvidence().activeUrls).toHaveLength(0));
     await expect(getBuilderEvidence().urls).toContainEqual({ action: "revoke", url: secondUrl });

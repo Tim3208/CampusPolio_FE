@@ -50,5 +50,5 @@ export const builderA11yLimitations: Record<string, string> = {
   "features-portfolio-portfoliobuilder--projects-failure": selectedA11y,
   "features-portfolio-portfoliobuilder--order-failure": selectedA11y,
   "features-portfolio-portfoliobuilder--visibility-failure": selectedA11y,
-  "features-portfolio-portfoliobuilder--preview-open": `${selectedA11y} 미리보기 프로젝트 순번 text-slate-200 대비 위반. dialog 역할/focus trap/Escape/복귀는 제품에 없는 수동 확인 한계.`,
+  "features-portfolio-portfoliobuilder--preview-open": selectedA11y,
 };

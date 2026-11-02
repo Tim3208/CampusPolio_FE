@@ -1,3 +1,4 @@
+import axe from "axe-core";
 import { http, HttpResponse } from "msw";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { emailUser, schoolEmail, type EmailScenario } from "./verify-email-page.story-fixtures";
@@ -18,7 +19,7 @@ export function installEmailClock() {
   const originalClear = window.clearInterval;
   window.setInterval = ((callback: TimerHandler, timeout?: number, ...args: unknown[]) => {
     const input = document.querySelector<HTMLInputElement>('[aria-label="1번째 인증번호"]');
-    if (timeout === 1000 && typeof callback === "function" && input && !input.disabled) {
+    if (timeout === 1000 && typeof callback === "function" && input) {
       const id = nextTimerId--;
       countdowns.set(id, () => callback(...args));
       return id;
@@ -69,9 +70,11 @@ export function cleanupEmailScenario() {
 }
 
 /** 요청 자체의 method/path/query/body를 보존한다. */
-async function record(request: Request) {
+async function record(request: Request, requestGeneration: number) {
   const url = new URL(request.url);
-  emailRequests.push({ method: request.method, path: url.pathname, query: url.search, body: request.method === "GET" ? null : await request.json() });
+  const body = request.method === "GET" ? null : await request.json();
+  if (requestGeneration !== generation) return;
+  emailRequests.push({ method: request.method, path: url.pathname, query: url.search, body });
 }
 
 /** 명시적 해제 또는 cleanup까지 로컬 응답을 기다린다. */
@@ -86,24 +89,28 @@ function failure(status: number) {
 
 export const emailHandlers = [
   http.get("/api/users/me", async ({ request }) => {
-    await record(request);
     const current = scenario;
     const requestGeneration = generation;
-    if (current === "user-pending") await hold();
+    await record(request, requestGeneration);
+    if (requestGeneration !== generation) return HttpResponse.error();
+    const attempt = emailRequests.filter((item) => item.method === "GET").length;
+    if (current === "user-pending" || (current === "user-retry-pending" && attempt > 1)) await hold();
     if (requestGeneration !== generation) return HttpResponse.error();
     if (current === "signed-out") return failure(401);
-    if (current === "user-error") return failure(404);
-    return HttpResponse.json({ success: true, data: { ...emailUser, universityVerified: current === "already-verified" } });
+    if (current === "user-error" || current === "user-retry-error" || (current.startsWith("user-retry-") && attempt === 1)) return failure(404);
+    if (current === "user-retry-unauthorized") return failure(401);
+    return HttpResponse.json({ success: true, data: { ...emailUser, email: current === "user-retry-pending" ? schoolEmail : emailUser.email, universityVerified: current === "already-verified" || current === "user-retry-verified" } });
   }),
   ...(["send", "resend", "verify"] as const).map((action) =>
     http.post(`/api/auth/email/${action}`, async ({ request }) => {
-      await record(request);
       const current = scenario;
       const requestGeneration = generation;
+      await record(request, requestGeneration);
+      if (requestGeneration !== generation) return HttpResponse.error();
       if (current === `${action}-pending`) await hold();
       if (requestGeneration !== generation) return HttpResponse.error();
       if (current === `${action}-unauthorized`) return failure(401);
-      if (current === `${action}-error`) return failure(400);
+      if (current === `${action}-error` && emailRequests.filter((item) => item.path.endsWith("/" + action)).length === 1) return failure(400);
       return HttpResponse.json({ success: true, data: { message: action === "verify" ? "학교 이메일 인증이 완료되었습니다." : "인증번호가 발송되었습니다." } });
     }),
   ),
@@ -143,3 +150,27 @@ export function emailLoginPath(nextPath: string) {
   return "/login?" + new URLSearchParams({ next: "/verify-email?" + new URLSearchParams({ next: nextPath }) });
 }
 
+
+
+/** 같은 이벤트 차례의 반복 클릭과 form Enter에 해당하는 제출도 실제 DOM으로 전달한다. */
+export function repeatEmailAction(canvasElement: HTMLElement, button: HTMLElement) {
+  for (let index = 0; index < 3; index++) {
+    button.click();
+    canvasElement.querySelector("form")?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+    button.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+  }
+}
+
+/** 현재 렌더 상태 전체의 실제 axe 위반을 확인한다. 기본 규칙을 생략하지 않는다. */
+export async function expectEmailAccessibility(canvasElement: HTMLElement) {
+  const result = await axe.run(canvasElement);
+  expect(result.violations.map(({ id, nodes }) => ({ id, targets: nodes.map((node) => node.target) }))).toEqual([]);
+}
+
+/** 코드 값과 관련 설명·오류 연결을 검사한다. */
+export function expectEmailDigits(canvasElement: HTMLElement, code: string) {
+  const canvas = within(canvasElement);
+  for (let index = 0; index < 6; index++) {
+    expect(canvas.getByLabelText(`${index + 1}번째 인증번호`)).toHaveValue(code[index] ?? "");
+  }
+}

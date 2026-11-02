@@ -1,5 +1,50 @@
 # Storybook 사용 안내
 
+2026-11-02 학교 이메일 인증 개발 검증 기준으로 **29개 파일·297개 기능 스토리**, 접근성 실행 설정 **error 218 / todo 79**다. 인증 28개는 모두 error이며 기존 다른 slice의 todo는 남는다. 별도 시각 기준은 **10개 wrapper 파일·12개 화면**을 유지한다.
+
+정상 자체 설치 뒤 타입·전체 린트·필터 없는 전체 기능·정적 Storybook·변경 없는 기본 Next Turbopack build가 모두 exit 0이었다. 개발/HTTP 정적 인증 66개 화면과 미리보기 24개 조합의 최종 관찰, 초기 즉시 초점 읽기의 정정, audit43과 실제 서버 미검증은 [학교 이메일 인증 기록](school-email-verification.md), [미리보기 기록](portfolio-preview-accessibility.md)을 따른다. 이 개발 확인은 최종 독립 QA·Claude 문서/Wiki 검수·finish·동기화·원본 전달 완료를 뜻하지 않는다.
+
+인증 Playground의 `resend-pending`·`user-retry-pending`은 각각 만료 후 재발송 대기와 첫 GET 실패 뒤 화면 내 복구를 수동 확인한다. `대기 응답 완료`·`179초 진행`·`1초 진행`·`시나리오 초기화`를 사용한다. 고정 Failure/UserRecovery의 play는 성공 재시도/후속 발송까지 진행하므로 오류·복구 직후를 유지하려면 Playground를 사용한다. Canvas/play와 Docs 수동 예제 경계는 그대로다.
+
+## 2026-11-02 현재 스토리 집계
+
+아래 표는 이번 정적 index의 story metadata와 전역/편집 폼 beforeEach의 todo ID 매핑을 합친 실행 설정이다. 기능 통과와 접근성 todo 해결을 합산하지 않는다.
+
+| 대상 / source | 전체 | error 설정 | todo 설정 |
+|---|---:|---:|---:|
+| [Features/Auth/GoogleSignInButton](../../src/features/auth/google-sign-in/ui/google-sign-in-button.stories.tsx) | 12 | 6 | 6 |
+| [Features/Portfolio/PortfolioBuilder](../../src/features/portfolio/portfolio-builder/ui/portfolio-builder.stories.tsx) | 20 | 0 | 20 |
+| [Features/Profile/ProfileSettingsForm](../../src/features/profile/profile-settings/ui/profile-settings-form.stories.tsx) | 28 | 20 | 8 |
+| [Features/Project/ProjectEditorForm](../../src/features/project/project-editor/ui/project-editor-form.stories.tsx) | 23 | 2 | 21 |
+| [Features/Project/ProjectReviewPanel](../../src/features/project/project-review/ui/project-review-panel.stories.tsx) | 8 | 6 | 2 |
+| [Features/Project/ProjectTagFilterSheet](../../src/features/project/project-search-filter/ui/project-tag-filter-sheet.stories.tsx) | 12 | 12 | 0 |
+| [Features/Project/RichMarkdownEditor](../../src/features/project/project-editor/ui/rich-markdown-editor.stories.tsx) | 10 | 10 | 0 |
+| [Features/ProjectEditor/ErrorDialog](../../src/features/project/project-editor/ui/project-editor-error-dialog.stories.tsx) | 14 | 14 | 0 |
+| [Shared/Button](../../src/shared/ui/button.stories.tsx) | 8 | 7 | 1 |
+| [Shared/DropdownMenu](../../src/shared/ui/dropdown-menu.stories.tsx) | 4 | 2 | 2 |
+| [Shared/Input](../../src/shared/ui/input.stories.tsx) | 6 | 6 | 0 |
+| [Shared/MarkdownViewer](../../src/shared/ui/markdown-viewer.stories.tsx) | 6 | 4 | 2 |
+| [Shared/Sheet](../../src/shared/ui/sheet.stories.tsx) | 7 | 7 | 0 |
+| [Widgets/Header/AppHeader](../../src/widgets/header/ui/app-header.stories.tsx) | 9 | 9 | 0 |
+| [Widgets/Home/HomePage](../../src/widgets/home/ui/home-page.stories.tsx) | 3 | 3 | 0 |
+| [Widgets/Home/HomePageSkeleton](../../src/widgets/home/ui/home-page-skeleton.stories.tsx) | 1 | 1 | 0 |
+| [Widgets/Home/ProjectCard](../../src/widgets/home/ui/project-card.stories.tsx) | 7 | 7 | 0 |
+| [Widgets/Mypage/MypageNav](../../src/widgets/mypage/ui/mypage-nav.stories.tsx) | 8 | 8 | 0 |
+| [Widgets/Mypage/MypagePortfoliosPage](../../src/widgets/mypage/ui/mypage-portfolios-page.stories.tsx) | 8 | 2 | 6 |
+| [Widgets/Mypage/MypageProjectsPage](../../src/widgets/mypage/ui/mypage-projects-page.stories.tsx) | 10 | 2 | 8 |
+| [Widgets/Mypage/MypageShell](../../src/widgets/mypage/ui/mypage-shell.stories.tsx) | 4 | 2 | 2 |
+| [Widgets/Project/ProjectDetailPage](../../src/widgets/project/ui/project-detail-page.stories.tsx) | 15 | 14 | 1 |
+| [Widgets/Project/ProjectDetailSkeleton](../../src/widgets/project/ui/project-detail-skeleton.stories.tsx) | 1 | 1 | 0 |
+| [Widgets/ProjectCollection/ProjectCard](../../src/widgets/project-collection/ui/project-card.stories.tsx) | 9 | 9 | 0 |
+| [Widgets/ProjectCollection/ProjectCollectionPage](../../src/widgets/project-collection/ui/project-collection-page.stories.tsx) | 17 | 17 | 0 |
+| [Widgets/ProjectCollection/ProjectCollectionSkeleton](../../src/widgets/project-collection/ui/project-collection-skeleton.stories.tsx) | 1 | 1 | 0 |
+| [Widgets/ProjectCollection/ProjectListItem](../../src/widgets/project-collection/ui/project-list-item.stories.tsx) | 8 | 8 | 0 |
+| [Widgets/UserFlows/UserFlowPage](../../src/widgets/user-flows/ui/user-flow-page.stories.tsx) | 10 | 10 | 0 |
+| [Widgets/VerifyEmail/VerifyEmailPage](../../src/widgets/verify-email/ui/verify-email-page.stories.tsx) | 28 | 28 | 0 |
+
+## 2026-10-27 DEV-14 안내 이력
+
+
 2026-10-27 DEV-14 수리의 개발 확인과 실제 Claude 개발 승인을 반영한 현재 사용 안내다. **28개 파일·273개 기능 스토리**, 별도 **10개 wrapper 파일·12개 시각 비교**, 접근성 **error 180 / todo 93** 집계는 유지된다. 입력 echo·폼 이미지·선택 제목의 수리와 실패 이력은 [QA 수리 1차 검증 기록](storybook-qa-recovery-01-verification.md)을 따른다. 전체 독립 QA 21개·DEV-15 문서 검수·Wiki·finish·문서 동기화·원본 전달은 이 문서 작성 시점의 후속 단계다. 과거 [DEV-13 확장 개발 확인](storybook-extension-verification.md), [확장 계획](storybook-adoption-plan.md), 아래 2026-10-24 도입 기록은 당시 사실로 보존한다.
 
 ## 현재 설치와 실행
@@ -63,7 +108,7 @@ toolbar에는 **360 / 375 / 768 / 1024 / 1280 / 1440 CSS px** 프리셋이 있�
 
 대상 옆 `*.stories.tsx`를 만들고 실제 제품 컴포넌트를 재사용한다. 가상 도메인 fixture는 같은 slice 옆 `*.story-fixtures.ts`에서 공개 타입에 `satisfies`하도록 작성한다. 다른 slice는 public API, 같은 slice는 상대 import를 쓴다. 제품 props를 테스트 편의로 추가하지 않는다.
 
-다음은 **아직 추가하지 않은** `src/shared/ui/button-example.stories.tsx` 예제다. `Playground`는 수동 클릭, `ClickOnce`만 자동 클릭한다. 273개 현재 집계에는 포함하지 않는다.
+다음은 **아직 추가하지 않은** `src/shared/ui/button-example.stories.tsx` 예제다. `Playground`는 수동 클릭, `ClickOnce`만 자동 클릭한다. 2026-11-02 기준 297개 현재 집계에는 포함하지 않는다.
 
 ```tsx
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
@@ -108,7 +153,7 @@ Storybook 라우터 spy의 URL·refresh 호출은 실제 Next 전환·SSR 재조
 - 프로필·포트폴리오: 명세의 필수 `userId` query와 세션을 전제로 생략하는 현재 client가 다르다. 프로필 grade의 `null`과 명세 integer도 차이다. 프로필 POST 성공→추가 PATCH 실패 후 재시도는 POST부터 반복된다. Mock 성공은 서버 수용·rollback·중복 안전의 근거가 아니다.
 - RTE: 링크는 `window.prompt` URL 입력/취소, 이미지는 별도 버튼 callback과 controlled `ref.insertImage` 경로다. 현재 제품 폼은 업로드 응답 후 실제 DOM이 편집 가능해진 뒤 이미지를 삽입한다. 성공/지연 완료 후 본문 img의 alt/src와 같은 이미지 Markdown이 저장 `PATCH.content`에 남는다. 업로드 중 편집·도구·파일·저장 disabled, 완료 후 focus/selection·후속 편집, 오류 후 재시도와 reset을 확인했다. 같은 URL 이미지를 문단 중간에 추가해도 기존 이미지의 노드·alt를 보존한다. 아래 legacy 스토리 안내와 [실제 PNG부터 저장 요청까지의 근거](storybook-qa-recovery-01-verification.md#폼-이미지와-동일-url-회귀)를 참고한다.
 - 편집 폼 오류 Dialog: 비활성 저장 버튼 뒤 열림/닫힘에서 BODY focus 잔류가 있다. 독립 Dialog trigger 복귀와 구분한다. 파일은 PDF/MD/JPG/JPEG/PNG, 50×1024×1024 bytes 경계, multipart `file` 등 현재 계약을 사용한다. 새 rollback·발행/중복 보장을 만들지 않는다.
-- PortfolioBuilder: 파일 선택은 로컬 object URL 미리보기이며 서버 업로드가 아니다. 저장 thumbnail은 첫 유효 프로젝트 썸네일이다. 교체·해제·unmount에서 URL revoke를 확인한다. create→조건부 정보 PATCH→projects add/remove→order→visibility false 및 slug 이동을 로컬 요청으로 확인한다. 미리보기에는 dialog role/focus trap/Escape/외부 클릭/trigger 복귀 보장이 없고 닫기 버튼은 동작한다. 현재 선택 목록의 컨테이너가 400px 미만이면 위/아래/해제 버튼을 둘째 행에 배치한다. 360/375 CSS px 화면에서 제목 칸 104/119px·14px 글자와 세 버튼이 유지됐고, 일반 제목 두 개를 읽을 수 있었다. 긴 제목은 앞부분과 말줄임으로 식별하며 전체 문서 넘침은 없었다. 순서 변경·해제·미리보기 동작과 원래 넓은 배치는 유지한다.
+- PortfolioBuilder: 파일 선택은 로컬 object URL 미리보기이며 서버 업로드가 아니다. 저장 thumbnail은 첫 유효 프로젝트 썸네일이다. 교체·해제·unmount에서 URL revoke를 확인한다. create→조건부 정보 PATCH→projects add/remove→order→visibility false 및 slug 이동을 로컬 요청으로 확인한다. 현재 미리보기는 Radix 대화상자로 구현하여 제목 초점, Tab 순환, Escape·외부 클릭·닫기 버튼과 트리거 초점 복귀를 제공한다. 이번 변경의 검증 상태는 [미리보기 접근성 작업 기록](portfolio-preview-accessibility.md)을 따른다. 현재 선택 목록의 컨테이너가 400px 미만이면 위/아래/해제 버튼을 둘째 행에 배치한다. 360/375 CSS px 화면에서 제목 칸 104/119px·14px 글자와 세 버튼이 유지됐고, 일반 제목 두 개를 읽을 수 있었다. 긴 제목은 앞부분과 말줄임으로 식별하며 전체 문서 넘침은 없었다. 순서 변경·해제·미리보기 동작과 원래 넓은 배치는 유지한다.
 - 헤더: 설치된 Next Link mock의 preventDefault→onClick 순서가 Radix 메뉴 선택 후 닫힘을 막을 수 있다. 실제 앱 링크 이동·닫힘과 별도로 확인한다. 열린 메뉴의 `aria-hidden-focus`/`region` 관찰은 닫힌 상태 addon 통과와 다르다.
 - 이메일: 6자리 코드, 180초를 `03:00 → 00:01 → 00:00`으로 표시하고 0초 후 검증 차단·재전송 활성화, 재전송 후 코드/03:00 reset을 검증한다. 가상 Google token/ID와 MSW 성공은 실제 credential·메일 발송·OAuth 성공이 아니다.
 
@@ -136,6 +181,9 @@ Storybook 라우터 spy의 URL·refresh 호출은 실제 Next 전환·SSR 재조
 
 ## 접근성 집계 읽기
 
+2026-11-02 현재 집계는 error 218 / todo 79이고 인증 28개는 모두 error다. 위의 새 전체 표와 학교 이메일 인증 기록을 따른다. 아래 문단의 180/93과 273개는 2026-10-27 당시 이력이다.
+
+
 공통 `a11y.test='error'`를 유지한다. 실제 loadStory metadata와 전역 beforeEach 5개, 편집 폼 beforeEach 21개 ID 매핑을 합친 실행 설정은 **지원 error 180개 / 개별 todo 93개**다. 273개 기능 테스트의 pass와 todo의 접근성 미완료를 분리한다. 수동 조작 후 열린 메뉴/성공 코드 영역은 초기 상태의 검사 범위 밖일 수 있다. 시각 12개 중 error 8/todo 4는 별도 집계다. 정확한 ID별 todo 원인과 실행 설정은 [개발 확인 기록](storybook-extension-verification.md#개별-접근성-todo)에 있다.
 
 ## 시각 기준 비교와 갱신
@@ -159,15 +207,15 @@ Storybook 라우터 spy의 URL·refresh 호출은 실제 Next 전환·SSR 재조
 
 ## PR workflow와 상태
 
-[.github/workflows/storybook.yml](../../.github/workflows/storybook.yml)은 pull_request에 windows-2025, contents:read, concurrency 취소, 30분 제한을 사용한다. actions SHA가 고정돼 있으며 checkout의 credential persistence를 끈다. `.nvmrc` Node와 실행별 npm10.9.9 → clean ci → Chromium → 타입 → 린트 → 전체273 기능 → 12시각 비교 → 정적 Storybook → 기본 Next build 순서다. 일반 비교만 실행하고 기준을 자동 생성하지 않는다. `if: always()`로 `build/` 로그·실패 화면·시각 diff·정적 결과를 보존한다.
+[.github/workflows/storybook.yml](../../.github/workflows/storybook.yml)은 pull_request에 windows-2025, contents:read, concurrency 취소, 30분 제한을 사용한다. actions SHA가 고정돼 있으며 checkout의 credential persistence를 끈다. `.nvmrc` Node와 실행별 npm10.9.9 → clean ci → Chromium → 타입 → 린트 → 전체 기능(2026-11-02 기준 29개 파일·297개 스토리) → 12시각 비교 → 정적 Storybook → 기본 Next build 순서다. 일반 비교만 실행하고 기준을 자동 생성하지 않는다. `if: always()`로 `build/` 로그·실패 화면·시각 diff·정적 결과를 보존한다.
 
 **아래 문단은 DEV-13 작성 시점의 gate 기록이다.** 현재 DEV-14는 실제 Claude 개발 PASS를 받았으며, DEV-15 문서와 후속 전체 독립 QA 21개·Wiki·finish·동기화·전달의 결과는 별도다.
 
 워크플로 작성·로컬 검증과 **원격 CI 실제 실행은 다르다**. DEV-13 작성 시점 원격 실행은 하지 않았다. clean 설치 audit21(1 low/5 moderate/13 high/2 critical), 긴 경로 기본 빌드 실패, 접근성 todo, 제품 동작 한계는 남는다. DEV01~12 실제 Claude 승인과 DEV13 개발자 확인, 후속 DEV13 Claude 검수·전체 독립 QA·Wiki 검수/게시·finish·문서 동기화·원본 전달은 각각 별도 gate다. 이후 상태는 해당 run의 실제 증거와 Wiki를 확인한다.
 
-## 현재 스토리 범위
+## 2026-10-27 스토리 범위 이력
 
-아래는 개발 시점 실제 Storybook index와 현재 source의 집계다. 각 행은 한 `*.stories.tsx` 파일이다. 수치는 상태 수이며 품질 점수가 아니다.
+아래 표는 2026-10-27 개발 시점 실제 Storybook index와 당시 source의 집계다. 각 행은 한 `*.stories.tsx` 파일이다. 수치는 상태 수이며 품질 점수가 아니다.
 
 | 대상 / source | 전체 | error 설정 | todo 설정 |
 |---|---:|---:|---:|

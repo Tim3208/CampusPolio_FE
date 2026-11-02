@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ChangeEvent, ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Dialog } from "radix-ui";
 import {
   ArrowDown,
   ArrowUp,
@@ -342,6 +343,7 @@ export function PortfolioBuilder({
   }
 
   return (
+    <Dialog.Root open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
     <main className="min-h-screen bg-[#f5f8fb] pb-28 text-slate-950">
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-[1504px] items-center justify-between gap-6 px-8 py-7">
@@ -694,14 +696,15 @@ export function PortfolioBuilder({
 
       <section className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-[1504px] flex-col gap-3 px-8 py-4 sm:flex-row sm:justify-end">
+          <Dialog.Trigger asChild>
           <button
             type="button"
-            onClick={() => setIsPreviewOpen(true)}
             disabled={isSaving}
             className="h-12 rounded-md border border-main-20 bg-main-22 px-10 text-sm font-bold text-main-10 transition hover:bg-main-20"
           >
             미리보기
           </button>
+          </Dialog.Trigger>
           <button
             type="button"
             onClick={handlePrivateSave}
@@ -714,14 +717,9 @@ export function PortfolioBuilder({
         </div>
       </section>
 
-      {isPreviewOpen && (
-        <PreviewDialog
-          selectedProjects={selectedProjects}
-          template={selectedTemplate}
-          onClose={() => setIsPreviewOpen(false)}
-        />
-      )}
+      <PreviewDialog selectedProjects={selectedProjects} template={selectedTemplate} />
     </main>
+    </Dialog.Root>
   );
 }
 
@@ -959,46 +957,54 @@ function TemplatePreview() {
 
 /**
  * 선택 내용 요약 미리보기 dialog를 렌더링한다.
- * @param props 선택 프로젝트, 템플릿, 닫기 핸들러
+ * @param props 선택 프로젝트와 템플릿
  * @returns 미리보기 dialog UI
  */
 function PreviewDialog({
-  onClose,
   selectedProjects,
   template,
 }: {
-  onClose: () => void;
   selectedProjects: MyProject[];
   template: SelectedTemplate;
 }) {
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  /** 긴 미리보기도 처음부터 읽을 수 있도록 제목에 초점을 둔다. */
+  function handleOpenAutoFocus(event: Event) {
+    event.preventDefault();
+    titleRef.current?.focus();
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
-      <section className="max-h-[88vh] w-full max-w-3xl overflow-auto rounded-lg bg-white p-6 shadow-xl">
-        <div className="flex items-start justify-between gap-4">
+    <Dialog.Portal>
+      <Dialog.Overlay className="fixed inset-0 z-50 bg-slate-950/40" />
+      <Dialog.Content aria-describedby={undefined} onOpenAutoFocus={handleOpenAutoFocus} className="fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg bg-white p-4 shadow-xl outline-none sm:p-6">
+        <div className="flex shrink-0 items-start justify-between gap-4">
           <div>
             <p className="text-xs font-bold tracking-[0.24em] text-main-10">
               PREVIEW
             </p>
-            <h2 className="mt-2 text-2xl font-extrabold text-slate-950">
+            <Dialog.Title ref={titleRef} tabIndex={-1} className="mt-2 text-2xl font-extrabold text-slate-950 outline-none">
               포트폴리오 미리보기
-            </h2>
+            </Dialog.Title>
           </div>
+          <Dialog.Close asChild>
           <button
             type="button"
-            onClick={onClose}
-            className="inline-flex size-9 items-center justify-center rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50"
+            className="inline-flex size-9 shrink-0 items-center justify-center rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-main-10"
           >
             <X className="size-5" aria-hidden="true" />
             <span className="sr-only">미리보기 닫기</span>
           </button>
+          </Dialog.Close>
         </div>
 
-        <div className="mt-6 rounded-lg bg-[#f5f8fb] p-6">
+        <div tabIndex={0} role="region" aria-label="미리보기 내용" className="mt-6 min-h-0 overflow-y-auto rounded-lg bg-[#f5f8fb] p-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-main-10 sm:p-6">
           <span className="inline-flex items-center gap-2 rounded bg-main-21 px-3 py-1 text-xs font-extrabold tracking-[0.18em] text-main-10">
             <Eye className="size-3.5" aria-hidden="true" />
             READ ONLY PAGE
           </span>
-          <h3 className="mt-8 text-5xl font-extrabold tracking-tight text-slate-950">
+          <h3 className="mt-8 break-words text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
             My Projects<span className="text-main-10">.</span>
           </h3>
           <p className="mt-6 max-w-xl text-base leading-7 text-slate-700">
@@ -1011,9 +1017,9 @@ function PreviewDialog({
               selectedProjects.map((project, index) => (
                 <article
                   key={project.projectId}
-                  className="grid grid-cols-[56px_1fr] gap-4 rounded-md bg-white p-4"
+                  className="grid min-w-0 grid-cols-[2rem_minmax(0,1fr)] gap-3 rounded-md bg-white p-4 sm:grid-cols-[56px_minmax(0,1fr)] sm:gap-4"
                 >
-                  <span className="text-2xl font-extrabold text-slate-200">
+                  <span className="text-2xl font-extrabold text-slate-600">
                     {String(index + 1).padStart(2, "0")}
                   </span>
                   <div>
@@ -1027,10 +1033,10 @@ function PreviewDialog({
                         </span>
                       ))}
                     </div>
-                    <h4 className="text-lg font-extrabold text-slate-950">
+                    <h4 className="break-words text-lg font-extrabold text-slate-950">
                       {project.title}
                     </h4>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                    <p className="mt-2 break-words text-sm leading-6 text-slate-600">
                       {getProjectDescription(project)}
                     </p>
                   </div>
@@ -1043,7 +1049,7 @@ function PreviewDialog({
             )}
           </div>
         </div>
-      </section>
-    </div>
+      </Dialog.Content>
+    </Dialog.Portal>
   );
 }

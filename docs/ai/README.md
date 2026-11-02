@@ -37,7 +37,7 @@
 
 ## 보조 디자인 스킬
 
-[design-taste-frontend](../../.claude/skills/design-taste-frontend/SKILL.md)는 로컬에 추가된 보조 스킬이다. 관련 작업에 한해 적용 범위를 읽고 사용한다. 스킬은 사용자에게 확인할 디자인 기준안을 선택하는 근거를 대신하지 않는다. 원문과 [라이선스](../../.claude/skills/design-taste-frontend/LICENSE)를 함께 유지한다.
+[design-taste-frontend](../../.claude/skills/design-taste-frontend/SKILL.md)는 로컬에 추가된 보조 스킬이다. 관련 작업에 한해 적용 범위를 읽고 사용한다. 스킬은 사용자에게 확인할 디자인 기준안을 선택하는 근거를 대신하지 않는다. 원문과 [라이선스](../../.claude/skills/design-taste-frontend/LICENSE)를 함께 유지한다. 이 두 링크의 파일은 원본 작업 폴더의 로컬 자료이며 이번 엔진 candidate 스냅샷에는 포함되지 않았다. 학교 이메일 인증 검증의 필수 선행 자료로 사용하지 않는다.
 
 ## 문서 추가 및 갱신
 
@@ -46,12 +46,26 @@
 - 계획·시안·구현 결과를 구분하고, 실제 완료 여부는 코드와 검증 결과로 확인한다.
 - 공통 작업 규칙은 이 폴더에 복제하지 않고 [AGENTS.md](../../AGENTS.md)로 연결한다.
 
+## 전체 유저 플로우
+
+[유저 플로우 검토 화면 안내](user-flow-guide.md)는 기존 기획·현재 코드·API 계약을 대조한 사용자 행동 목록의 범위, 구현 상태 판단과 예외·조건·새 제안의 구분을 기록한다. 개발 서버의 `/user-flows`에서 탭·아코디언으로 확인하며 서버 연결 없이 목록을 검토할 수 있다. 기획된 목표와 구현된 프론트 동작, 실제 서버 검증을 구분한다. Storybook의 `Widgets/UserFlows/UserFlowPage/Playground`에서도 전체 목록을 확인할 수 있다.
+
+[서버 없이 유저 플로우 보기](user-flow-standalone.md)는 브라우저에서 바로 열 수 있는 단일 HTML과 최신 화면으로 다시 만드는 방법을 안내한다. HTML은 생성 시점의 스냅샷이며 원본 수정이 자동 반영되지 않는다.
+
 ## Storybook
 
-[Storybook 사용 안내](storybook-guide.md)는 2026-10-27 현재 28개 파일·273개 기능 상태, 별도12개 시각 기준, Node24.22.1/npm10.9.9 설치·실행·Controls/reset·Docs·기준 갱신과 환경 격리를 제공한다. 과거57개·DEV-06 도입 원문은 별도 이력으로 보존했다. 최종 독립 QA·검수·전달 상태는 해당 run 증거와 Wiki에서 확인한다. Storybook 추가는 위의 확정 시안·과거 승인 및 구현 이력을 변경하지 않는다.
+[Storybook 사용 안내](storybook-guide.md)는 2026-10-27 당시 28개 파일·273개 기능 상태, 별도12개 시각 기준, Node24.22.1/npm10.9.9 설치·실행·Controls/reset·Docs·기준 갱신과 환경 격리를 제공한다. 과거57개·DEV-06 도입 원문은 별도 이력으로 보존했다. 최종 독립 QA·검수·전달 상태는 해당 run 증거와 Wiki에서 확인한다. Storybook 추가는 위의 확정 시안·과거 승인 및 구현 이력을 변경하지 않는다.
 
 [Storybook UI 조작과 검증 확장 계획](storybook-adoption-plan.md)은 2026-10-26 현재 기반 분석과 Playground·대상 컴포넌트·접근성·반응형·CI·시각 회귀의 적용 순서 및 완료 조건을 정리한다. 당시 확장 제안 원문이며 후속 구현과 개발 확인을 별도 추가했다. 같은 날의 기존 Chromium 테스트 9개 파일·57개 통과 기록은 그대로 보존한다.
 
 [Storybook 확장 개발 확인](storybook-extension-verification.md)은 DEV-13의 실제 명령·시각·화면·effective 접근성180/93·계약 차이·기본 빌드 실패 및 대체 결과를 기록한다. PR workflow 작성과 로컬 검증, 원격 CI 실제 실행을 구분한다. 이 개발 확인 시점의 후속 독립 QA·DEV13 Claude·Wiki·finish·문서 동기화·원본 전달은 미리 완료로 표시하지 않으며 이후 상태는 실제 run 증거를 따른다. 과거 UIUX/Storybook QA, SKIPPED_QUOTA/WAITING_QUOTA/BLOCKED를 이번 결과로 소급 변경하지 않는다.
 
 [Storybook QA 수리 1차 개발 확인](storybook-qa-recovery-01-verification.md)은 QA attempt-01의 14 PASS/4 FAIL(입력 echo·폼 이미지·좁은 선택 제목의 3주제), DEV-14 수리와 추가 동일 URL 이미지 alt 회귀, 최종 273 기능/12 시각 비교 및 실패·재시도 근거를 연결한다. DEV-14 실제 Claude 개발 PASS와 DEV-15 문서 작성, 이후 개발자들과 다른 새 담당자의 QA-01~21 전체 재실행·Wiki 검수·finish·동기화·원본 전달은 별도 상태다. DEV-13 및 과거 도입·quota 이력은 보존한다.
+
+
+[포트폴리오 미리보기 접근성 개선](portfolio-preview-accessibility.md)은 기존 요약 미리보기의 키보드·화면 읽기·모바일 동작과 검증 상태를 기록한다.
+
+
+## 학교 이메일 인증 상태와 복구
+
+[학교 이메일 인증 기록](school-email-verification.md)은 동작별 진행 표시·중복 요청 차단·사용자 GET 복구·입력/상태 접근성·28개 인증 스토리·API 차이를 기록한다. 2026-11-02 자체 정상 설치에서 전체 29파일·297/297 기능, 접근성 실행 설정 error218/todo79, 타입·전체 린트·정적 Storybook·기본 Turbopack build와 개발/HTTP 정적 인증66화면을 확인했다. 기존 미리보기의 모바일/낮은 높이 24조합과 비동기 초점 재관찰은 [미리보기 기록](portfolio-preview-accessibility.md)에 이어 적었다. 과거 검사·실패·미검증은 보존하며 실제 서버 성공과 최종 독립 QA·Claude 문서/Wiki 검수·finish·동기화·원본 전달은 별도다.
