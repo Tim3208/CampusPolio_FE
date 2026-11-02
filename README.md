@@ -12,10 +12,11 @@ Next.js App Router, React, TypeScript, Tailwind CSS와 shadcn/ui 기반 공통 �
 | [CLAUDE.md](CLAUDE.md) | Claude에서 공통 규칙을 읽는 안내 |
 | [api.md](api.md) | OpenAPI JSON 형식의 백엔드 명세 |
 | [설계 문서 안내](docs/ai/README.md) | UI/UX 작업 계획과 시안의 위치·선택 상태 |
+| [Storybook 사용 안내](docs/ai/storybook-guide.md) | 설치·상태 스토리·Mock·동작 테스트와 개발 확인 기록 |
 
 ## 개발 실행
 
-Node.js와 npm을 준비하고 저장소 루트에서 실행한다.
+[.nvmrc](.nvmrc)의 Node **24.22.1**, packageManager의 npm **10.9.9**를 준비하고 저장소 루트에서 실행한다. 실행별 런타임을 사용할 수 있으며 사용자 전역 설치를 바꿀 필요는 없다.
 
 ```sh
 npm ci
@@ -54,6 +55,14 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=YOUR_GOOGLE_WEB_CLIENT_ID
 
 `NEXT_PUBLIC_*`는 브라우저에 노출되는 설정이다. Google client secret 등 비밀값을 넣지 않는다. Mock 예시는 조회 화면 개발용이며, Google 로그인 UI는 Mock 사용 시에도 웹 클라이언트 ID와 외부 Google SDK를 요구한다. 실제 로그인·메일·서버 권한은 실제 백엔드에서 확인해야 하며, Mock 인증 상태만으로 해당 검증을 완료할 수 없다. 현재 Mock은 서버와 브라우저 사이 상태 및 세션 동작에 제약이 있다.
 
+## 유저 플로우 검토
+
+개발 서버에서 [`/user-flows`](http://localhost:3000/user-flows)에 접속하면 전체 사용자 행동과 기대 결과를 확인할 수 있다. `사용자 행동`, `조건별 흐름`, `새 아이디어` 탭, 구현 상태·영역·검색 필터와 아코디언을 제공한다. 목록은 정적 데이터이므로 서버 연결이나 Mock 설정 없이 확인할 수 있다.
+
+구현 상태는 프론트 코드 근거를 기준으로 하며 실제 서버 성공을 뜻하지 않는다. 기획 근거·판정 기준·검증 범위는 [유저 플로우 안내](docs/ai/user-flow-guide.md), 컴포넌트 미리보기는 Storybook의 `Widgets/UserFlows/UserFlowPage/Playground`를 따른다.
+
+서버를 실행하지 않고 파일을 직접 열려면 [독립형 유저 플로우 안내](docs/ai/user-flow-standalone.md)를 참고한다.
+
 ## Sentry 클라이언트 오류 수집
 
 `.env.local`에 `NEXT_PUBLIC_SENTRY_DSN`을 설정하고 개발 서버를 재시작하면 브라우저 오류 수집을 활성화한다. DSN은 Sentry 프로젝트의 Settings → Client Keys (DSN)에서 확인한다. 미설정 시 수집을 초기화하지 않는다. 배포 시에는 빌드 환경에 설정한다.
@@ -62,13 +71,30 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=YOUR_GOOGLE_WEB_CLIENT_ID
 
 ## 검증
 
+최신 main의 보안·Sentry 변경과 Storybook·유저 플로우·인증·미리보기를 함께 확인한 2026-11-02 결과는 [로컬 작업 통합 검증](docs/ai/local-integration-verification.md)을 따른다. 아래 작업별 기록의 과거 버전·보안 경고 수와 구분한다.
+
+2026-11-02 학교 이메일 인증 개발 검증은 **29개 파일·297/297 기능**, 접근성 실행 설정 **error 218 / todo 79**다. 인증 28개는 모두 error이며 다른 slice의 todo는 남는다. 자체 정상 설치·타입·전체 린트·정적 Storybook·변경 없는 기본 Turbopack 앱 build가 통과했다. 개발/HTTP 정적 인증 66화면과 기존 미리보기 24조합, audit43·시각 미실행 근거·실제 서버 미검증·후속 gate는 [학교 이메일 인증 기록](docs/ai/school-email-verification.md), [미리보기 기록](docs/ai/portfolio-preview-accessibility.md)을 따른다. 아래 2026-10-24/27의 집계와 빌드 이력은 당시 사실로 보존한다.
+
 ```sh
 npx tsc --noEmit --incremental false
 npm run lint
 npm run build
 ```
 
-저장소에 일반 자동 테스트용 `test` 스크립트는 아직 없다. 변경한 사용자 동작과 화면은 작업 범위에 맞춰 추가 검증한다. 타입·린트·빌드 통과와 실제 API 흐름의 성공은 별도로 기록한다.
+종료형 Storybook 동작 테스트는 다음과 같다. 일반 `test` 스크립트는 없으며 `test:storybook`을 사용한다.
+
+```sh
+npm exec -- playwright install chromium
+npm run test:storybook
+npm run test:visual
+npm run build-storybook
+```
+
+2026-10-27 당시 전체 **28개 파일·273개 기능 스토리**를 실제 Chromium에서 실행했다. 별도 시각 프로젝트는 **10개 wrapper 파일·12개 기준 화면**을 비교한다. 당시 접근성 error 설정 180개와 미완료 todo 93개를 구분했으며 기능 테스트 통과가 todo 해결을 뜻하지 않는다. `npm run storybook`은 `http://localhost:6006`의 개발 서버다. 정적 산출물은 `build/storybook`을 HTTP 서버로 열어 확인한다. 설치 버전, 정적 서버 실행 예시, 스토리 추가·MSW·개인 환경 차단과 실제 개발 결과는 [Storybook 사용 안내](docs/ai/storybook-guide.md)를 따른다. 타입·린트·빌드 및 Mock 확인은 실제 backend/OAuth/AI 성공과 별도로 기록한다.
+
+과거 2026-10-24 도입 단계 DEV-06 개발 확인에서 clean 설치·57개 Chromium 테스트·Storybook 빌드·타입·린트가 통과했다. 긴 Windows 중앙 작업 경로의 기본 Turbopack 빌드는 실패했고 별도 `npm run build -- --webpack`은 통과했다. 기본 스크립트는 변경하지 않았다. 경로 진단·앱 Mock 화면·한계와 시점별 근거는 [가이드의 개발 확인 기록](docs/ai/storybook-guide.md#dev-06-개발-단계-확인-기록)을 따른다. 최종 독립 QA·검수·전달 상태는 run 증거와 Wiki에서 확인한다.
+
+2026-10-27 확장 DEV-13 개발 확인에서 전체273 기능·12시각 비교·타입·린트·정적 Storybook이 통과했다. 긴 경로 기본 build 실패와 별도 webpack/자체 clean 설치한 짧은 실제 복사본의 기본 build 성공을 각각 기록했다. audit21과 개별 접근성·제품 한계는 남는다. [당시 개발 확인 기록](docs/ai/storybook-extension-verification.md)과 [PR workflow](.github/workflows/storybook.yml)를 참고한다. 원격 CI 실행과 이후 독립 QA·Claude 검수·Wiki·finish·문서 동기화·원본 전달은 별도 증거로 확인한다.
 
 빌드 결과를 로컬에서 실행하려면 빌드 성공 후 다음 명령을 사용한다.
 

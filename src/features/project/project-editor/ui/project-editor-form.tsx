@@ -6,6 +6,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -335,6 +336,7 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
     [],
   );
   const [isUploading, setIsUploading] = useState(false);
+  const [pendingInlineImage, setPendingInlineImage] = useState<UploadedProjectAsset | null>(null);
   const [savingAction, setSavingAction] = useState<SavingAction | null>(null);
   const [notice, setNotice] = useState("");
   const [dialogError, setDialogError] =
@@ -342,6 +344,14 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
   const years = getProductionYears();
   const isSaving = savingAction !== null;
   const nextPath = getEditorNextPath(mode, projectId);
+
+  useLayoutEffect(() => {
+    if (isUploading || !pendingInlineImage || !richEditorRef.current) return;
+    // disabled=false가 실제 contenteditable DOM에 반영된 commit 이후에만 삽입한다.
+    richEditorRef.current.insertImage(pendingInlineImage.name, pendingInlineImage.fileUrl);
+    setPendingInlineImage(null);
+    setNotice("본문에 이미지를 삽입했습니다.");
+  }, [isUploading, pendingInlineImage]);
 
   useEffect(() => {
     if (mode !== "edit" || !projectId) {
@@ -566,9 +576,10 @@ export function ProjectEditorForm({ mode, projectId }: ProjectEditorFormProps) {
     try {
       const uploaded = await uploadSingleFile(file);
 
+      // unmount된 폼의 늦은 응답은 삽입 대기 상태로 만들지 않는다.
+      if (!richEditorRef.current) return;
       setUploadedAssets((currentAssets) => [...currentAssets, uploaded]);
-      richEditorRef.current?.insertImage(file.name, uploaded.fileUrl);
-      setNotice("본문에 이미지를 삽입했습니다.");
+      setPendingInlineImage(uploaded);
     } catch (error) {
       if (error instanceof ApiError) {
         setDialogError(getProjectEditorDialogError(error));
