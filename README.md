@@ -63,6 +63,12 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=YOUR_GOOGLE_WEB_CLIENT_ID
 
 서버를 실행하지 않고 파일을 직접 열려면 [독립형 유저 플로우 안내](docs/ai/user-flow-standalone.md)를 참고한다.
 
+## Sentry 클라이언트 오류 수집
+
+`.env.local`에 `NEXT_PUBLIC_SENTRY_DSN`을 설정하고 개발 서버를 재시작하면 브라우저 오류 수집을 활성화한다. DSN은 Sentry 프로젝트의 Settings → Client Keys (DSN)에서 확인한다. 미설정 시 수집을 초기화하지 않는다. 배포 시에는 빌드 환경에 설정한다.
+
+성능 추적·세션 리플레이·서버 수집·소스맵 업로드는 이번 범위에 포함하지 않는다. 설정과 검증 상태는 [Sentry 작업 기록](docs/ai/sentry-client-monitoring.md)을 참고한다.
+
 ## 검증
 
 2026-11-02 학교 이메일 인증 개발 검증은 **29개 파일·297/297 기능**, 접근성 실행 설정 **error 218 / todo 79**다. 인증 28개는 모두 error이며 다른 slice의 todo는 남는다. 자체 정상 설치·타입·전체 린트·정적 Storybook·변경 없는 기본 Turbopack 앱 build가 통과했다. 개발/HTTP 정적 인증 66화면과 기존 미리보기 24조합, audit43·시각 미실행 근거·실제 서버 미검증·후속 gate는 [학교 이메일 인증 기록](docs/ai/school-email-verification.md), [미리보기 기록](docs/ai/portfolio-preview-accessibility.md)을 따른다. 아래 2026-10-24/27의 집계와 빌드 이력은 당시 사실로 보존한다.

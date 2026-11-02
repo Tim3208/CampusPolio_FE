@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs/config";
 
 /**
  * 환경변수 URL 값 끝의 슬래시를 제거해 rewrite destination을 안정적으로 만든다.
@@ -45,4 +46,14 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // 오류 수집에는 인증 토큰이 필요하지 않으며 소스맵 업로드는 별도 설정한다.
+  sourcemaps: { disable: true },
+  buildTimeInstrumentation: false,
+  silent: true,
+  webpack: {
+    autoInstrumentServerFunctions: false,
+    autoInstrumentMiddleware: false,
+    autoInstrumentAppDirectory: false,
+  },
+});
