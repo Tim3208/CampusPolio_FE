@@ -41,7 +41,7 @@ const meta = {
     imageName: { control: "text" }, imageUrl: { control: "text", description: "이미지 버튼 callback이 ref.insertImage에 전달할 로컬 fixture URL" },
     onChange: { control: false }, onImageButtonClick: { control: false },
   },
-  parameters: { layout: "fullscreen", docs: { story: { inline: false, height: "650px" }, description: { component: "Docs는 iframe별 초기 상태와 수동 조작을 제공하며 자동 play는 Canvas와 Vitest에서 실행한다. 실제 contenteditable·Selection·document.execCommand를 사용한다. Playground는 자동 조작하지 않는다. 링크만 window.prompt를 사용하며 이미지는 callback→ref.insertImage 경로다. 이미지 업로드/외부 서버 성공을 뜻하지 않는다. disabled는 사용자 입력과 toolbar를 막고 업로드 완료용 ref API는 그대로 유지한다." } } },
+  parameters: { layout: "fullscreen", docs: { story: { inline: false, height: "650px" }, description: { component: "Docs는 iframe별 초기 상태와 수동 조작을 제공하며 자동 play는 Canvas와 Vitest에서 실행한다. 실제 contenteditable·Selection·document.execCommand를 사용한다. Playground는 자동 조작하지 않는다. 링크만 window.prompt를 사용하며 이미지는 callback→ref.insertImage 경로다. 이미지 업로드/외부 서버 성공을 뜻하지 않는다. disabled는 사용자 입력·toolbar·ref 이미지 삽입을 막는다. 업로드가 끝나 편집 가능 상태가 반영된 뒤 ref API로 이미지를 삽입한다." } } },
   /** 선택·콜백 기록을 스토리마다 정리한다. */
   beforeEach() { clearEditorSelection(); return clearEditorSelection; },
 } satisfies Meta<EditorArgs>;

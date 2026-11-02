@@ -9,6 +9,8 @@ npm run test:visual:update
 
 첫 명령은 종료형 비교이며 `--update=none`과 CI 모드로 **기준이 없거나 다르면 실패**한다. 두 번째 명령만 기준을 생성·갱신한다. 갱신 뒤에는 PNG를 직접 검토하고 첫 명령을 다시 실행한다. 일반 비교에 `--update=false`를 사용하지 않는다. Vitest 4.1.12는 update 옵션의 문자열을 해석하므로 명시적 `none`이 필요하다. `test:visual`에 갱신 옵션을 추가하면 runner가 거부한다.
 
+2026-11-02 PR #25의 첫 원격 실행에서는 5/12 화면이 달랐다. 5개 모두 프로젝트 fixture SVG 내부의 `sans-serif` 문구에만 차이가 있었고, 그 밖의 제품 픽셀은 동일했다. PC 기본 글꼴의 차이를 제거하기 위해 저장소의 Pretendard 1.3.9 Regular로 문구를 SVG 윤곽선으로 고정했다. 이미지의 접근성 title과 기존 폰트 라이선스는 유지했다. 영향을 받는 기준 PNG 5개만 직접 검토·갱신했으며, 로컬 일반 비교에서 12/12 통과했다. 픽셀 허용치와 기준 자동 갱신 차단은 그대로다.
+
 기본 loopback 포트는 6221이다. 다른 작업과 겹치지 않을 때 검증된 정수 `STORYBOOK_TEST_PORT`로 변경할 수 있다. 공개 API/Google 설정은 기존 allowlist 경계를 유지한다. 실제 backend·OAuth·AI 호출 성공을 검사하지 않는다.
 
 ## 환경과 캡처

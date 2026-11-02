@@ -71,6 +71,8 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=YOUR_GOOGLE_WEB_CLIENT_ID
 
 ## 검증
 
+최신 main의 보안·Sentry 변경과 Storybook·유저 플로우·인증·미리보기를 함께 확인한 2026-11-02 결과는 [로컬 작업 통합 검증](docs/ai/local-integration-verification.md)을 따른다. 아래 작업별 기록의 과거 버전·보안 경고 수와 구분한다.
+
 2026-11-02 학교 이메일 인증 개발 검증은 **29개 파일·297/297 기능**, 접근성 실행 설정 **error 218 / todo 79**다. 인증 28개는 모두 error이며 다른 slice의 todo는 남는다. 자체 정상 설치·타입·전체 린트·정적 Storybook·변경 없는 기본 Turbopack 앱 build가 통과했다. 개발/HTTP 정적 인증 66화면과 기존 미리보기 24조합, audit43·시각 미실행 근거·실제 서버 미검증·후속 gate는 [학교 이메일 인증 기록](docs/ai/school-email-verification.md), [미리보기 기록](docs/ai/portfolio-preview-accessibility.md)을 따른다. 아래 2026-10-24/27의 집계와 빌드 이력은 당시 사실로 보존한다.
 
 ```sh

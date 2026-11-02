@@ -56,6 +56,8 @@
 
 ## 전체 유저 플로우
 
+[로컬 작업 통합 검증](local-integration-verification.md)은 PR #25에서 기존 Storybook 커밋과 후속 유저 플로우·학교 인증·미리보기 작업을 최신 main 보안/Sentry 변경과 함께 검증한 결과다. 과거 각 작업의 검증 기록과 최종 원격 PR 상태를 구분한다.
+
 [유저 플로우 검토 화면 안내](user-flow-guide.md)는 기존 기획·현재 코드·API 계약을 대조한 사용자 행동 목록의 범위, 구현 상태 판단과 예외·조건·새 제안의 구분을 기록한다. 개발 서버의 `/user-flows`에서 탭·아코디언으로 확인하며 서버 연결 없이 목록을 검토할 수 있다. 기획된 목표와 구현된 프론트 동작, 실제 서버 검증을 구분한다. Storybook의 `Widgets/UserFlows/UserFlowPage/Playground`에서도 전체 목록을 확인할 수 있다.
 
 [서버 없이 유저 플로우 보기](user-flow-standalone.md)는 브라우저에서 바로 열 수 있는 단일 HTML과 최신 화면으로 다시 만드는 방법을 안내한다. HTML은 생성 시점의 스냅샷이며 원본 수정이 자동 반영되지 않는다.
