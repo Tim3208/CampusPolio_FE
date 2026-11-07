@@ -258,6 +258,33 @@ export const PendingSuccess: Story = {
   },
 };
 
+export const CreatePending: Story = {
+  args: { scenario: "pending" },
+  /** 신규 생성과 추가 수정이 각각 대기 중일 때 중복 요청을 차단한다. */
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await typeProfileField(canvasElement, "닉네임", "대기 중 생성");
+    await typeProfileField(canvasElement, "이름", "추가 정보");
+    await userEvent.click(canvas.getByRole("button", { name: "저장" }));
+    await waitFor(() => expect(getProfileRequests()).toHaveLength(1));
+    expect(getProfileRequests()[0].method).toBe("POST");
+    const pending = canvas.getByRole("button", { name: "저장 중" });
+    expect(pending).toBeDisabled();
+    await userEvent.click(pending, { pointerEventsCheck: 0 });
+    await userEvent.click(pending, { pointerEventsCheck: 0 });
+    expect(getProfileRequests()).toHaveLength(1);
+    await userEvent.click(canvas.getByRole("button", { name: "대기 응답 완료" }));
+    await waitFor(() => expect(getProfileRequests()).toHaveLength(2));
+    expect(getProfileRequests()[1].method).toBe("PATCH");
+    expect(pending).toBeDisabled();
+    await userEvent.click(pending, { pointerEventsCheck: 0 });
+    expect(getProfileRequests()).toHaveLength(2);
+    await userEvent.click(canvas.getByRole("button", { name: "대기 응답 완료" }));
+    await waitFor(() => expect(canvas.getByRole("status")).toHaveTextContent("프로필 수정 완료"));
+    expect(getRouter().refresh).toHaveBeenCalledTimes(1);
+  },
+};
+
 /** HTTP 오류별 현재 안내와 입력 보존/무 refresh를 자동으로 확인하는 사례를 만든다. */
 function errorStory(scenario: keyof typeof profileErrors, initialProfile: InitialProfile = "existing"): Story {
   return {
@@ -338,20 +365,68 @@ export const CreateMessageFallback: Story = {
 
 export const PartialCreateFailure: Story = {
   args: { scenario: "patch-failure" },
-  parameters: { ...errorAccessibility, docs: { description: { story: `${errorAccessibility.docs.description.story}\n\nPOST 성공 뒤 PATCH 실패 시 현재 폼은 hasProfile을 바꾸지 않습니다. 재시도는 POST부터 다시 시작합니다. rollback이나 서버 중복 생성 안전성을 보장하지 않으며 실제 서버에서는 409가 가능하다는 기존 경계입니다.` } } },
-  /** 생성 후 수정 실패에서도 입력을 보존하고 현 구현의 재시도 POST 반복 경계를 드러낸다. */
+  parameters: { ...errorAccessibility, docs: { description: { story: `${errorAccessibility.docs.description.story}\n\n생성에 성공한 뒤 추가 정보 저장이 실패하면 입력값을 유지하며, 다시 저장할 때 생성 요청을 반복하지 않습니다. 실제 서버의 저장 결과는 별도로 검증해야 합니다.` } } },
+  /** 추가 정보 저장이 반복 실패해도 입력을 보존하고 수정 요청만 재시도한다. */
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await typeProfileField(canvasElement, "닉네임", "부분 생성");
-    await typeProfileField(canvasElement, "이름", "추가 정보");
+    await typeProfileField(canvasElement, "닉네임", "  부분 생성  ");
+    await typeProfileField(canvasElement, "이름", "  추가 정보  ");
     const first = [{ method: "POST", body: { nickname: "부분 생성", bio: "" } }, { method: "PATCH", body: { nickname: "부분 생성", bio: "", name: "추가 정보", major: "", grade: null, profileImage: "" } }];
     await userEvent.click(canvas.getByRole("button", { name: "저장" }));
     await waitFor(() => expect(canvas.getByRole("alert")).toBeVisible());
     await expectProfileRequests(first);
+    expect(canvas.getByLabelText("닉네임")).toHaveValue("  부분 생성  ");
+    expect(canvas.getByLabelText("이름")).toHaveValue("  추가 정보  ");
     await userEvent.click(canvas.getByRole("button", { name: "저장" }));
     await waitFor(() => expect(canvas.getByRole("alert")).toBeVisible());
-    await expectProfileRequests([...first, ...first]);
+    await expectProfileRequests([...first, first[1]]);
+    expect(canvas.getByLabelText("닉네임")).toHaveValue("  부분 생성  ");
+    expect(canvas.getByLabelText("이름")).toHaveValue("  추가 정보  ");
     expect(getRouter().refresh).not.toHaveBeenCalled();
+  },
+};
+
+export const PartialCreateRetrySuccess: Story = {
+  args: { scenario: "patch-retry" },
+  /** 생성 성공 후 추가 저장만 실패하면 수정한 입력으로 PATCH를 재시도하고 성공 시 새로고침한다. */
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await typeProfileField(canvasElement, "닉네임", "부분 생성 후 재시도");
+    await typeProfileField(canvasElement, "이름", "첫 입력");
+    await userEvent.click(canvas.getByRole("button", { name: "저장" }));
+    await waitFor(() => expect(canvas.getByRole("alert")).toBeVisible());
+    expect(canvas.getByLabelText("이름")).toHaveValue("첫 입력");
+    expect(getRouter().refresh).not.toHaveBeenCalled();
+    await typeProfileField(canvasElement, "이름", "바꾼 입력");
+    await saveProfile(canvasElement, "프로필 수정 완료");
+    const create = { nickname: "부분 생성 후 재시도", bio: "" };
+    const patch = { ...create, name: "첫 입력", major: "", grade: null, profileImage: "" };
+    await expectProfileRequests([
+      { method: "POST", body: create },
+      { method: "PATCH", body: patch },
+      { method: "PATCH", body: { ...patch, name: "바꾼 입력" } },
+    ]);
+  },
+};
+
+export const CreateRetrySuccess: Story = {
+  args: { scenario: "retry" },
+  /** 생성 성공을 확인하지 못하면 입력을 보존하고 생성부터 다시 시도한다. */
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await typeProfileField(canvasElement, "닉네임", "생성 재시도");
+    await typeProfileField(canvasElement, "이름", "추가 정보");
+    await userEvent.click(canvas.getByRole("button", { name: "저장" }));
+    await waitFor(() => expect(canvas.getByRole("alert")).toBeVisible());
+    expect(canvas.getByLabelText("이름")).toHaveValue("추가 정보");
+    expect(getRouter().refresh).not.toHaveBeenCalled();
+    await saveProfile(canvasElement, "프로필 수정 완료");
+    const create = { nickname: "생성 재시도", bio: "" };
+    await expectProfileRequests([
+      { method: "POST", body: create },
+      { method: "POST", body: create },
+      { method: "PATCH", body: { ...create, name: "추가 정보", major: "", grade: null, profileImage: "" } },
+    ]);
   },
 };
 

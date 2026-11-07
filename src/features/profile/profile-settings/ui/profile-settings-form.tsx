@@ -205,6 +205,9 @@ export function ProfileSettingsForm({ profile }: ProfileSettingsFormProps) {
           nickname: normalizedValues.nickname,
         })
 
+        // 생성은 이미 완료됐으므로 추가 저장이 실패해도 재시도에서 중복 생성하지 않는다.
+        setHasProfile(true)
+
         if (hasUpdateOnlyValues(normalizedValues)) {
           const updateResponse = await updateProfile(normalizedValues)
 
@@ -221,8 +224,6 @@ export function ProfileSettingsForm({ profile }: ProfileSettingsFormProps) {
             tone: "success",
           })
         }
-
-        setHasProfile(true)
       }
 
       setValues(normalizedValues)

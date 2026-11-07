@@ -99,7 +99,7 @@ export const ConditionsRoundTrip: Story = {
 };
 
 export const StatesAndEvidence: Story = {
-  /** 오류·제안 상태의 구분과 원본 커밋에 고정된 근거 링크를 확인한다. */
+  /** 오류·제안 상태와 기본·개별 커밋에 고정된 근거 링크를 확인한다. */
   async play({ canvasElement }) {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole("button", { name: /fixture-01/ }));
@@ -109,6 +109,7 @@ export const StatesAndEvidence: Story = {
     await expect(flow.getByText("제안", { exact: true })).toBeVisible();
     await expect(flow.getByText(/프로젝트가 삭제되었다면/)).toBeVisible();
     await expect(canvas.getByRole("link", { name: /화면 경로/ })).toHaveAttribute("href", `${storyCatalog.repositoryUrl}/blob/${storyCatalog.revision}/src/shared/config/routes.ts#L1`);
+    await expect(canvas.getByRole("link", { name: /갱신 근거/ })).toHaveAttribute("href", `${storyCatalog.repositoryUrl}/blob/test-evidence-revision/src/features/profile/profile-settings/ui/profile-settings-form.tsx#L209`);
     await userEvent.click(canvas.getByRole("tab", { name: /새 아이디어/ }));
     await expect(canvas.getByRole("button", { name: /프로젝트 즐겨찾기/ })).toBeVisible();
     await expect(canvas.queryByRole("combobox", { name: "구현 상태 필터" })).not.toBeInTheDocument();

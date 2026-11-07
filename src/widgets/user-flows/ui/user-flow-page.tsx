@@ -36,7 +36,7 @@ function EvidenceList({ evidence, catalog }: { evidence: FlowEvidence[]; catalog
       <ul className="mt-2 space-y-2">
         {evidence.map((source) => (
           <li key={`${source.path}:${source.line}`}>
-            <a href={`${catalog.repositoryUrl}/blob/${catalog.revision}/${source.path}#L${source.line}`} target="_blank" rel="noreferrer" className={cn("inline-flex max-w-full items-start gap-1.5 text-xs text-main-10 underline-offset-4 hover:underline", focusClass)}>
+            <a href={`${catalog.repositoryUrl}/blob/${source.revision ?? catalog.revision}/${source.path}#L${source.line}`} target="_blank" rel="noreferrer" className={cn("inline-flex max-w-full items-start gap-1.5 text-xs text-main-10 underline-offset-4 hover:underline", focusClass)}>
               <span className="min-w-0"><span className="font-medium">{source.label}</span><span className="mt-0.5 block break-all text-slate-600">{source.path}:{source.line}</span></span>
               <ArrowUpRight className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
               <span className="sr-only"> (새 탭)</span>

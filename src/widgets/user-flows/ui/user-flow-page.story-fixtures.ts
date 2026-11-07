@@ -6,7 +6,7 @@ export const storyCatalog: UserFlowCatalog = {
   repositoryUrl: "https://github.com/Tim3208/CampusPolio_FE",
   areas: [{ id: "explore", title: "프로젝트 탐색" }, { id: "account", title: "계정" }],
   flows: [
-    { id: "fixture-01", area: "explore", action: "프로젝트 카드를 선택한다", result: "선택한 프로젝트 상세로 이동한다", status: "구현됨", statusNote: "상세 링크가 연결되어 있습니다. 서버 응답은 별도로 확인합니다.", conditionIds: ["fixture-session"], evidence: [{ path: "src/shared/config/routes.ts", line: 1, label: "화면 경로" }], states: [{ kind: "오류", when: "상세 조회에 실패하면", result: "오류 안내를 표시한다", origin: "기존" }, { kind: "빈 화면", when: "프로젝트가 삭제되었다면", result: "목록으로 돌아갈 경로를 안내한다", origin: "제안" }] },
+    { id: "fixture-01", area: "explore", action: "프로젝트 카드를 선택한다", result: "선택한 프로젝트 상세로 이동한다", status: "구현됨", statusNote: "상세 링크가 연결되어 있습니다. 서버 응답은 별도로 확인합니다.", conditionIds: ["fixture-session"], evidence: [{ path: "src/shared/config/routes.ts", line: 1, label: "화면 경로" }, { path: "src/features/profile/profile-settings/ui/profile-settings-form.tsx", line: 209, label: "갱신 근거", revision: "test-evidence-revision" }], states: [{ kind: "오류", when: "상세 조회에 실패하면", result: "오류 안내를 표시한다", origin: "기존" }, { kind: "빈 화면", when: "프로젝트가 삭제되었다면", result: "목록으로 돌아갈 경로를 안내한다", origin: "제안" }] },
     { id: "fixture-02", area: "account", action: "로그아웃을 선택한다", result: "로그인 세션을 종료한다", status: "미구현", statusNote: "계약은 있지만 사용자 버튼은 없습니다.", conditionIds: ["fixture-session"], evidence: [{ path: "api.md", line: 637, label: "로그아웃 계약" }], states: [] },
     { id: "fixture-03", area: "account", action: "프로필을 저장한다", result: "입력한 프로필을 다시 확인한다", status: "확인 필요", statusNote: "화면과 API 계약의 차이를 확인해야 합니다.", conditionIds: [], evidence: [{ path: "src/shared/config/routes.ts", line: 1, label: "프로필 경로" }], states: [] },
   ],

@@ -36,9 +36,11 @@ const sourcePaths = {
   support: "src/app/mypage/support/page.tsx",
 } as const;
 
+const PROFILE_RETRY_REVISION = "f7dffd591507e76cfa88853836673aea998191bb";
+
 /** 조사한 기존 파일과 줄 번호로 구현 또는 기획 근거를 만든다. */
-function evidence(key: keyof typeof sourcePaths, line: number, label: string): FlowEvidence {
-  return { path: sourcePaths[key], line, label };
+function evidence(key: keyof typeof sourcePaths, line: number, label: string, revision?: string): FlowEvidence {
+  return { path: sourcePaths[key], line, label, ...(revision ? { revision } : {}) };
 }
 
 /** 예외 상태를 기존 동작과 추가 제안으로 구분해 기록한다. */
@@ -176,7 +178,7 @@ const flows: UserFlow[] = [
 
   flow("PROFILE-01", "profile", "프로필 설정을 연다", "기존 프로필 또는 새 프로필 입력 폼을 표시한다", "확인 필요", "조회·404 분기는 있으나 명세 필수 userId query를 클라이언트가 생략한다.", [evidence("profileRoute", 16, "프로필 조회"), evidence("profileApi", 22, "현재 조회 요청")], ["COND-MYPAGE", "COND-PROFILE"], [state("오류", "프로필 조회 실패", "설정 화면에 조회 오류 본문을 표시한다.")]),
   flow("PROFILE-02", "profile", "이름·닉네임·전공·학년·이미지 URL·자기소개를 입력한다", "폼과 프로필 미리보기에 반영한다", "구현됨", "입력과 미리보기가 상태에 연결되어 있다. 이미지 URL은 파일 업로드가 아니다.", [evidence("profile", 153, "프로필 입력 상태"), evidence("profile", 397, "프로필 미리보기")], ["COND-MYPAGE", "COND-PROFILE"], [state("입력", "필수 닉네임 누락 또는 입력 길이·학년·URL 검증 실패", "검증 메시지를 표시하고 저장을 중단한다."), state("오류", "이미지 URL을 불러올 수 없음", "이니셜 등 대체 이미지를 제공한다.", "제안")]),
-  flow("PROFILE-03", "profile", "새 프로필을 작성하고 저장한다", "프로필을 생성하고 성공 메시지를 표시한다", "확인 필요", "생성 후 추가 필드를 PATCH하는 요청이 있다. 필수 userId 및 후속 요청 실패 복구를 확인해야 한다.", [evidence("profile", 177, "새 프로필 저장"), evidence("profile", 203, "생성 후 추가 수정"), evidence("guide", 108, "프로필 계약 차이")], ["COND-PROFILE"], [state("오류", "생성 성공 후 추가 정보 저장 실패", "현재 오류를 표시하지만 재시도하면 생성부터 반복한다."), state("오류", "생성 후 추가 저장 실패", "생성 상태를 유지하며 추가 수정만 재시도한다.", "제안")]),
+  flow("PROFILE-03", "profile", "새 프로필을 작성하고 저장한다", "프로필을 생성하고 성공 메시지를 표시한다", "확인 필요", "생성 후 추가 저장 실패 시 재시도 분기를 수정했지만 userId·학년 계약과 실제 서버 확인이 남아 있다.", [evidence("profile", 177, "새 프로필 저장", PROFILE_RETRY_REVISION), evidence("profile", 209, "생성 후 추가 저장 재시도", PROFILE_RETRY_REVISION), evidence("api", 392, "프로필 생성 userId 명세"), evidence("api", 2199, "학년 타입 명세")], ["COND-PROFILE"], [state("오류", "생성 성공 후 추가 정보 저장 실패", "오류와 입력값을 유지하며 같은 화면에서 다시 저장하면 추가 정보만 다시 요청한다.")]),
   flow("PROFILE-04", "profile", "기존 프로필을 수정하고 저장한다", "프로필을 갱신하고 성공 안내와 새로고침을 제공한다", "확인 필요", "수정 핸들러는 있으나 필수 userId와 학년 null의 계약 차이가 남아 있다.", [evidence("profile", 195, "기존 프로필 수정"), evidence("profile", 229, "저장 성공 처리"), evidence("guide", 108, "프로필 API 차이")], ["COND-PROFILE"], [state("진행 중", "저장 요청 중", "중복 제출을 제한한다."), state("오류", "프로필 없음·인증 만료 또는 저장 오류", "원인에 맞는 오류 메시지를 표시한다.")]),
 
   flow("OTHER-01", "planned", "지원 메뉴를 선택한다", "서비스 지원 내용을 확인한다", "미구현", "현재 제목과 placeholder만 있다. FAQ·문의 방법 등 구체 내용은 아직 미정이다.", [evidence("support", 8, "지원 placeholder")]),
@@ -280,13 +282,13 @@ const conditions: ConditionFlow[] = [
     { when: "프로젝트 연결 해제 또는 포트폴리오 삭제", result: "원본 프로젝트는 유지한다. 삭제된 포트폴리오 slug는 재사용하지 않는다.", origin: "기존" },
     { when: "소유자가 아닌 사용자의 변경 요청", result: "접근 거부를 명확히 안내하고 안전한 목록으로 돌아갈 수 있게 한다.", origin: "제안" },
   ], evidence: [evidence("api", 1027, "정보 변경 권한"), evidence("api", 957, "삭제 및 원본 보존 정책")] },
-  { id: "COND-PROFILE", title: "프로필 유무와 저장 계약", summary: "생성·수정 분기와 추가 저장 실패 후 재시도", status: "확인 필요", statusNote: "필수 userId query와 학년 null의 차이가 있으며 생성 후 추가 저장 실패의 복구가 남아 있다.", cases: [
+  { id: "COND-PROFILE", title: "프로필 유무와 저장 계약", summary: "생성·수정 분기와 추가 저장 실패 후 재시도", status: "확인 필요", statusNote: "필수 userId query와 학년 null의 차이가 있으며 실제 서버 검증이 남아 있다.", cases: [
     { when: "프로필 조회가 404", result: "빈 생성 폼을 표시하고 저장 시 POST한다.", origin: "기존" },
     { when: "기존 프로필 존재", result: "기존 값을 표시하고 PATCH로 수정한다.", origin: "기존" },
     { when: "새 프로필에 추가 필드가 있음", result: "POST 후 추가 PATCH로 이름·전공·학년·이미지 등을 저장한다.", origin: "기존" },
-    { when: "POST 성공 후 PATCH 실패", result: "현재 오류를 표시하며 다음 저장도 POST부터 반복한다.", origin: "기존" },
-    { when: "부분 저장 후 재시도", result: "생성 상태를 유지하고 PATCH만 재시도하도록 보완한다.", origin: "제안" },
-  ], evidence: [evidence("profile", 195, "생성·수정 분기"), evidence("profile", 203, "추가 저장 단계"), evidence("guide", 108, "프로필 계약과 재시도 제약")] },
+    { when: "POST 성공 후 PATCH 실패", result: "오류를 표시하고 입력값을 유지한다. 같은 화면에서 다시 저장하면 PATCH만 재시도한다.", origin: "기존" },
+    { when: "POST 성공을 확인하지 못한 후 재시도", result: "같은 화면에서 POST부터 다시 요청한다. 응답이 유실된 경우 실제 생성 여부는 서버 확인이 필요하며 중복 생성 또는 충돌이 발생할 수 있다.", origin: "기존" },
+  ], evidence: [evidence("profile", 195, "생성·수정 분기", PROFILE_RETRY_REVISION), evidence("profile", 209, "추가 저장 전 생성 상태 반영", PROFILE_RETRY_REVISION), evidence("api", 392, "프로필 생성 userId 명세"), evidence("api", 2199, "학년 타입 명세")] },
 ];
 
 export const userFlowCatalog: UserFlowCatalog = {
