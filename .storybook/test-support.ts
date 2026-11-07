@@ -11,8 +11,7 @@ export const localProjectImage = "/storybook/project-fixture.svg";
 // 이 목록은 제품 수정 권한이 없는 기존 위반의 공개 기록이며 접근성 PASS가 아니다.
 export const storyA11yLimitations: Record<string, string> = {
   "shared-button--variants": "color-contrast: destructive 버튼의 #e7000b/#fde5e7 대비 3.98:1이 4.5:1에 미달한다. 제품 색상 변경은 DEV-01 범위 밖이다.",
-  "shared-markdownviewer--headings-and-lists": "label: GFM의 disabled checkbox에 접근 가능한 이름이 없다. Markdown 제품 렌더러 수정은 DEV-01 범위 밖이다.",
-  "shared-markdownviewer--long-content": "label 및 scrollable-region-focusable: GFM checkbox 이름과 .campus-markdown-table/pre의 키보드 접근이 없다. 제품 렌더러 수정은 DEV-01 범위 밖이다.",
+  "shared-markdownviewer--long-content": "scrollable-region-focusable: 표와 코드의 스크롤 영역은 일부 브라우저에서 키보드 포커스를 명시적으로 지원해야 한다.",
   "features-project-projectreviewpanel--success": "scrollable-region-focusable: 리뷰 코드 pre.max-h-48의 키보드 접근이 없다. 리뷰 제품 UI 수정은 DEV-01 범위 밖이다.",
   "features-project-projectreviewpanel--retry-success": "scrollable-region-focusable: 재시도 성공 리뷰 코드 pre.max-h-48의 키보드 접근이 없다. 리뷰 제품 UI 수정은 DEV-01 범위 밖이다.",
 };
