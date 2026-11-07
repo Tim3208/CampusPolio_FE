@@ -147,6 +147,7 @@ async function main() {
   const [javascript, styles] = await Promise.all([buildJavascript(), buildStyles()]);
   const notices = await buildLicenseNotices(javascript.modules);
   const html = `<!doctype html>
+<!-- scripts/build-user-flow-standalone.mjs로 생성된 파일입니다. -->
 <html lang="ko" class="h-full antialiased">
 <head>
 <meta charset="utf-8">
@@ -162,7 +163,8 @@ async function main() {
 </body>
 </html>
 `;
-  await writeFile(outputPath, html, "utf8");
+  // 의존성 라이선스와 소스의 개행을 통일해 OS와 Git 설정이 달라도 동일한 파일을 만든다.
+  await writeFile(outputPath, html.replace(/\r\n?/g, "\n"), "utf8");
   console.log(`서버 없이 열 수 있는 유저 플로우: ${outputPath}`);
 }
 
