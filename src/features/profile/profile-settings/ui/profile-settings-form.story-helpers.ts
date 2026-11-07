@@ -42,7 +42,8 @@ async function handleProfileRequest({ request }: { request: Request }) {
   if (current.disposed) return HttpResponse.error();
   const code = current.scenario.startsWith("error") ? Number(current.scenario.slice(5))
     : current.scenario === "retry" && number === 1 ? 503
-      : current.scenario === "patch-failure" && request.method === "PATCH" ? 503 : 200;
+      : current.scenario === "patch-failure" && request.method === "PATCH" ? 503
+        : current.scenario === "patch-retry" && request.method === "PATCH" && current.requests.filter((entry) => entry.method === "PATCH").length === 1 ? 503 : 200;
   if (code !== 200) return HttpResponse.json({ success: false }, { status: code });
   const fallback = current.scenario === "fallback";
   const data = request.method === "POST"

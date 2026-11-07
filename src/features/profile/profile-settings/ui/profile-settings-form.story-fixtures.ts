@@ -11,7 +11,7 @@ export const updatedProfile: ProfileUpdateResponse = {
 export const initialProfiles = ["undefined", "null", "existing"] as const;
 export type InitialProfile = typeof initialProfiles[number];
 export const profileScenarios = [
-  "success", "pending", "fallback", "create-message-fallback", "error400", "error401", "error404", "error409", "error503", "retry", "patch-failure",
+  "success", "pending", "fallback", "create-message-fallback", "error400", "error401", "error404", "error409", "error503", "retry", "patch-failure", "patch-retry",
 ] as const;
 export type ProfileScenario = typeof profileScenarios[number];
 export const profileErrors = {
