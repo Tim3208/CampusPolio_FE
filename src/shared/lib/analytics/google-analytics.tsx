@@ -2,7 +2,7 @@
 
 import Script from "next/script";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { getAnalyticsPage, getAnalyticsReferrer, isValidMeasurementId } from "./page-context";
 
 declare global {
@@ -28,7 +28,8 @@ export function GoogleAnalytics({ measurementId, enabled, debugMode = false }: G
   const active = enabled && isValidMeasurementId(measurementId);
   const trackedPath = !!pathname && getAnalyticsPage(`https://campus-polio.local${pathname}`) !== null;
 
-  useEffect(() => {
+  // afterInteractive Script의 effect보다 먼저 초기 설정 큐를 준비한다.
+  useLayoutEffect(() => {
     if (!isValidMeasurementId(measurementId)) return;
 
     // 제외 화면에 진입한 뒤에도 이미 로드된 태그가 참여 이벤트를 보내지 않게 한다.
@@ -57,12 +58,16 @@ export function GoogleAnalytics({ measurementId, enabled, debugMode = false }: G
     };
 
     const needsInitialization = initializedId.current !== measurementId;
+    // 새 Google 태그는 첫 js/config 명령 직전에 자동 초기화한다. 전역 설정을 먼저 넣는다.
+    window.gtag("set", {
+      send_page_view: false,
+      allow_google_signals: false,
+      allow_ad_personalization_signals: false,
+      ...context,
+      ...(debugMode ? { debug_mode: true } : {}),
+    });
     if (needsInitialization) {
       window.gtag("js", new Date());
-    }
-    // 참여 시간 등 SDK의 후속 이벤트도 정리된 URL과 제목을 사용한다.
-    window.gtag("set", context);
-    if (needsInitialization) {
       window.gtag("config", measurementId, {
         send_page_view: false,
         allow_google_signals: false,
