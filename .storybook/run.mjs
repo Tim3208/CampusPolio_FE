@@ -35,6 +35,8 @@ Object.assign(env, {
   NODE_ENV: mode === "test" || mode.startsWith("visual") ? "test" : mode === "build" ? "production" : "development",
   NEXT_PUBLIC_API_BASE_URL: "",
   NEXT_PUBLIC_GOOGLE_CLIENT_ID: "",
+  NEXT_PUBLIC_GA_MEASUREMENT_ID: "",
+  NEXT_PUBLIC_GA_DEBUG: "false",
   NEXT_PUBLIC_USE_MOCK_API: "false",
   NEXT_PUBLIC_MOCK_AUTH_STATE: "unverified",
   STORYBOOK_DISABLE_TELEMETRY: "1",
