@@ -258,6 +258,33 @@ export const PendingSuccess: Story = {
   },
 };
 
+export const CreatePending: Story = {
+  args: { scenario: "pending" },
+  /** 신규 생성과 추가 수정이 각각 대기 중일 때 중복 요청을 차단한다. */
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await typeProfileField(canvasElement, "닉네임", "대기 중 생성");
+    await typeProfileField(canvasElement, "이름", "추가 정보");
+    await userEvent.click(canvas.getByRole("button", { name: "저장" }));
+    await waitFor(() => expect(getProfileRequests()).toHaveLength(1));
+    expect(getProfileRequests()[0].method).toBe("POST");
+    const pending = canvas.getByRole("button", { name: "저장 중" });
+    expect(pending).toBeDisabled();
+    await userEvent.click(pending, { pointerEventsCheck: 0 });
+    await userEvent.click(pending, { pointerEventsCheck: 0 });
+    expect(getProfileRequests()).toHaveLength(1);
+    await userEvent.click(canvas.getByRole("button", { name: "대기 응답 완료" }));
+    await waitFor(() => expect(getProfileRequests()).toHaveLength(2));
+    expect(getProfileRequests()[1].method).toBe("PATCH");
+    expect(pending).toBeDisabled();
+    await userEvent.click(pending, { pointerEventsCheck: 0 });
+    expect(getProfileRequests()).toHaveLength(2);
+    await userEvent.click(canvas.getByRole("button", { name: "대기 응답 완료" }));
+    await waitFor(() => expect(canvas.getByRole("status")).toHaveTextContent("프로필 수정 완료"));
+    expect(getRouter().refresh).toHaveBeenCalledTimes(1);
+  },
+};
+
 /** HTTP 오류별 현재 안내와 입력 보존/무 refresh를 자동으로 확인하는 사례를 만든다. */
 function errorStory(scenario: keyof typeof profileErrors, initialProfile: InitialProfile = "existing"): Story {
   return {
@@ -384,7 +411,7 @@ export const PartialCreateRetrySuccess: Story = {
 
 export const CreateRetrySuccess: Story = {
   args: { scenario: "retry" },
-  /** 생성 자체가 실패하면 입력을 보존하고 생성부터 다시 시도한다. */
+  /** 생성 성공을 확인하지 못하면 입력을 보존하고 생성부터 다시 시도한다. */
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await typeProfileField(canvasElement, "닉네임", "생성 재시도");

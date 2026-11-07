@@ -4,6 +4,7 @@ export type FlowEvidence = {
   path: string;
   line: number;
   label: string;
+  revision?: string;
 };
 
 export type FlowState = {
