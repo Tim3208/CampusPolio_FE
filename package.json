@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:analytics": "node --test tests/analytics/*.test.mts",
     "storybook": "node .storybook/run.mjs dev",
     "build-storybook": "node .storybook/run.mjs build",
     "test:storybook": "node .storybook/run.mjs test",

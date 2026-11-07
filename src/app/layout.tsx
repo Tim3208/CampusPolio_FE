@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 import { AppHeader } from "@/widgets/header";
+import { analyticsConfig } from "@/shared/config/analytics";
+import { GoogleAnalytics } from "@/shared/lib/analytics";
 
 export const metadata: Metadata = {
   title: "CampusPolio",
@@ -17,6 +19,7 @@ export default function RootLayout({
   return (
     <html lang="ko" className="h-full antialiased">
       <body className="flex min-h-screen flex-col">
+        <GoogleAnalytics {...analyticsConfig} />
         <AppHeader />
         <div className="flex flex-1 flex-col">{children}</div>
       </body>

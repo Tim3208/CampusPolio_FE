@@ -1,6 +1,8 @@
 export const storybookEnvironment = {
   NEXT_PUBLIC_API_BASE_URL: "",
   NEXT_PUBLIC_GOOGLE_CLIENT_ID: "",
+  NEXT_PUBLIC_GA_MEASUREMENT_ID: "",
+  NEXT_PUBLIC_GA_DEBUG: "false",
   NEXT_PUBLIC_USE_MOCK_API: "false",
   NEXT_PUBLIC_MOCK_AUTH_STATE: "unverified",
 } as const;

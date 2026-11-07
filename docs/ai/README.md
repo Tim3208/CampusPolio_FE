@@ -39,6 +39,10 @@
 
 [설정·검증 기록](sentry-client-monitoring.md): 이슈 #20의 클라이언트 오류 수집 설정과 검증 상태를 기록한다. 실제 브라우저 오류 2건의 전송과 Sentry 대시보드 표시를 확인했다.
 
+## Google Analytics 방문 분석
+
+[Google Analytics 설정 안내](google-analytics.md): GA4 웹 스트림 생성, 환경 설정, 중복 조회 방지, 유입·이동 경로·이탈률 보고서와 전송 범위를 기록한다. 운영 스트림 `G-4K84FLPG3F`의 설정과 Vercel Production 환경변수를 확인했으며, 코드 검증과 실제 배포 수신 확인을 구분해 기록한다.
+
 ## 배포 의존성 보안 업데이트
 
 [의존성 업데이트 검증 기록](security-dependency-update.md)은 이슈 #22의 Next.js 및 이미지 처리 의존성 변경, 보안 경고 비교, 화면·Sentry 회귀 검증 범위와 남은 제약을 기록한다.

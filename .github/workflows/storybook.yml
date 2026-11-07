@@ -25,6 +25,8 @@ jobs:
       NEXT_PUBLIC_GOOGLE_CLIENT_ID: ''
       NEXT_PUBLIC_USE_MOCK_API: 'false'
       NEXT_PUBLIC_MOCK_AUTH_STATE: unverified
+      NEXT_PUBLIC_GA_MEASUREMENT_ID: ''
+      NEXT_PUBLIC_GA_DEBUG: 'false'
       NEXT_TELEMETRY_DISABLED: '1'
       STORYBOOK_DISABLE_TELEMETRY: '1'
 
@@ -76,6 +78,11 @@ jobs:
       - name: Lint
         run: |
           node "$env:NPM_CLI" run lint 2>&1 | Tee-Object -FilePath build/ci/lint.log
+          exit $LASTEXITCODE
+
+      - name: Test analytics configuration and URL filtering
+        run: |
+          node "$env:NPM_CLI" run test:analytics 2>&1 | Tee-Object -FilePath build/ci/analytics-tests.log
           exit $LASTEXITCODE
 
       - name: Test all Storybook stories

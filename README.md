@@ -35,6 +35,8 @@ npm run dev
 | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google 로그인에 사용하는 웹 클라이언트 ID | 빈 문자열 |
 | `NEXT_PUBLIC_USE_MOCK_API` | 문자열 `true`일 때 Mock API 사용 | 비활성 |
 | `NEXT_PUBLIC_MOCK_AUTH_STATE` | `unverified`, `verified`, `invalid-domain` 중 Mock 인증 시나리오 | `unverified`; 잘못된 값도 동일 |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | GA4 웹 스트림 측정 ID (`G-...`); 운영 빌드에서 방문 분석 활성화 | 분석 스크립트·이벤트 없음 |
+| `NEXT_PUBLIC_GA_DEBUG` | 문자열 `true`일 때 개발·Mock에서도 분석을 켜고 DebugView 이벤트 전송 | 개발·Mock 분석 비활성 |
 
 화면 개발용 Mock 예시:
 
@@ -63,6 +65,14 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=YOUR_GOOGLE_WEB_CLIENT_ID
 
 서버를 실행하지 않고 파일을 직접 열려면 [독립형 유저 플로우 안내](docs/ai/user-flow-standalone.md)를 참고한다.
 
+## Google Analytics 방문 분석
+
+GA4 웹 스트림을 만든 뒤 배포 환경에 `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-발급받은ID`를 설정하고 다시 빌드·배포한다. 운영용 ID는 운영 배포 환경에만 넣는다. 별도 패키지 설치나 Google 로그인용 secret은 필요하지 않다. ID가 없거나 형식이 잘못되면 태그를 읽지 않는다.
+
+유입 출처·캠페인, 화면 이동, 방문자·세션, 기기·브라우저, 참여 시간·이탈률을 분석할 수 있는 페이지 조회 수집을 연결했다. 운영 스트림은 `G-4K84FLPG3F`, 주소는 [campus-polio.vercel.app](https://campus-polio.vercel.app)이며 Vercel의 Production 환경에 ID를 설정했다. GA4의 **향상된 측정 → 페이지 조회 → 고급 설정 → 브라우저 방문 기록 이벤트에 따른 페이지 변경**은 꺼야 한다. 앱이 화면 이동을 직접 전송하므로 켜 두면 중복 조회가 발생한다. 해당 스트림에서 이 설정이 꺼져 있는 것을 확인했다.
+
+[Google Analytics 설정 안내](docs/ai/google-analytics.md)에 계정 생성부터 필요한 스트림 설정, 보고서 위치, 전송 범위와 검증 결과를 정리했다. 로컬 검증에는 운영용과 분리한 테스트 스트림과 `NEXT_PUBLIC_GA_DEBUG=true`를 사용한다.
+
 ## Sentry 클라이언트 오류 수집
 
 `.env.local`에 `NEXT_PUBLIC_SENTRY_DSN`을 설정하고 개발 서버를 재시작하면 브라우저 오류 수집을 활성화한다. DSN은 Sentry 프로젝트의 Settings → Client Keys (DSN)에서 확인한다. 미설정 시 수집을 초기화하지 않는다. 배포 시에는 빌드 환경에 설정한다.
@@ -78,6 +88,7 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=YOUR_GOOGLE_WEB_CLIENT_ID
 ```sh
 npx tsc --noEmit --incremental false
 npm run lint
+npm run test:analytics
 npm run build
 ```
 
