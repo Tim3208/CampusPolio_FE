@@ -4,6 +4,8 @@ import { StrictMode as ReactStrictMode, useState, type ComponentProps, type Reac
 import { expect, userEvent, waitFor, within } from "storybook/test";
 
 import {
+  createAnalyticsInitializationModel,
+  getAnalyticsScriptObservations,
   getAnalyticsScriptSources,
   resetAnalyticsScriptSources,
 } from "../../../../.storybook/mocks/analytics-scenario";
@@ -99,7 +101,20 @@ async function assertInitialPageView(debugMode = false) {
     page_title: "프로젝트 탐색 | CampusPolio",
     page_referrer: "https://search.example.invalid/",
   };
-  await expect(commands[1]).toEqual(["set", context]);
+  await waitFor(() => expect(getAnalyticsScriptObservations()).toHaveLength(1));
+  const observation = getAnalyticsScriptObservations()[0];
+  // 큐를 나중에 채우는 구현은 전송 순서가 우연히 맞아도 스크립트 로딩 경계에서 실패해야 한다.
+  await expect(observation.commandsAtLoad.length).toBeGreaterThan(0);
+  await expect(observation.commandsAtLoad[0][0]).toBe("set");
+  await expect(observation.initializationSettings).toEqual({
+    send_page_view: false,
+    allow_google_signals: false,
+    allow_ad_personalization_signals: false,
+    ...context,
+    ...(debugMode ? { debug_mode: true } : {}),
+  });
+  await expect(observation.pageViews).toHaveLength(1);
+  await expect(observation.pageViews[0]).toMatchObject({ source: "manual", parameters: context });
   await expect(getPageViews()[0]).toEqual(["event", "page_view", { ...context, send_to: measurementId }]);
   await expect(JSON.stringify(commands)).not.toMatch(/student|private-token|keyword/);
   await expect(Object.prototype.toString.call(window.dataLayer?.[0])).toBe("[object Arguments]");
@@ -112,6 +127,7 @@ async function assertInitialPageView(debugMode = false) {
 async function assertNoCollection() {
   await expect(getCommands()).toHaveLength(0);
   await expect(getAnalyticsScriptSources()).toHaveLength(0);
+  await expect(getAnalyticsScriptObservations()).toHaveLength(0);
   await expect(window.gtag).toBeUndefined();
   await expect(document.querySelector('script[src^="https://www.googletagmanager.com/"]')).toBeNull();
 }
@@ -125,7 +141,7 @@ const meta = {
     analyticsLocation: initialLocation,
     docs: {
       story: { inline: false, height: 600 },
-      description: { component: "실제 GoogleAnalytics의 조건부 초기화·정리된 페이지 조회·경로 이동을 검증합니다. 가상 측정 ID와 로컬 next/script 대체물을 사용하여 Google SDK를 다운로드하거나 데이터를 전송하지 않습니다. 브라우저 큐 검증이며 실제 GA 실시간 보고서 수신 성공을 뜻하지 않습니다." },
+      description: { component: "실제 GoogleAnalytics의 조건부 초기화·정리된 페이지 조회·경로 이동을 검증합니다. 가상 측정 ID와 로컬 next/script 대체물을 사용하여 Google SDK를 다운로드하거나 데이터를 전송하지 않습니다. 첫 js/config/event/get 직전에 목적지를 초기화하는 새 Google 태그의 규칙을 제한적으로 모형화하여 자동 조회 중복과 스크립트 로딩 전 설정 누락을 검사합니다. 실제 GA SDK 전체 동작이나 서버 수신 성공을 뜻하지 않습니다." },
     },
   },
   /** 주소·분석 전역·referrer를 격리하고 스토리 종료 시 모두 복원한다. */
@@ -215,6 +231,35 @@ export const DebugMode: Story = {
   async play() { await assertInitialPageView(true); },
 };
 
+export const NewTagInitializationOrdering: Story = {
+  /** 늦은 config로 막을 수 없는 신규 태그의 자동 조회를 모형으로 재현하고 제품 수정을 검증한다. */
+  async play() {
+    await assertInitialPageView();
+
+    const commands = getCommands();
+    const previousOrdering = [
+      ...commands.filter((command) => command[0] === "js"),
+      ...commands.filter((command) => command[0] === "set"),
+      ...commands.filter((command) => command[0] === "config"),
+      ...commands.filter((command) => command[0] === "event"),
+    ];
+    const comparison = createAnalyticsInitializationModel({
+      page_location: "https://campus.example.invalid/?token=private",
+      page_title: "CampusPolio",
+      page_referrer: "",
+    });
+    for (const command of previousOrdering) comparison.consume(command);
+    const previousResult = comparison.snapshot();
+    await expect(previousResult.pageViews).toHaveLength(2);
+    await expect(previousResult.pageViews[0]).toMatchObject({
+      source: "automatic",
+      parameters: { page_title: "CampusPolio", page_location: "https://campus.example.invalid/?token=private" },
+    });
+    await expect(previousResult.pageViews[1].source).toBe("manual");
+    await expect(getAnalyticsScriptObservations()[0].pageViews).toHaveLength(1);
+  },
+};
+
 export const StrictMode: Story = {
   /** 개발 모드의 StrictMode에서도 같은 제품 컴포넌트를 렌더링한다. */
   render(args) { return <AnalyticsPreview args={args} strict />; },
@@ -224,6 +269,7 @@ export const StrictMode: Story = {
     await userEvent.click(within(canvasElement).getByRole("button", { name: "수집 기록 확인" }));
     await expect(getPageViews()).toHaveLength(1);
     await expect(getCommands().filter((command) => command[0] === "config")).toHaveLength(1);
+    await expect(getAnalyticsScriptObservations()[0].pageViews).toHaveLength(1);
   },
 };
 
@@ -252,6 +298,8 @@ export const RouteTransitions: Story = {
       page_referrer: `${window.location.origin}/projects/42`,
     });
     await expect(getCommands().filter((command) => command[0] === "config")).toHaveLength(1);
+    await expect(getAnalyticsScriptObservations()[0].pageViews).toHaveLength(3);
+    await expect(getAnalyticsScriptObservations()[0].pageViews.every((pageView) => pageView.source === "manual")).toBe(true);
     await userEvent.click(canvas.getByRole("button", { name: "수집 기록 확인" }));
   },
 };

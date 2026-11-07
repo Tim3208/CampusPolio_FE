@@ -28,7 +28,7 @@
 | 양식 상호작용 | 끔 | 인증·편집 폼을 자동 분석하지 않음 |
 | 이탈 클릭·파일 다운로드·동영상 | 초기에는 끔 | 사용자 입력 외부 링크·파일명 등의 자동 전송 범위를 별도로 결정해야 함 |
 
-`send_page_view: false`는 태그 초기화 시 자동 조회만 끈다. **방문 기록 기반 조회는 GA4 화면에서도 꺼야 한다.** Google Tag Manager나 다른 GA 태그를 추가로 설치하지 않는다. 중복 조회는 참여율·이탈률도 왜곡할 수 있다. 위 설정을 적용한 뒤 측정 ID를 배포 환경에 넣는다.
+자동 조회를 끄는 `send_page_view: false`는 첫 `js` 명령보다 앞선 전역 `set`과 기존 태그 호환용 `config`에 지정한다. 새 Google 태그는 `config`를 기다리지 않고 초기화할 수 있으므로 `config`만으로는 첫 자동 조회가 남을 수 있다. **방문 기록 기반 조회는 GA4 화면에서도 꺼야 한다.** Google Tag Manager나 다른 GA 태그를 추가로 설치하지 않는다. 중복 조회는 참여율·이탈률도 왜곡할 수 있다. 위 설정을 적용한 뒤 측정 ID를 배포 환경에 넣는다.
 
 설정 근거: [수동 페이지 조회와 중복 방지](https://developers.google.com/analytics/devguides/collection/ga4/views), [향상된 측정 항목](https://support.google.com/analytics/answer/9216061?hl=ko).
 
@@ -73,6 +73,7 @@ GA4 **이탈률**은 참여하지 않은 세션의 비율이다. 기본 참여 �
 - 제목은 사용자 입력을 읽지 않고 화면별 고정 제목으로 전송한다. 외부 referrer는 도메인만, 내부 referrer는 정리된 화면 경로만 사용한다.
 - `/user-flows`와 알 수 없는 경로는 추적하지 않는다. 기존 태그가 이미 로드된 경우에도 해당 화면에서는 측정을 비활성화한다. 새 라우트를 추가하면 허용 경로도 검토한다.
 - 이메일·사용자 ID·프로필·폼 입력을 이벤트에 넣지 않는다. 광고 개인화와 Google signals를 코드에서 끈다. GA 자체의 세션·참여·기기 측정은 사용한다.
+- Google 스크립트를 읽는 `afterInteractive` effect보다 먼저 layout effect에서 `set → js → config → event` 큐를 준비한다. 맨 앞의 `set`에 자동 조회 비활성, 광고 비활성, 정리된 페이지 문맥을 함께 넣어 새 태그의 자동 초기화에도 적용한다. [Google 태그 초기화 방식과 config 호환성](https://support.google.com/google-ads/answer/18411054?hl=en)
 - 후속 자동 이벤트의 페이지 문맥은 전역 `gtag('set', ...)`으로 갱신하고, 조회 이벤트에도 명시한다. 초기 `config`에 페이지 문맥을 고정하면 전역 값보다 우선하므로 페이지 필드는 넣지 않는다. [Google 태그의 매개변수 우선순위](https://developers.google.com/tag-platform/gtagjs/reference#parameter_precedence)
 
 ## 검증
@@ -119,3 +120,11 @@ Node **24.22.1 / npm 10.9.9**를 실행별로 사용했다. 원본의 기존 설
 - Vercel `tim3208/campus-polio` 프로젝트의 **Production** 환경에 `NEXT_PUBLIC_GA_MEASUREMENT_ID`를 Config 값으로 저장했다. Preview와 Development에는 운영 ID를 추가하지 않았다.
 - 무시되는 로컬 `.env.local`에도 ID와 `NEXT_PUBLIC_GA_DEBUG=false`를 저장했다. 개발 모드에서는 기본적으로 수집하지 않는다.
 - 환경변수 저장 자체는 운영 코드 배포나 GA4 수신 확인을 의미하지 않는다. 배포 후 실제 사이트 방문과 GA4 실시간 보고서를 함께 확인한다.
+
+### 실제 Google 태그 수신과 초기화 보정
+
+[PR #32](https://github.com/Tim3208/CampusPolio_FE/pull/32)의 원격 검사에서 분석 11/11, Storybook 30파일·310/310, 시각 비교 10파일·12/12, 타입·린트·정적 Storybook·기본 앱 빌드가 통과했다. main `5da9af6`의 [운영 배포](https://vercel.com/tim3208/campus-polio/81S7RhG7iZfr725PSmPHPVP6R2D1)는 2026-11-07 21:38 KST에 Ready가 되었고 실제 `page_view`, `first_visit`, `session_start`, `scroll` 수신을 확인했다. GA4의 **보고서 → 리드 생성 → 트래픽 획득**에는 이탈률 항목을 추가해 저장했다.
+
+실제 SDK 검증에서 전체 페이지 로드마다 기본 제목 `CampusPolio`인 자동 조회가 추가되는 문제를 발견했다. 홈 로드 → 로그인 → 뒤로 → 홈 새로고침의 4회 동작에 수동 조회 4건 외 자동 조회 2건이 더해졌다. 로컬 가상 SDK 검증에서는 드러나지 않은 차이다. 현재 태그의 공개 SDK는 `gtm.init`에서 목적지 태그를 초기화하며, 큐의 첫 `js` 앞에 이 초기화를 넣었다. 기존 `js → set → config` 순서에서는 초기 자동 조회가 뒤의 설정을 읽지 못했다.
+
+자동 조회·광고 비활성 및 페이지 문맥을 담은 전역 `set`을 큐 맨 앞에 옮기고 스크립트 실행 전에 큐가 준비되도록 보정했다. 이후 검증·운영 재배포 결과는 보정 PR의 기록과 함께 확인한다. 배포 확인 중 홈의 프로젝트 조회는 기존 API 오류 상태였으므로 실제 프로젝트 내용의 정상 조회를 검증한 결과와 구분한다.
