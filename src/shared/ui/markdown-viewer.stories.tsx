@@ -53,7 +53,29 @@ export const HeadingsAndLists: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole("heading", { name: "캠퍼스 프로젝트 기록" })).toBeVisible();
     await expect(canvas.getAllByRole("list")).toHaveLength(3);
-    await expect(canvas.getByRole("checkbox")).toBeChecked();
+    const checkbox = canvas.getByRole("checkbox", { name: "고정 fixture 작성" });
+    await expect(checkbox).toBeChecked();
+    await expect(checkbox).toBeDisabled();
+  },
+};
+export const TaskListNames: Story = {
+  args: { content: [
+    "- [x] 완료한 **프로젝트** [링크](https://example.invalid/project)",
+    "  - [ ] 하위 작업",
+    "- [ ] ![계획 아이콘](/storybook/project-fixture.svg) 확인",
+    "- [ ] ![](/storybook/project-fixture.svg)",
+  ].join("\n") },
+  /** 서식과 중첩을 포함한 각 읽기 전용 작업의 이름과 상태를 확인한다. */
+  async play({ canvasElement }) {
+    const canvas = within(canvasElement);
+    const completed = canvas.getByRole("checkbox", { name: "완료한 프로젝트 링크" });
+    const nested = canvas.getByRole("checkbox", { name: "하위 작업" });
+    const withImage = canvas.getByRole("checkbox", { name: "계획 아이콘 확인" });
+    const empty = canvas.getByRole("checkbox", { name: "내용 없는 작업 항목" });
+    await expect(completed).toBeChecked();
+    await expect(nested).not.toBeChecked();
+    for (const checkbox of [completed, nested, withImage, empty]) await expect(checkbox).toBeDisabled();
+    await expect(canvas.getByRole("link", { name: "링크" })).toHaveAttribute("href", "https://example.invalid/project");
   },
 };
 export const LongContent: Story = {
@@ -90,7 +112,7 @@ export const FailedImage: Story = {
 export const Playground: Story = {
   args: { content: normalImageMarkdown, parentWidth: 720 },
   render: MarkdownPlayground,
-  parameters: { docs: { description: { story: "원문과 부모 폭을 변경하고 시나리오 초기화로 복원합니다. 본문을 숨기는 overflow:hidden은 사용하지 않습니다. GFM 작업 목록의 이름 없는 checkbox는 기존 제품의 알려진 접근성 제한입니다." } } },
+  parameters: { docs: { description: { story: "원문과 부모 폭을 변경하고 시나리오 초기화로 복원합니다. 본문을 숨기는 overflow:hidden은 사용하지 않습니다." } } },
 };
 
 export const ImageRecovery: Story = {
