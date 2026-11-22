@@ -596,32 +596,21 @@
         }
       }
     },
-    "/api/auth/test-login/{userId}": {
+    "/api/auth/refresh": {
       "post": {
         "tags": [
           "Auth"
         ],
-        "summary": "테스트 로그인",
-        "description": "개발용 로그인 API",
-        "operationId": "testLogin",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
+        "summary": "토큰 재발급",
+        "description": "Refresh Token을 검증하고 새로운 Access Token과 Refresh Token을 발급합니다.",
+        "operationId": "refresh",
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseVoid"
+                  "$ref": "#/components/schemas/ApiResponseLoginResponse"
                 }
               }
             }
@@ -635,11 +624,11 @@
           "Auth"
         ],
         "summary": "로그아웃",
-        "description": "현재 세션을 만료시켜 로그아웃합니다.",
+        "description": "Refresh Token을 폐기하고 인증 쿠키를 삭제합니다.",
         "operationId": "logout",
         "responses": {
           "200": {
-            "description": "로그아웃 성공",
+            "description": "OK",
             "content": {
               "*/*": {
                 "schema": {
@@ -657,7 +646,7 @@
           "Auth"
         ],
         "summary": "Google OAuth 로그인",
-        "description": "프론트에서 Google 로그인 후 받은 idToken을 서버로 전달합니다.\n서버는 Google 사용자 정보를 검증한 뒤 User를 조회/생성하고 세션에 userId를 저장합니다.\n",
+        "description": "Google ID Token을 검증하고 JWT를 HttpOnly 쿠키로 발급합니다.",
         "operationId": "login",
         "requestBody": {
           "content": {
@@ -671,27 +660,7 @@
         },
         "responses": {
           "200": {
-            "description": "로그인 성공",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseLoginResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "잘못된 요청 또는 이메일 정보 없음",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseLoginResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "유효하지 않은 Google 토큰",
+            "description": "OK",
             "content": {
               "*/*": {
                 "schema": {
@@ -1582,17 +1551,7 @@
         ],
         "responses": {
           "200": {
-            "description": "포트폴리오 조회 성공",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponsePortfolioDetailResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "존재하지 않는 포트폴리오 또는 접근할 수 없는 비공개 포트폴리오",
+            "description": "OK",
             "content": {
               "*/*": {
                 "schema": {
@@ -1995,21 +1954,6 @@
           }
         }
       },
-      "LoginRequest": {
-        "type": "object",
-        "description": "Google OAuth 로그인 요청",
-        "properties": {
-          "idToken": {
-            "type": "string",
-            "description": "프론트에서 Google OAuth 로그인 후 받은 Google ID Token",
-            "example": "eyJhbGciOiJSUzI1NiIsImtpZCI6...",
-            "minLength": 1
-          }
-        },
-        "required": [
-          "idToken"
-        ]
-      },
       "ApiResponseLoginResponse": {
         "type": "object",
         "description": "공통 API 응답 형식",
@@ -2046,6 +1990,21 @@
             "example": false
           }
         }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "description": "Google OAuth 로그인 요청",
+        "properties": {
+          "idToken": {
+            "type": "string",
+            "description": "프론트에서 Google OAuth 로그인 후 받은 Google ID Token",
+            "example": "eyJhbGciOiJSUzI1NiIsImtpZCI6...",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "idToken"
+        ]
       },
       "EmailVerifyRequest": {
         "type": "object",
@@ -2372,7 +2331,10 @@
           "add": {
             "type": "array",
             "description": "추가할 프로젝트 ID 목록",
-            "example": [1, 2],
+            "example": [
+              1,
+              2
+            ],
             "items": {
               "type": "integer",
               "format": "int64"
@@ -2381,7 +2343,9 @@
           "remove": {
             "type": "array",
             "description": "제거할 프로젝트 ID 목록",
-            "example": [3],
+            "example": [
+              3
+            ],
             "items": {
               "type": "integer",
               "format": "int64"
@@ -2422,7 +2386,11 @@
           "projectOrder": {
             "type": "array",
             "description": "변경할 프로젝트 ID 순서",
-            "example": [2, 1, 3],
+            "example": [
+              2,
+              1,
+              3
+            ],
             "items": {
               "type": "integer",
               "format": "int64"
@@ -2545,12 +2513,6 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         }
       },

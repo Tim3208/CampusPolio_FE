@@ -32,6 +32,27 @@ export const Playground: Story = {
   args: { catalog: userFlowCatalog },
 };
 
+export const BackendAgreementSearch: Story = {
+  args: { catalog: userFlowCatalog },
+  /** 실제 목록에서 선합의 항목을 찾아 우선순위와 작업 ID를 확인한다. */
+  async play({ canvasElement }) {
+    const canvas = within(canvasElement);
+    const search = canvas.getByRole("textbox", { name: "플로우 검색" });
+    await userEvent.type(search, "BE 선합의");
+    const logout = canvas.getByRole("button", { name: /AUTH-07/ });
+    await expect(logout).toBeVisible();
+    await expect(canvas.queryByRole("button", { name: /NAV-01/ })).not.toBeInTheDocument();
+    await userEvent.click(logout);
+    await expect(logout).toHaveAttribute("aria-expanded", "true");
+    await expect(canvas.getByText(/P0.*BE 선합의.*AUTH-01/)).toBeVisible();
+
+    await userEvent.clear(search);
+    await userEvent.type(search, "FE 선행");
+    await expect(canvas.queryByRole("button", { name: /AUTH-07/ })).not.toBeInTheDocument();
+    await expect(canvas.getByRole("button", { name: /EDIT-03/ })).toBeVisible();
+  },
+};
+
 export const SuccessfulActions: Story = {
   /** 기본 성공 목록과 모든 구현 상태를 접힌 상태에서 확인한다. */
   async play({ canvasElement }) {
