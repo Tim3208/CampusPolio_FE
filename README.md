@@ -13,6 +13,7 @@ Next.js App Router, React, TypeScript, Tailwind CSS와 shadcn/ui 기반 공통 �
 | [api.md](api.md) | OpenAPI JSON 형식의 백엔드 명세 |
 | [백엔드 리워크 API 교체 TODO](docs/ai/backend-rework-todo.md) | 팀 정책과 수신 명세의 차이, FE 우선순위, BE 선합의 항목 |
 | [BE 전달 요구사항](docs/ai/backend-requirements.md) | 팀 최종 정책, 화면 연동 협의 항목과 8주 고도화 계획 |
+| [FE 역제안 API 계약안](docs/ai/api-contract-proposal.md) | 미확정 계약의 FE 추천안, 현재 서버 동작 확인 결과, BE 회신 양식 |
 | [설계 문서 안내](docs/ai/README.md) | UI/UX 작업 계획과 시안의 위치·선택 상태 |
 | [Storybook 사용 안내](docs/ai/storybook-guide.md) | 설치·상태 스토리·Mock·동작 테스트와 개발 확인 기록 |
 
